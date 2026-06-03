@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>HatidGo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{
+      width:100%;
+      height:100%;
+    }
+    body{
+      background:#0d0d0d;
+      font-family:'DM Sans',sans-serif;
+      width:100%;
+      min-height:100vh;
+      overflow-x:hidden;
+      padding-bottom:24px;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+
+    /* HEADER */
+    .hdr{width:100%;background:linear-gradient(135deg,#111,#1a1a1a);border-bottom:1px solid #222;padding:12px 12px 10px;text-align:center}
+    .logo{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:4px}
+    .logo span:first-child{font-size:20px}
+    .logo-txt{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff;letter-spacing:2px}
+    .logo-txt b{color:#FF6B35;font-weight:400}
+    .badge{display:inline-flex;align-items:center;gap:5px;background:#FF6B3520;border:1px solid #FF6B3550;border-radius:99px;padding:2px 11px;color:#FF6B35;font-size:11px;font-weight:700;margin-bottom:3px}
+    .dot-pulse{width:6px;height:6px;border-radius:50%;background:#FF6B35;animation:pulse 1.5s infinite}
+    .tag{color:#555;font-size:9px;letter-spacing:2px;text-transform:uppercase}
+
+    /* CARD */
+    .card{width:calc(100% - 16px);margin:10px auto 0;background:#141414;border-radius:16px;border:1px solid #222;overflow:hidden}
+
+    /* SECTION */
+    .sec{display:flex;flex-direction:column;padding:14px 12px;gap:11px}
+    .sec-title{font-size:16px;font-weight:800;color:#fff}
+
+    /* VEHICLES */
+    .v-row{display:flex;gap:8px}
+    .v-btn{flex:1;border:2px solid #2a2a2a;border-radius:12px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;background:#1a1a1a;transition:all .2s}
+    .v-btn.sel-motor{border-color:#FF6B35;background:#FF6B3520;box-shadow:0 0 12px #FF6B3540}
+    .v-btn.sel-car{border-color:#1B998B;background:#1B998B20;box-shadow:0 0 12px #1B998B40}
+    .vi{font-size:22px}
+    .vn{font-weight:700;font-size:12px;color:#ccc}
+    .vn.cm{color:#FF6B35}.vn.cc{color:#1B998B}
+    .vd{color:#555;font-size:9px}
+    .ve{font-size:10px;font-weight:600;color:#888}
+    .ve.cm{color:#FF6B35}.ve.cc{color:#1B998B}
+
+    /* INPUTS */
+    .inp-grp{background:#1e1e1e;border-radius:12px;border:1px solid #2a2a2a;overflow:hidden}
+    .inp-row{display:flex;align-items:center;padding:10px 12px;gap:9px}
+    .c-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .inp-div{height:1px;background:#2a2a2a;margin:0 12px}
+    .inp-grp input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;width:100%}
+    .inp-grp input::placeholder{color:#444}
+
+    /* BUTTONS */
+    .p-btn{border:none;border-radius:12px;padding:13px;color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:14px;cursor:pointer;width:100%}
+    .p-btn:disabled{background:#333!important;cursor:not-allowed}
+    .g-btn{background:transparent;border:1px solid #333;border-radius:12px;padding:11px;color:#888;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;width:100%}
+
+    /* SUMMARY */
+    .sum-box{background:#1a1a1a;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:9px}
+    .sum-row{display:flex;justify-content:space-between;align-items:center}
+    .sum-row.tot{border-top:1px solid #2a2a2a;padding-top:9px;margin-top:2px}
+    .sl{color:#666;font-size:11px}
+    .sv{color:#ccc;font-weight:700;font-size:12px;max-width:55%;text-align:right}
+    .sf{font-size:18px;font-weight:800}
+
+    /* FINDING */
+    .ctr{align-items:center;text-align:center}
+    .pulse-ring{width:80px;height:80px;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:36px;animation:ripple 1.2s infinite,pulse 1.2s infinite;margin:12px 0 10px}
+
+    /* DRIVER */
+    .drv-card{background:#1a1a1a;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px}
+    .drv-av{font-size:30px}
+    .drv-inf{flex:1}
+    .drv-nm{color:#fff;font-weight:700;font-size:14px}
+    .drv-mt{color:#aaa;font-size:11px;margin-top:1px}
+    .plate{display:inline-block;background:#FFD700;color:#000;font-weight:800;font-size:10px;border-radius:4px;padding:1px 6px;margin-top:4px;letter-spacing:1px}
+    .call-btn{background:transparent;border:2px solid;border-radius:9px;padding:7px 10px;font-size:16px;cursor:pointer}
+
+    /* PROGRESS */
+    .prg-sec{display:flex;flex-direction:column;gap:6px}
+    .prg-lbl{display:flex;justify-content:space-between;color:#aaa;font-size:11px;font-weight:600}
+    .prg-bg{height:6px;background:#222;border-radius:99px;overflow:hidden}
+    .prg-fill{height:100%;border-radius:99px;width:0%;transition:width .1s linear}
+
+    /* RIDE INFO */
+    .ride-row{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;border-radius:11px;padding:10px 12px}
+    .ride-arr{font-size:16px}
+    .ride-itm{flex:1}
+    .ride-v{color:#fff;font-weight:700;font-size:11px}
+    .ride-k{color:#555;font-size:9px;margin-top:2px}
+
+    /* DONE */
+    .fare-big{font-size:40px;font-weight:800;font-family:'Bebas Neue',sans-serif;color:#1B998B;letter-spacing:2px}
+    .star-row{display:flex;gap:3px;margin-bottom:3px}
+    .star{font-size:24px;cursor:pointer}
+
+    .footer{margin-top:18px;color:#333;font-size:10px;text-align:center}
+    .hidden{display:none!important}
+
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:.8}}
+    @keyframes ripple{0%{box-shadow:0 0 0 0 rgba(255,107,53,.4)}100%{box-shadow:0 0 0 28px rgba(255,107,53,0)}}
+  </style>
+</head>
+<body>
+
+  <div class="hdr">
+    <div class="logo">
+      <span>🛵</span>
+      <span class="logo-txt">HATID<b>GO</b></span>
+    </div>
+    <div class="badge"><span class="dot-pulse"></span>📍 Cotabato City</div>
+    <div class="tag">Motor · Sasakyan · Mabilis</div>
+  </div>
+
+  <div class="card">
+
+    <!-- BOOK -->
+    <div id="step-book" class="sec">
+      <div class="sec-title">Saan ka pupunta?</div>
+      <div class="v-row">
+        <button class="v-btn sel-motor" id="btn-motor" onclick="selV('motor')">
+          <div class="vi">🏍️</div>
+          <div class="vn cm" id="vn-motor">Motor</div>
+          <div class="vd">Mabilis, abot-kaya</div>
+          <div class="ve cm" id="ve-motor">~3 min</div>
+        </button>
+        <button class="v-btn" id="btn-car" onclick="selV('car')">
+          <div class="vi">🚗</div>
+          <div class="vn" id="vn-car">Sasakyan</div>
+          <div class="vd">Komportable, may A/C</div>
+          <div class="ve" id="ve-car">~5 min</div>
+        </button>
+      </div>
+      <div class="inp-grp">
+        <div class="inp-row">
+          <span class="c-dot" style="background:#22c55e"></span>
+          <input type="text" id="ip" placeholder="Pickup location..." oninput="chk()"/>
+        </div>
+        <div class="inp-div"></div>
+        <div class="inp-row">
+          <span class="c-dot" style="background:#FF6B35"></span>
+          <input type="text" id="id" placeholder="Destination..." oninput="chk()"/>
+        </div>
+      </div>
+      <button class="p-btn" id="book-btn" onclick="goConfirm()" disabled style="background:#333">Hanapin ang Sasakyan</button>
+    </div>
+
+    <!-- CONFIRM -->
+    <div id="step-confirm" class="sec hidden">
+      <div class="sec-title">I-confirm ang booking</div>
+      <div class="sum-box">
+        <div class="sum-row"><span class="sl">Uri ng Sasakyan</span><span class="sv" id="sv"></span></div>
+        <div class="sum-row"><span class="sl">Pickup</span><span class="sv" id="sp"></span></div>
+        <div class="sum-row"><span class="sl">Destination</span><span class="sv" id="sd"></span></div>
+        <div class="sum-row"><span class="sl">Est. Layo</span><span class="sv" id="sk"></span></div>
+        <div class="sum-row tot">
+          <span class="sl" style="font-size:13px;color:#fff">Bayad</span>
+          <span class="sv sf" id="sf"></span>
+        </div>
+      </div>
+      <button class="p-btn" id="conf-btn" onclick="goFind()">I-book Na!</button>
+      <button class="g-btn" onclick="goBack()">Bumalik</button>
+    </div>
+
+    <!-- FINDING -->
+    <div id="step-finding" class="sec ctr hidden">
+      <div class="pulse-ring" id="find-ico">🏍️</div>
+      <div class="sec-title">Hinahanap ang driver...</div>
+      <div style="color:#888;font-size:12px">Sandali lang, naghahanap kami ng driver sa'yo.</div>
+    </div>
+
+    <!-- RIDING -->
+    <div id="step-riding" class="sec hidden">
+      <div class="sec-title" id="rid-title">Papunta na! 🏍️</div>
+      <div class="drv-card">
+        <div class="drv-av" id="drv-av">👨</div>
+        <div class="drv-inf">
+          <div class="drv-nm" id="drv-nm">Kuya Jun</div>
+          <div class="drv-mt" id="drv-mt">⭐ 4.9 · Motor</div>
+          <div class="plate" id="drv-pl">ABC 123</div>
+        </div>
+        <button class="call-btn" id="call-btn" style="border-color:#FF6B35;color:#FF6B35">📞</button>
+      </div>
+      <div class="prg-sec">
+        <div class="prg-lbl"><span>Papunta sa'yo</span><span id="prg-pct" style="color:#FF6B35">0%</span></div>
+        <div class="prg-bg"><div class="prg-fill" id="prg-fill" style="background:#FF6B35"></div></div>
+      </div>
+      <div class="ride-row">
+        <div class="ride-itm"><div class="ride-v" id="r-pickup"></div><div class="ride-k">Pickup</div></div>
+        <div class="ride-arr" id="r-arr" style="color:#FF6B35">→</div>
+        <div class="ride-itm"><div class="ride-v" id="r-drop"></div><div class="ride-k">Destination</div></div>
+      </div>
+    </div>
+
+    <!-- DONE -->
+    <div id="step-done" class="sec ctr hidden">
+      <div style="font-size:52px;margin-bottom:8px">🎉</div>
+      <div class="sec-title" style="color:#1B998B">Nakarating ka na!</div>
+      <div style="color:#aaa;margin-bottom:5px;font-size:12px" id="done-msg">Salamat!</div>
+      <div class="fare-big" id="done-fare">₱0</div>
+      <div style="color:#666;font-size:11px;margin-bottom:12px">Bayad sa cash o e-wallet</div>
+      <div class="star-row"><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span></div>
+      <div style="color:#666;font-size:11px;margin-bottom:12px">I-rate ang iyong driver</div>
+      <button class="p-btn" style="background:#FF6B35" onclick="reset()">Mag-book Ulit</button>
+    </div>
+
+  </div>
+
+  <div class="footer">HatidGo © 2026 · Para sa bawat Pilipino</div>
+
+  <script>
+    // Force mobile fit inside GAS iframe
+    (function(){
+      var meta = document.querySelector('meta[name=viewport]');
+      if(meta) meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+      document.documentElement.style.fontSize = '14px';
+    })();
+
+    const V={motor:{icon:'🏍️',name:'Motor',price:40,color:'#FF6B35'},car:{icon:'🚗',name:'Sasakyan',price:80,color:'#1B998B'}};
+    const D={motor:[{name:'Kuya Jun',r:4.9,pl:'ABC 123',av:'👨'},{name:'Kuya Rodel',r:4.8,pl:'XYZ 789',av:'👴'}],car:[{name:'Kuya Edgar',r:4.95,pl:'DEF 456',av:'🧔'},{name:'Ate Mariz',r:4.7,pl:'GHI 321',av:'👩'}]};
+    let sel='motor',dist=0,fare=0,pInt=null;
+
+    function selV(t){
+      sel=t;
+      ['motor','car'].forEach(x=>{
+        document.getElementById('btn-'+x).className='v-btn';
+        document.getElementById('vn-'+x).className='vn';
+        document.getElementById('ve-'+x).className='ve';
+      });
+      document.getElementById('btn-'+t).className='v-btn sel-'+t;
+      document.getElementById('vn-'+t).className='vn c'+t[0];
+      document.getElementById('ve-'+t).className='ve c'+t[0];
+      chk();
+    }
+
+    function chk(){
+      const p=document.getElementById('ip').value.trim();
+      const d=document.getElementById('id').value.trim();
+      const b=document.getElementById('book-btn');
+      b.disabled=!(p&&d);
+      b.style.background=(p&&d)?V[sel].color:'#333';
+    }
+
+    function show(id){
+      ['step-book','step-confirm','step-finding','step-riding','step-done'].forEach(s=>document.getElementById(s).classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function goConfirm(){
+      const p=document.getElementById('ip').value.trim();
+      const d=document.getElementById('id').value.trim();
+      if(!p||!d)return;
+      dist=Math.floor(Math.random()*8)+2;
+      const v=V[sel]; fare=v.price+dist*12;
+      document.getElementById('sv').textContent=v.icon+' '+v.name;
+      document.getElementById('sv').style.color=v.color;
+      document.getElementById('sp').textContent=p;
+      document.getElementById('sd').textContent=d;
+      document.getElementById('sk').textContent=dist+' km';
+      document.getElementById('sf').textContent='₱'+fare;
+      document.getElementById('sf').style.color=v.color;
+      document.getElementById('conf-btn').style.background=v.color;
+      show('step-confirm');
+    }
+
+    function goBack(){show('step-book');}
+
+    function goFind(){
+      const v=V[sel];
+      document.getElementById('find-ico').textContent=v.icon;
+      show('step-finding');
+      setTimeout(()=>{
+        const drv=D[sel][Math.floor(Math.random()*D[sel].length)];
+        document.getElementById('rid-title').textContent='Papunta na! '+v.icon;
+        document.getElementById('rid-title').style.color=v.color;
+        document.getElementById('drv-av').textContent=drv.av;
+        document.getElementById('drv-nm').textContent=drv.name;
+        document.getElementById('drv-mt').textContent='⭐ '+drv.r+' · '+v.name;
+        document.getElementById('drv-pl').textContent=drv.pl;
+        document.getElementById('call-btn').style.borderColor=v.color;
+        document.getElementById('call-btn').style.color=v.color;
+        document.getElementById('prg-pct').style.color=v.color;
+        document.getElementById('prg-fill').style.background=v.color;
+        document.getElementById('r-arr').style.color=v.color;
+        document.getElementById('r-pickup').textContent=document.getElementById('ip').value;
+        document.getElementById('r-drop').textContent=document.getElementById('id').value;
+        document.getElementById('done-msg').textContent='Salamat, '+drv.name+' ang iyong driver.';
+        show('step-riding');
+        let p=0;
+        pInt=setInterval(()=>{
+          p+=2;
+          document.getElementById('prg-fill').style.width=p+'%';
+          document.getElementById('prg-pct').textContent=p+'%';
+          if(p>=100){clearInterval(pInt);document.getElementById('done-fare').textContent='₱'+fare;show('step-done');}
+        },120);
+      },2500);
+    }
+
+    function reset(){
+      if(pInt)clearInterval(pInt);
+      document.getElementById('ip').value='';
+      document.getElementById('id').value='';
+      document.getElementById('prg-fill').style.width='0%';
+      document.getElementById('prg-pct').textContent='0%';
+      selV('motor'); chk(); show('step-book');
+    }
+  </script>
+</body>
+</html>
