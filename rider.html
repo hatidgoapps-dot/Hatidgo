@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>HatidGo – Rider</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #141414;
+      --card2: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #f97316;
+      --accent2: #fbbf24;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --text: #f0f0f0;
+      --muted: #777;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100dvh;
+    }
+    .header {
+      background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+    .logo span { color: var(--accent); }
+    .logout-btn {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 10px; padding: 7px 12px;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; cursor: pointer;
+    }
+    .content { padding: 20px; max-width: 500px; margin: 0 auto; }
+    /* PROFILE */
+    .profile-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .avatar {
+      width: 52px; height: 52px;
+      background: rgba(249,115,22,0.15);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .profile-info { flex: 1; }
+    .profile-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+    .profile-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    /* TOGGLE */
+    .toggle-wrap {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .toggle-label { font-size: 12px; font-weight: 600; }
+    .toggle {
+      width: 46px; height: 26px;
+      background: var(--border); border-radius: 13px;
+      position: relative; cursor: pointer;
+      transition: background 0.2s;
+      border: none; outline: none;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--green); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      background: #fff; border-radius: 50%;
+      transition: left 0.2s;
+    }
+    .toggle.on::after { left: 23px; }
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px; text-align: center;
+    }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    /* SECTION */
+    .section-title {
+      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+      margin-bottom: 14px;
+    }
+    /* BOOKING CARDS */
+    .booking-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px;
+      margin-bottom: 12px;
+    }
+    .booking-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .booking-type { font-size: 13px; font-weight: 700; color: var(--accent); }
+    .booking-time { font-size: 11px; color: var(--muted); }
+    .booking-route {
+      font-size: 12px; color: var(--muted); line-height: 1.7;
+      background: var(--card2); border-radius: 10px; padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .booking-meta {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .booking-fare {
+      font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
+      color: var(--accent);
+    }
+    .booking-dist { font-size: 11px; color: var(--muted); }
+    .action-btns { display: flex; gap: 8px; }
+    .btn-accept {
+      background: var(--green); border: none; border-radius: 10px;
+      padding: 9px 16px; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-decline {
+      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px; padding: 9px 16px; color: var(--red);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-complete {
+      background: var(--blue); border: none; border-radius: 10px;
+      padding: 9px 16px; color: #fff;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; width: 100%; margin-top: 8px;
+    }
+    /* STATUS BADGE */
+    .status-badge {
+      font-size: 10px; font-weight: 700; padding: 3px 9px;
+      border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
+    .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
+    .s-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
+    /* EMPTY */
+    .empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--muted); font-size: 14px; line-height: 1.7;
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    /* PULSE */
+    .online-pulse {
+      display: inline-block;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      animation: pulse 1.5s ease-in-out infinite;
+      margin-right: 6px;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    /* SPINNER */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Hatid<span>Go</span></div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="content">
+
+  <!-- PROFILE -->
+  <div class="profile-card">
+    <div class="avatar">🛵</div>
+    <div class="profile-info">
+      <div class="profile-name" id="riderName">Loading…</div>
+      <div class="profile-email" id="riderEmail"></div>
+    </div>
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="toggleLabel">OFFLINE</span>
+      <button class="toggle" id="availToggle" onclick="toggleAvail()"></button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="statDone">0</div>
+      <div class="stat-label">Natapos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statEarnings">₱0</div>
+      <div class="stat-label">Kita Ngayon</div>
+    </div>
+  </div>
+
+  <!-- PENDING BOOKINGS -->
+  <div class="section-title" id="bookingTitle">
+    <span class="online-pulse" id="pulse" style="display:none"></span>
+    Mga Bagong Booking
+  </div>
+  <div id="bookingList"><div class="empty"><div class="empty-icon">🔄</div>Loading…</div></div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let riderId = null;
+  let riderAvail = false;
+  let subscription = null;
+
+  // Auth guard
+  db.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) { window.location.href = 'login.html'; return; }
+    const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
+    if (data?.role !== 'rider') { window.location.href = 'login.html'; return; }
+    riderId = session.user.id;
+    riderAvail = data.is_available;
+    document.getElementById('riderName').textContent = data.name || 'Rider';
+    document.getElementById('riderEmail').textContent = data.email || '';
+    updateToggleUI();
+    await loadBookings();
+    await loadStats();
+    subscribeBookings();
+  });
+
+  function updateToggleUI() {
+    const toggle = document.getElementById('availToggle');
+    const label = document.getElementById('toggleLabel');
+    const pulse = document.getElementById('pulse');
+    if (riderAvail) {
+      toggle.classList.add('on');
+      label.textContent = 'ONLINE';
+      label.style.color = 'var(--green)';
+      pulse.style.display = 'inline-block';
+    } else {
+      toggle.classList.remove('on');
+      label.textContent = 'OFFLINE';
+      label.style.color = 'var(--muted)';
+      pulse.style.display = 'none';
+    }
+  }
+
+  async function toggleAvail() {
+    riderAvail = !riderAvail;
+    await db.from('users').update({ is_available: riderAvail }).eq('id', riderId);
+    updateToggleUI();
+    await loadBookings();
+  }
+
+  async function loadBookings() {
+    const list = document.getElementById('bookingList');
+    if (!riderAvail) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">😴</div>Naka-offline ka.<br>I-on ang toggle para makita ang mga booking.</div>`;
+      return;
+    }
+    const { data } = await db.from('bookings')
+      .select('*')
+      .in('status', ['pending', 'accepted'])
+      .order('created_at', { ascending: false });
+
+    if (!data || data.length === 0) {
+      list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div>Wala pang booking.<br>Hintayin ang susunod!</div>`;
+      return;
+    }
+
+    list.innerHTML = data.map(b => {
+      const time = new Date(b.created_at).toLocaleTimeString('fil', { hour: '2-digit', minute: '2-digit' });
+      const isAccepted = b.status === 'accepted' && b.rider_id === riderId;
+      return `
+        <div class="booking-card" id="book-${b.id}">
+          <div class="booking-header">
+            <span class="booking-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="booking-time">${time}</span>
+              <span class="status-badge s-${b.status}">${b.status.toUpperCase()}</span>
+            </div>
+          </div>
+          <div class="booking-route">
+            🟢 <strong>Pickup:</strong> ${b.pickup_address || '—'}<br>
+            🔴 <strong>Dropoff:</strong> ${b.dropoff_address || '—'}
+            ${b.notes ? `<br>📝 ${b.notes}` : ''}
+          </div>
+          <div class="booking-meta">
+            <div>
+              <div class="booking-fare">₱${b.fare || 0}</div>
+              <div class="booking-dist">${b.distance_km || 0} km</div>
+            </div>
+            <div class="action-btns">
+              ${b.status === 'pending' ? `
+                <button class="btn-decline" onclick="declineBooking('${b.id}')">✕</button>
+                <button class="btn-accept" onclick="acceptBooking('${b.id}')">Tanggapin ✓</button>
+              ` : isAccepted ? `
+                <button class="btn-complete" onclick="completeBooking('${b.id}', ${b.fare || 0})">✅ Tapos Na</button>
+              ` : '<span style="font-size:12px;color:var(--muted)">Iba nang nag-accept</span>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function acceptBooking(id) {
+    await db.from('bookings').update({ status: 'accepted', rider_id: riderId }).eq('id', id);
+    await loadBookings();
+  }
+
+  async function declineBooking(id) {
+    document.getElementById('book-' + id)?.remove();
+  }
+
+  async function completeBooking(id, fare) {
+    await db.from('bookings').update({ status: 'completed' }).eq('id', id);
+    await loadBookings();
+    await loadStats();
+  }
+
+  async function loadStats() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const { data } = await db.from('bookings')
+      .select('fare')
+      .eq('rider_id', riderId)
+      .eq('status', 'completed')
+      .gte('created_at', today.toISOString());
+
+    const total = (data || []).reduce((sum, b) => sum + (b.fare || 0), 0);
+    document.getElementById('statDone').textContent = (data || []).length;
+    document.getElementById('statEarnings').textContent = '₱' + total;
+  }
+
+  // Real-time updates
+  function subscribeBookings() {
+    subscription = db.channel('bookings-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        loadBookings();
+      })
+      .subscribe();
+  }
+
+  async function logout() {
+    if (subscription) db.removeChannel(subscription);
+    await db.auth.signOut();
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>HatidGo – Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #141414;
+      --card2: #1a1a1a;
+      --border: #2a2a2a;
+      --accent: #f97316;
+      --accent2: #fbbf24;
+      --green: #22c55e;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --text: #f0f0f0;
+      --muted: #777;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100dvh;
+    }
+    /* HEADER */
+    .header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+    .logo span { color: var(--accent); }
+    .admin-badge {
+      background: rgba(249,115,22,0.15);
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 700;
+      color: var(--accent); letter-spacing: 1px;
+    }
+    .logout-btn {
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 10px; padding: 7px 12px;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; cursor: pointer;
+    }
+    /* CONTENT */
+    .content { padding: 20px; max-width: 500px; margin: 0 auto; }
+    /* STATS */
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 12px; text-align: center;
+    }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+    .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    /* SECTION */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 800;
+      margin-bottom: 14px;
+    }
+    /* ADD RIDER FORM */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px;
+      margin-bottom: 24px;
+    }
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--muted); margin-bottom: 5px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .field input {
+      width: 100%;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 11px 13px;
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: #444; }
+    .btn-add {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 12px;
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+      margin-top: 4px; transition: opacity 0.15s;
+    }
+    .btn-add:disabled { opacity: 0.5; }
+    /* FEEDBACK */
+    .feedback {
+      border-radius: 10px; padding: 10px 14px;
+      font-size: 13px; margin-bottom: 12px; display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+    .feedback.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+    /* RIDER LIST */
+    .rider-list { display: flex; flex-direction: column; gap: 10px; }
+    .rider-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .rider-avatar {
+      width: 42px; height: 42px;
+      background: rgba(249,115,22,0.15);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .rider-info { flex: 1; }
+    .rider-name { font-size: 14px; font-weight: 600; }
+    .rider-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .rider-phone { font-size: 11px; color: var(--muted); }
+    .avail-badge {
+      font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .avail-badge.online { background: rgba(34,197,94,0.15); color: var(--green); }
+    .avail-badge.offline { background: rgba(120,120,120,0.15); color: var(--muted); }
+    .delete-btn {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 8px; padding: 5px 10px;
+      color: var(--red); font-size: 12px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    /* EMPTY */
+    .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
+    /* SPINNER */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* TABS */
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab {
+      flex: 1; padding: 10px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--muted);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-align: center; transition: all 0.15s;
+    }
+    .tab.active { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.1); }
+    /* BOOKINGS */
+    .booking-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .booking-type { font-size: 12px; font-weight: 700; color: var(--accent); }
+    .booking-status {
+      font-size: 10px; font-weight: 700; padding: 3px 9px;
+      border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .status-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
+    .status-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
+    .status-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .status-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
+    .booking-route { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .booking-fare { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--accent); margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Hatid<span>Go</span></div>
+  <div class="admin-badge">ADMIN</div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="content">
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="statRiders">—</div>
+      <div class="stat-label">Mga Rider</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statBookings">—</div>
+      <div class="stat-label">Bookings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statPending">—</div>
+      <div class="stat-label">Pending</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('riders', this)">🛵 Mga Rider</div>
+    <div class="tab" onclick="switchTab('bookings', this)">📋 Bookings</div>
+  </div>
+
+  <!-- RIDERS TAB -->
+  <div id="tabRiders">
+    <!-- ADD RIDER -->
+    <div class="section-title">➕ Mag-add ng Rider</div>
+    <div class="form-card">
+      <div class="feedback" id="feedback"></div>
+      <div class="field">
+        <label>Pangalan</label>
+        <input type="text" id="rName" placeholder="Juan dela Cruz"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="rEmail" placeholder="rider@hatidgo.com"/>
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="tel" id="rPhone" placeholder="09xxxxxxxxx"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="rPassword" placeholder="Minimum 6 characters"/>
+      </div>
+      <button class="btn-add" id="addBtn" onclick="addRider()">➕ I-add ang Rider</button>
+    </div>
+
+    <!-- RIDER LIST -->
+    <div class="section-title">👥 Listahan ng Riders</div>
+    <div class="rider-list" id="riderList">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+  <!-- BOOKINGS TAB -->
+  <div id="tabBookings" style="display:none">
+    <div class="section-title">📋 Lahat ng Bookings</div>
+    <div id="bookingList"><div class="empty">Loading…</div></div>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Auth guard
+  db.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) { window.location.href = 'login.html'; return; }
+    const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
+    if (data?.role !== 'admin') { window.location.href = 'login.html'; return; }
+    loadAll();
+  });
+
+  async function loadAll() {
+    await Promise.all([loadRiders(), loadBookings(), loadStats()]);
+  }
+
+  async function loadStats() {
+    const [r, b, p] = await Promise.all([
+      db.from('users').select('id', { count: 'exact' }).eq('role', 'rider'),
+      db.from('bookings').select('id', { count: 'exact' }),
+      db.from('bookings').select('id', { count: 'exact' }).eq('status', 'pending')
+    ]);
+    document.getElementById('statRiders').textContent = r.count ?? 0;
+    document.getElementById('statBookings').textContent = b.count ?? 0;
+    document.getElementById('statPending').textContent = p.count ?? 0;
+  }
+
+  async function loadRiders() {
+    const { data } = await db.from('users').select('*').eq('role', 'rider').order('created_at', { ascending: false });
+    const list = document.getElementById('riderList');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">Wala pang riders. Mag-add na! 🛵</div>';
+      return;
+    }
+    list.innerHTML = data.map(r => `
+      <div class="rider-card">
+        <div class="rider-avatar">🛵</div>
+        <div class="rider-info">
+          <div class="rider-name">${r.name || 'Walang pangalan'}</div>
+          <div class="rider-email">${r.email || '—'}</div>
+          <div class="rider-phone">${r.phone || '—'}</div>
+        </div>
+        <span class="avail-badge ${r.is_available ? 'online' : 'offline'}">${r.is_available ? 'ONLINE' : 'OFFLINE'}</span>
+      </div>
+    `).join('');
+  }
+
+  async function loadBookings() {
+    const { data } = await db.from('bookings').select('*').order('created_at', { ascending: false }).limit(30);
+    const list = document.getElementById('bookingList');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">Wala pang bookings.</div>';
+      return;
+    }
+    list.innerHTML = data.map(b => `
+      <div class="booking-card">
+        <div class="booking-header">
+          <span class="booking-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
+          <span class="booking-status status-${b.status}">${b.status.toUpperCase()}</span>
+        </div>
+        <div class="booking-route">
+          🟢 ${b.pickup_address || '—'}<br>
+          🔴 ${b.dropoff_address || '—'}
+        </div>
+        <div class="booking-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
+      </div>
+    `).join('');
+  }
+
+  async function addRider() {
+    const name = document.getElementById('rName').value.trim();
+    const email = document.getElementById('rEmail').value.trim();
+    const phone = document.getElementById('rPhone').value.trim();
+    const password = document.getElementById('rPassword').value;
+    const btn = document.getElementById('addBtn');
+    const fb = document.getElementById('feedback');
+
+    if (!name || !email || !password) {
+      showFeedback('Punan ang pangalan, email, at password.', 'error'); return;
+    }
+    if (password.length < 6) {
+      showFeedback('Minimum 6 characters ang password.', 'error'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Nagda-dagdag…';
+    fb.classList.remove('show');
+
+    // Create auth user via admin (using service role is ideal, but using signUp as workaround)
+    const { data, error } = await db.auth.signUp({ email, password });
+
+    if (error) {
+      showFeedback('Error: ' + error.message, 'error');
+      btn.disabled = false; btn.textContent = '➕ I-add ang Rider';
+      return;
+    }
+
+    // Update user profile
+    if (data.user) {
+      await db.from('users').upsert({
+        id: data.user.id,
+        name, email, phone,
+        role: 'rider',
+        is_available: false
+      });
+    }
+
+    showFeedback(`✅ Na-add na si ${name}!`, 'success');
+    document.getElementById('rName').value = '';
+    document.getElementById('rEmail').value = '';
+    document.getElementById('rPhone').value = '';
+    document.getElementById('rPassword').value = '';
+    btn.disabled = false;
+    btn.textContent = '➕ I-add ang Rider';
+    await loadAll();
+  }
+
+  function showFeedback(msg, type) {
+    const fb = document.getElementById('feedback');
+    fb.textContent = msg;
+    fb.className = `feedback show ${type}`;
+  }
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('tabRiders').style.display = tab === 'riders' ? 'block' : 'none';
+    document.getElementById('tabBookings').style.display = tab === 'bookings' ? 'block' : 'none';
+  }
+
+  async function logout() {
+    await db.auth.signOut();
+    window.location.href = 'login.html';
+  }
+</script>
+</body>
+</html>
