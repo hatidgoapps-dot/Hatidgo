@@ -212,6 +212,28 @@
       <!-- BOOK -->
       <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
 
+      <!-- RIDER DETAILS (shown when accepted) -->
+      <div class="rider-details" id="riderDetailsCard">
+        <div class="rider-details-title">Rider na Papunta Sa Yo!</div>
+        <div class="rider-info-row">
+          <div class="rider-big-avatar">🛵</div>
+          <div>
+            <div class="rider-detail-name" id="rdName">—</div>
+            <div class="rider-detail-sub" id="rdPhone">—</div>
+          </div>
+        </div>
+        <div class="rider-detail-grid">
+          <div class="rider-detail-item">
+            <div class="rider-detail-label">🏍️ Motor</div>
+            <div class="rider-detail-value" id="rdMotor">—</div>
+          </div>
+          <div class="rider-detail-item">
+            <div class="rider-detail-label">🔖 Plate No.</div>
+            <div class="rider-detail-value" id="rdPlate">—</div>
+          </div>
+        </div>
+      </div>
+
       <!-- HISTORY -->
       <div class="history-title">📋 Aking mga Booking</div>
       <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
@@ -331,6 +353,8 @@
     document.getElementById('bkName').textContent = currentUser?.name || '';
     document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
     loadHistory();
+    checkAcceptedBooking();
+    subscribeBookingUpdates();
   }
 
   function setType(type, el) {
@@ -404,6 +428,39 @@
 
   function closeModal() {
     document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  async function checkAcceptedBooking() {
+    if (!currentUser) return;
+    const { data } = await db.from('bookings')
+      .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
+      .eq('passenger_id', currentUser.id)
+      .eq('status', 'accepted')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const card = document.getElementById('riderDetailsCard');
+    if (data && data.rider) {
+      document.getElementById('rdName').textContent = data.rider.name || '—';
+      document.getElementById('rdPhone').textContent = '📞 ' + (data.rider.phone || '—');
+      document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
+      document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
+      card.classList.add('show');
+    } else {
+      card.classList.remove('show');
+    }
+  }
+
+  // Real-time booking status update
+  function subscribeBookingUpdates() {
+    if (!currentUser) return;
+    db.channel('customer-booking-' + currentUser.id)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings',
+        filter: 'passenger_id=eq.' + currentUser.id }, () => {
+        checkAcceptedBooking();
+        loadHistory();
+      }).subscribe();
   }
 
   async function loadHistory() {
