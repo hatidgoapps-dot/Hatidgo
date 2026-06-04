@@ -12,14 +12,14 @@
       --border: #2a2a2a; --accent: #f97316; --accent2: #fbbf24;
       --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
       --text: #f0f0f0; --muted: #777;
-    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
     .header {
       background: var(--card); border-bottom: 1px solid var(--border);
       padding: 16px 20px; display: flex; align-items: center;
       justify-content: space-between; position: sticky; top: 0; z-index: 10;
-    }
+
     .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
     .logo span { color: var(--accent); }
     .admin-badge { background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
@@ -197,7 +197,7 @@
     const list = document.getElementById('riderList');
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">Wala pang riders. Mag-add na! 🛵</div>'; return;
-    }
+
     list.innerHTML = data.map(r => `
       <div class="rider-card">
         <div class="rider-top">
@@ -221,7 +221,7 @@
     const list = document.getElementById('bookingList');
     if (!data || data.length === 0) {
       list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return;
-    }
+
     list.innerHTML = data.map(b => `
       <div class="booking-card">
         <div class="booking-header">
@@ -247,16 +247,22 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Nagda-dagdag…';
 
-    const { data, error } = await db.auth.signUp({ email, password });
+    const { data, error } = await db.rpc('create_rider_account', {
+      rider_email: email,
+      rider_password: password,
+      rider_name: name,
+      rider_phone: phone
+    });
 
-    if (error) {
-      showFeedback('Error: ' + error.message, 'error');
+    if (error || (data && !data.success)) {
+      showFeedback('Error: ' + (error?.message || data?.error), 'error');
       btn.disabled = false; btn.textContent = '➕ I-add ang Rider'; return;
     }
 
-    if (data.user) {
-      await db.from('users').upsert({ id: data.user.id, name, email, phone, role: 'rider', is_available: false });
-    }
+
+
+
+
 
     showFeedback(`✅ Na-add na si ${name}!`, 'success');
     document.getElementById('rName').value = '';
@@ -291,15 +297,15 @@
     if (!newPass || !confirmPass) {
       fb.textContent = 'Punan ang lahat ng fields.';
       fb.className = 'modal-fb show error'; return;
-    }
+
     if (newPass.length < 6) {
       fb.textContent = 'Minimum 6 characters ang password.';
       fb.className = 'modal-fb show error'; return;
-    }
+
     if (newPass !== confirmPass) {
       fb.textContent = 'Hindi magkapareho ang password!';
       fb.className = 'modal-fb show error'; return;
-    }
+
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>';
@@ -310,11 +316,11 @@
     if (error) {
       fb.textContent = 'Error: ' + error.message;
       fb.className = 'modal-fb show error';
-    } else {
+ else {
       fb.textContent = '✅ Na-update na! Ibigay ang bagong password sa rider.';
       fb.className = 'modal-fb show success';
       setTimeout(() => closeModal(), 2000);
-    }
+
     btn.disabled = false; btn.textContent = 'I-update';
   }
 
