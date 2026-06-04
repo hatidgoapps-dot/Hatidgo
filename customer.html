@@ -447,6 +447,7 @@
     if (pickupMarker) map.removeLayer(pickupMarker);
     pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup').openPopup();
     drawRoute();
+    computeFare();
   }
 
   function setDropoff(lat, lng, addr) {
@@ -455,6 +456,7 @@
     if (dropoffMarker) map.removeLayer(dropoffMarker);
     dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map).bindPopup('🏁 Destinasyon').openPopup();
     drawRoute();
+    computeFare();
   }
 
   function drawRoute() {
@@ -462,7 +464,6 @@
     if (routeLine) map.removeLayer(routeLine);
     routeLine = L.polyline([[pickupCoords.lat, pickupCoords.lng],[dropoffCoords.lat, dropoffCoords.lng]], { color: '#f97316', weight: 3, dashArray: '6,6', opacity: 0.8 }).addTo(map);
     map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
-    computeFare();
   }
 
   function clearLocation(type) {
@@ -514,12 +515,18 @@
   }
 
   function computeFare() {
-    if (!pickupCoords || !dropoffCoords) return null;
+    if (!pickupCoords || !dropoffCoords) {
+      document.getElementById('fareCard').classList.remove('show');
+      return null;
+    }
     const km = haversine(pickupCoords, dropoffCoords);
     const fare = Math.max(20, Math.round(km * 20));
-    document.getElementById('fareCard').classList.add('show');
+    const fareCard = document.getElementById('fareCard');
+    fareCard.style.display = 'flex';
+    fareCard.classList.add('show');
     document.getElementById('fareDistLabel').textContent = km.toFixed(2) + ' km · ₱20/km (min. ₱20)';
     document.getElementById('fareAmount').textContent = '₱' + fare;
+    console.log('Fare computed:', fare, 'Distance:', km);
     return { km: parseFloat(km.toFixed(2)), fare };
   }
 
