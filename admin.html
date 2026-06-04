@@ -33,7 +33,6 @@
       font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer;
     }
     .content { padding: 20px; max-width: 500px; margin: 0 auto; }
-    /* STATS */
     .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
     .stat-card {
       background: var(--card); border: 1px solid var(--border);
@@ -41,7 +40,6 @@
     }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
     .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    /* TABS */
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
     .tab {
       flex: 1; padding: 10px; background: var(--card);
@@ -51,18 +49,9 @@
     }
     .tab.active { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.1); }
     .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 14px; }
-    /* FORM */
     .form-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 16px; padding: 20px; margin-bottom: 24px;
-    }
-    .steps {
-      background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2);
-      border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 13px; line-height: 1.8;
-    }
-    .steps strong { color: var(--accent); }
-    .steps a {
-      color: var(--accent2); text-decoration: underline;
     }
     .field { margin-bottom: 12px; }
     .field label {
@@ -92,7 +81,6 @@
     .feedback.show { display: block; }
     .feedback.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
     .feedback.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
-    /* RIDER LIST */
     .rider-list { display: flex; flex-direction: column; gap: 10px; }
     .rider-card {
       background: var(--card); border: 1px solid var(--border);
@@ -113,17 +101,13 @@
     }
     .avail-badge.online { background: rgba(34,197,94,0.15); color: var(--green); }
     .avail-badge.offline { background: rgba(120,120,120,0.15); color: var(--muted); }
-    /* BOOKINGS */
     .booking-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
     }
     .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .booking-type { font-size: 12px; font-weight: 700; color: var(--accent); }
-    .booking-status {
-      font-size: 10px; font-weight: 700; padding: 3px 9px;
-      border-radius: 20px; letter-spacing: 0.5px;
-    }
+    .booking-status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
     .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
     .s-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
@@ -137,6 +121,11 @@
       animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .info-box {
+      background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+      font-size: 12px; color: #93c5fd; line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -148,8 +137,6 @@
 </div>
 
 <div class="content">
-
-  <!-- STATS -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-num" id="statRiders">—</div>
@@ -165,7 +152,6 @@
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs">
     <div class="tab active" onclick="switchTab('riders', this)">🛵 Mga Rider</div>
     <div class="tab" onclick="switchTab('bookings', this)">📋 Bookings</div>
@@ -175,31 +161,25 @@
   <div id="tabRiders">
     <div class="section-title">➕ Mag-add ng Rider</div>
     <div class="form-card">
-
-      <!-- INSTRUCTIONS -->
-      <div class="steps">
-        <strong>Step 1:</strong> Pumunta sa
-        <a href="https://supabase.com/dashboard" target="_blank">Supabase Dashboard</a>
-        → Authentication → Users → Add user<br>
-        <strong>Step 2:</strong> Ilagay ang email at password ng rider<br>
-        <strong>Step 3:</strong> I-type ang email dito tapos click "I-sync"
-      </div>
-
+      <div class="info-box">ℹ️ Dito ka mag-fill ng info ng rider. Gagawa ito ng account niya at maidadagdag sa listahan.</div>
       <div class="feedback" id="feedback"></div>
-
       <div class="field">
-        <label>Pangalan ng Rider</label>
+        <label>Pangalan</label>
         <input type="text" id="rName" placeholder="Juan dela Cruz"/>
       </div>
       <div class="field">
-        <label>Email (same sa Supabase)</label>
+        <label>Email</label>
         <input type="email" id="rEmail" placeholder="rider@gmail.com"/>
       </div>
       <div class="field">
-        <label>Phone Number</label>
+        <label>Phone</label>
         <input type="tel" id="rPhone" placeholder="09xxxxxxxxx"/>
       </div>
-      <button class="btn-add" id="addBtn" onclick="syncRider()">🔄 I-sync ang Rider</button>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="rPassword" placeholder="Minimum 6 characters"/>
+      </div>
+      <button class="btn-add" id="addBtn" onclick="addRider()">➕ I-add ang Rider</button>
     </div>
 
     <div class="section-title">👥 Listahan ng Riders</div>
@@ -211,7 +191,6 @@
     <div class="section-title">📋 Lahat ng Bookings</div>
     <div id="bookingList"><div class="empty">Loading…</div></div>
   </div>
-
 </div>
 
 <script>
@@ -220,7 +199,6 @@
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Auth guard
   db.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) { window.location.href = 'index.html'; return; }
     const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
@@ -274,54 +252,60 @@
           <span class="booking-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
           <span class="booking-status s-${b.status}">${b.status.toUpperCase()}</span>
         </div>
-        <div class="booking-route">
-          🟢 ${b.pickup_address || '—'}<br>
-          🔴 ${b.dropoff_address || '—'}
-        </div>
+        <div class="booking-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
         <div class="booking-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
       </div>
     `).join('');
   }
 
-  async function syncRider() {
+  async function addRider() {
     const name = document.getElementById('rName').value.trim();
     const email = document.getElementById('rEmail').value.trim();
     const phone = document.getElementById('rPhone').value.trim();
+    const password = document.getElementById('rPassword').value;
     const btn = document.getElementById('addBtn');
 
-    if (!name || !email) {
-      showFeedback('Punan ang pangalan at email.', 'error'); return;
+    if (!name || !email || !password) {
+      showFeedback('Punan ang lahat ng fields.', 'error'); return;
+    }
+    if (password.length < 6) {
+      showFeedback('Minimum 6 characters ang password.', 'error'); return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Nagse-sync…';
+    btn.innerHTML = '<span class="spinner"></span> Nagda-dagdag…';
 
-    // Find the user by email in users table
-    const { data: existing } = await db.from('users').select('id').eq('email', email).single();
-
-    if (!existing) {
-      showFeedback('Hindi mahanap ang email na yan. Siguraduhing na-add mo na sa Supabase → Authentication → Users.', 'error');
-      btn.disabled = false; btn.textContent = '🔄 I-sync ang Rider';
-      return;
-    }
-
-    // Update role to rider
-    const { error } = await db.from('users').update({
-      name, phone, role: 'rider', is_available: false
-    }).eq('id', existing.id);
+    // Use the SQL function we created
+    const { data, error } = await db.rpc('create_rider', {
+      rider_email: email,
+      rider_password: password,
+      rider_name: name,
+      rider_phone: phone
+    });
 
     if (error) {
-      showFeedback('Error: ' + error.message, 'error');
-    } else {
-      showFeedback(`✅ Na-sync na si ${name} bilang Rider!`, 'success');
-      document.getElementById('rName').value = '';
-      document.getElementById('rEmail').value = '';
-      document.getElementById('rPhone').value = '';
-      await loadAll();
+      // Fallback: try signUp then update
+      const { data: signUpData, error: signUpError } = await db.auth.signUp({ email, password });
+      if (signUpError) {
+        showFeedback('Error: ' + signUpError.message, 'error');
+        btn.disabled = false; btn.textContent = '➕ I-add ang Rider';
+        return;
+      }
+      if (signUpData.user) {
+        await db.from('users').upsert({
+          id: signUpData.user.id, name, email, phone, role: 'rider', is_available: false
+        });
+      }
     }
 
+    showFeedback(`✅ Na-add na si ${name} bilang Rider!`, 'success');
+    document.getElementById('rName').value = '';
+    document.getElementById('rEmail').value = '';
+    document.getElementById('rPhone').value = '';
+    document.getElementById('rPassword').value = '';
     btn.disabled = false;
-    btn.textContent = '🔄 I-sync ang Rider';
+    btn.textContent = '➕ I-add ang Rider';
+    await loadAll();
   }
 
   function showFeedback(msg, type) {
