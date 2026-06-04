@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>HatidGo – Mag-Book</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -13,15 +15,12 @@
       --green: #22c55e; --red: #ef4444; --text: #f0f0f0; --muted: #777;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
+    html, body { height: 100%; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
 
     /* ---- AUTH SCREEN ---- */
-    .auth-screen {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100dvh; padding: 24px;
-    }
-    .auth-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+    .auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 24px; overflow-y: auto; }
+    .auth-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0; }
     .logo { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; text-align: center; }
     .logo span { color: var(--accent); }
     .logo-sub { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
@@ -46,62 +45,108 @@
     .msg-box.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
 
     /* ---- BOOKING SCREEN ---- */
-    .booking-screen { display: none; flex-direction: column; min-height: 100dvh; }
-    /* HEADER */
-    .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .booking-screen { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
+    .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
     .bk-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
     .bk-logo span { color: var(--accent); }
     .bk-user { display: flex; align-items: center; gap: 10px; }
-    .bk-name { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .bk-name { font-size: 12px; font-weight: 600; color: var(--muted); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bk-logout { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; }
-    /* CONTENT */
-    .bk-content { padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
-    .bk-greeting { margin-bottom: 20px; }
-    .bk-greeting h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
-    .bk-greeting p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* MAP */
+    #map { height: 240px; width: 100%; flex-shrink: 0; z-index: 1; }
+    .map-hint { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(13,17,23,0.85); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 10px; padding: 6px 14px; font-size: 11px; font-weight: 600; color: var(--text); z-index: 5; white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
+    .map-hint.hide { opacity: 0; }
+    .locate-fab { position: absolute; bottom: 10px; right: 10px; z-index: 5; background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+    .map-wrap { position: relative; flex-shrink: 0; }
+
+    /* BOTTOM PANEL */
+    .bottom-panel { flex: 1; overflow-y: auto; scrollbar-width: none; }
+    .bottom-panel::-webkit-scrollbar { display: none; }
+    .panel-content { padding: 16px 18px 40px; max-width: 500px; margin: 0 auto; }
+
+    /* MAP MODE INDICATOR */
+    .map-mode-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .map-mode-btn { flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .map-mode-btn.active { border-color: var(--green); background: rgba(34,197,94,0.1); color: var(--green); }
+    .map-mode-btn.active-dest { border-color: var(--red); background: rgba(239,68,68,0.1); color: var(--red); }
+
     /* TYPE TOGGLE */
-    .type-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
-    .type-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+    .type-btn { flex: 1; padding: 11px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
     .type-btn.active { border-color: var(--accent); background: rgba(249,115,22,0.1); color: var(--accent); }
-    /* LOCATION INPUTS */
-    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
-    .loc-field { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+
+    /* CONTACT INFO */
+    .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .info-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .info-input { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; transition: border-color 0.15s; }
+    .info-input:focus-within { border-color: var(--accent); }
+    .info-input:last-child { margin-bottom: 0; }
+    .info-input input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+    .info-input input::placeholder { color: #444; }
+
+    /* LOCATION CARD */
+    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .loc-field { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
     .loc-field:not(:last-child) { border-bottom: 1px solid var(--border); }
-    .loc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .loc-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
     .dot-green { background: var(--green); }
     .dot-red { background: var(--red); }
     .loc-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
     .loc-field input::placeholder { color: var(--muted); }
+    .loc-clear { font-size: 16px; cursor: pointer; color: var(--muted); padding: 2px; }
+
     /* NOTES */
-    .notes-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 14px; display: none; }
+    .notes-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: none; }
     .notes-card.show { display: block; }
-    .notes-card textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; resize: none; height: 60px; }
+    .notes-card textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; resize: none; height: 55px; }
     .notes-card textarea::placeholder { color: var(--muted); }
     .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
-    /* FARE BOX */
-    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; display: none; }
+
+    /* FARE */
+    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: none; }
     .fare-card.show { display: flex; justify-content: space-between; align-items: center; }
     .fare-label { font-size: 12px; color: var(--muted); }
     .fare-dist { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .fare-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent); }
+
     /* BOOK BTN */
-    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.12s, opacity 0.15s; }
+    .book-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; transition: transform 0.12s; margin-bottom: 20px; }
     .book-btn:active { transform: scale(0.97); }
     .book-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    /* BOOKINGS HISTORY */
-    .history-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; margin: 20px 0 12px; }
+
+    /* RIDER DETAILS */
+    .rider-details { background: var(--card); border: 1.5px solid rgba(34,197,94,0.3); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: none; }
+    .rider-details.show { display: block; }
+    .rider-details-title { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .rd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+    .rider-info-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .rider-big-avatar { width: 44px; height: 44px; background: rgba(249,115,22,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .rider-detail-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+    .rider-detail-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .rider-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .rd-item { background: var(--card2); border-radius: 10px; padding: 9px 12px; }
+    .rd-item-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 3px; }
+    .rd-item-value { font-size: 13px; font-weight: 600; }
+
+    /* HISTORY */
+    .history-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; margin-bottom: 12px; }
     .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
     .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .history-type { font-size: 12px; font-weight: 700; color: var(--accent); }
     .history-status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
     .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
+    .s-arrived { background: rgba(249,115,22,0.15); color: var(--accent); }
+    .s-ongoing { background: rgba(59,130,246,0.15); color: #60a5fa; }
     .s-completed { background: rgba(59,130,246,0.15); color: #60a5fa; }
     .s-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
-    .history-route { font-size: 12px; color: var(--muted); line-height: 1.6; }
-    .history-fare { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--accent); margin-top: 6px; }
-    /* SUCCESS MODAL */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
+    .history-route { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+    .history-fare { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--accent); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
     .modal { width: 100%; max-width: 500px; background: #141414; border-radius: 24px 24px 0 0; border-top: 1px solid #2a2a2a; padding: 28px 24px 44px; text-align: center; animation: slideUp 0.3s ease; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -110,10 +155,10 @@
     .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.6; }
     .modal-id { background: var(--card2); border-radius: 10px; padding: 10px; font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: monospace; }
     .modal-btn { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
-    /* SPINNER */
     .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+    .leaflet-control-attribution { display: none !important; }
   </style>
 </head>
 <body>
@@ -121,17 +166,15 @@
   <!-- AUTH SCREEN -->
   <div class="auth-screen" id="authScreen">
     <div class="auth-wrap">
-      <div>
+      <div style="text-align:center">
         <div class="logo">🛵 Hatid<span>Go</span></div>
         <div class="logo-sub">Motor · Sasakyan · Mabilis</div>
-        <div style="text-align:center"><div class="city-pill">📍 Cotabato City</div></div>
+        <div class="city-pill">📍 Cotabato City</div>
       </div>
-
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="showAuthTab('signup', this)">Mag-Sign Up</button>
         <button class="auth-tab" onclick="showAuthTab('login', this)">Mag-Login</button>
       </div>
-
       <!-- SIGN UP -->
       <div class="auth-card" id="signupCard">
         <div class="auth-title">Bagong Account 🎉</div>
@@ -143,7 +186,6 @@
         <div class="field"><label>Password</label><input type="password" id="sPass" placeholder="Minimum 6 characters"/></div>
         <button class="btn-main" id="signupBtn" onclick="signUp()">Gumawa ng Account</button>
       </div>
-
       <!-- LOGIN -->
       <div class="auth-card" id="loginCard" style="display:none">
         <div class="auth-title">Mag-Login 🔐</div>
@@ -153,7 +195,6 @@
         <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"/></div>
         <button class="btn-main" id="loginBtn" onclick="loginCustomer()">Mag-Login</button>
       </div>
-
       <div style="font-size:12px;color:var(--muted);text-align:center">
         Admin o Rider? <a href="/Hatidgo/index.html" style="color:var(--accent);font-weight:600">Dito mag-login →</a>
       </div>
@@ -170,88 +211,104 @@
       </div>
     </div>
 
-    <div class="bk-content">
-      <div class="bk-greeting">
-        <h2 id="greetingName">Saan ka pupunta? 🛵</h2>
-        <p>📍 Cotabato City</p>
-      </div>
+    <!-- MAP -->
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="map-hint" id="mapHint">📍 I-click ang mapa para itakda ang pickup</div>
+      <div class="locate-fab" onclick="locateMe()" title="Kunin ang aking lokasyon">📍</div>
+    </div>
 
-      <!-- TYPE -->
-      <div class="type-toggle">
-        <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
-        <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
-      </div>
+    <!-- BOTTOM PANEL -->
+    <div class="bottom-panel">
+      <div class="panel-content">
 
-      <!-- CUSTOMER CONTACT INFO -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">👤 Iyong Info</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px">
-            <span style="font-size:16px">👤</span>
-            <input type="text" id="cName" placeholder="Iyong pangalan…" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px"/>
+        <!-- MAP MODE BUTTONS -->
+        <div class="map-mode-row">
+          <button class="map-mode-btn active" id="modePickup" onclick="setMapMode('pickup')">🟢 Itakda Pickup</button>
+          <button class="map-mode-btn" id="modeDest" onclick="setMapMode('destination')">🔴 Itakda Destinasyon</button>
+        </div>
+
+        <!-- TYPE -->
+        <div class="type-toggle">
+          <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
+          <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
+        </div>
+
+        <!-- CONTACT INFO -->
+        <div class="info-card">
+          <div class="info-label">👤 Iyong Info</div>
+          <div class="info-input">
+            <span>👤</span>
+            <input type="text" id="cName" placeholder="Iyong pangalan…"/>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px">
-            <span style="font-size:16px">📞</span>
-            <input type="tel" id="cPhone" placeholder="Cellphone number…" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px"/>
+          <div class="info-input">
+            <span>📞</span>
+            <input type="tel" id="cPhone" placeholder="Cellphone number…"/>
           </div>
         </div>
-      </div>
 
-      <!-- LOCATIONS -->
-      <div class="location-card">
-        <div class="loc-field">
-          <div class="loc-dot dot-green"></div>
-          <input type="text" id="pickup" placeholder="Pickup location…" oninput="computeFare()"/>
+        <!-- LOCATIONS -->
+        <div class="location-card">
+          <div class="loc-field">
+            <div class="loc-dot dot-green"></div>
+            <input type="text" id="pickup" placeholder="Pickup location… (i-click sa mapa)" oninput="onManualInput('pickup')"/>
+            <span class="loc-clear" onclick="clearLocation('pickup')">✕</span>
+          </div>
+          <div class="loc-field">
+            <div class="loc-dot dot-red"></div>
+            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click sa mapa)" oninput="onManualInput('dropoff')"/>
+            <span class="loc-clear" onclick="clearLocation('dropoff')">✕</span>
+          </div>
         </div>
-        <div class="loc-field">
-          <div class="loc-dot dot-red"></div>
-          <input type="text" id="dropoff" placeholder="Destinasyon…" oninput="computeFare()"/>
+
+        <!-- NOTES -->
+        <div class="notes-card" id="notesCard">
+          <div class="notes-label">📝 Detalye ng Padala</div>
+          <textarea id="notes" placeholder="Ano ang ipapadala?"></textarea>
         </div>
-      </div>
 
-      <!-- DELIVERY NOTES -->
-      <div class="notes-card" id="notesCard">
-        <div class="notes-label">📝 Detalye ng Padala</div>
-        <textarea id="notes" placeholder="Ano ang ipapadala? (hal. pagkain, damit…)"></textarea>
-      </div>
-
-      <!-- FARE -->
-      <div class="fare-card" id="fareCard">
-        <div>
-          <div class="fare-label">Estimated Fare</div>
-          <div class="fare-dist" id="fareDistLabel"></div>
-        </div>
-        <div class="fare-amount" id="fareAmount">₱0</div>
-      </div>
-
-      <!-- BOOK -->
-      <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
-
-      <!-- RIDER DETAILS (shown when accepted) -->
-      <div class="rider-details" id="riderDetailsCard">
-        <div class="rider-details-title" id="riderDetailsTitle">Rider na Papunta Sa Yo!</div>
-        <div class="rider-info-row">
-          <div class="rider-big-avatar">🛵</div>
+        <!-- FARE -->
+        <div class="fare-card" id="fareCard">
           <div>
-            <div class="rider-detail-name" id="rdName">—</div>
-            <div class="rider-detail-sub" id="rdPhone">—</div>
+            <div class="fare-label">Estimated Fare</div>
+            <div class="fare-dist" id="fareDistLabel"></div>
           </div>
+          <div class="fare-amount" id="fareAmount">₱0</div>
         </div>
-        <div class="rider-detail-grid">
-          <div class="rider-detail-item">
-            <div class="rider-detail-label">🏍️ Motor</div>
-            <div class="rider-detail-value" id="rdMotor">—</div>
-          </div>
-          <div class="rider-detail-item">
-            <div class="rider-detail-label">🔖 Plate No.</div>
-            <div class="rider-detail-value" id="rdPlate">—</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- HISTORY -->
-      <div class="history-title">📋 Aking mga Booking</div>
-      <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
+        <!-- RIDER DETAILS (shown when accepted) -->
+        <div class="rider-details" id="riderDetailsCard">
+          <div class="rider-details-title">
+            <div class="rd-dot"></div>
+            <span id="riderDetailsTitle">Rider Papunta Na!</span>
+          </div>
+          <div class="rider-info-row">
+            <div class="rider-big-avatar">🛵</div>
+            <div>
+              <div class="rider-detail-name" id="rdName">—</div>
+              <div class="rider-detail-sub" id="rdPhone">—</div>
+            </div>
+          </div>
+          <div class="rider-detail-grid">
+            <div class="rd-item">
+              <div class="rd-item-label">🏍️ Motor</div>
+              <div class="rd-item-value" id="rdMotor">—</div>
+            </div>
+            <div class="rd-item">
+              <div class="rd-item-label">🔖 Plate</div>
+              <div class="rd-item-value" id="rdPlate">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOOK -->
+        <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
+
+        <!-- HISTORY -->
+        <div class="history-title">📋 Aking mga Booking</div>
+        <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
+
+      </div>
     </div>
   </div>
 
@@ -260,7 +317,7 @@
     <div class="modal">
       <div class="modal-icon">🎉</div>
       <div class="modal-title">Nakapag-book na!</div>
-      <div class="modal-sub">Hinahanap na ang available na rider sa Cotabato City. Maghintay sandali.</div>
+      <div class="modal-sub">Hinahanap na ang available na rider sa Cotabato City.</div>
       <div class="modal-id" id="bookingIdLabel"></div>
       <button class="modal-btn" onclick="closeModal()">Sige, Salamat!</button>
     </div>
@@ -272,20 +329,25 @@
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  const COTABATO = [7.2047, 124.2311];
   let currentUser = null;
   let bookingType = 'ride';
+  let mapMode = 'pickup'; // 'pickup' or 'destination'
+  let pickupCoords = null, dropoffCoords = null;
+  let pickupMarker = null, dropoffMarker = null;
+  let routeLine = null;
+  let map = null;
 
   // Check if already logged in
   db.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) return;
     const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
-    if (data?.role === 'customer') {
-      currentUser = data;
-      showBookingScreen();
-    }
+    if (data?.role === 'customer') { currentUser = data; showBookingScreen(); }
   });
 
-  // ---- AUTH ----
+  // =====================
+  // AUTH
+  // =====================
   function showAuthTab(tab, el) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -300,27 +362,16 @@
     const pass = document.getElementById('sPass').value;
     const btn = document.getElementById('signupBtn');
     const msg = document.getElementById('signupMsg');
-
     if (!name || !email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
     if (pass.length < 6) { showMsg(msg, 'Minimum 6 characters ang password.', 'error'); return; }
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
-    msg.classList.remove('show');
-
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
     const { data, error } = await db.auth.signUp({ email, password: pass });
-
-    if (error) {
-      showMsg(msg, 'Error: ' + error.message, 'error');
-      btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return;
-    }
-
+    if (error) { showMsg(msg, 'Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return; }
     if (data.user) {
       await db.from('users').upsert({ id: data.user.id, name, email, phone, role: 'customer' });
       currentUser = { id: data.user.id, name, email, phone, role: 'customer' };
       showBookingScreen();
     }
-
     btn.disabled = false; btn.textContent = 'Gumawa ng Account';
   }
 
@@ -329,50 +380,147 @@
     const pass = document.getElementById('lPass').value;
     const btn = document.getElementById('loginBtn');
     const msg = document.getElementById('loginMsg');
-
     if (!email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
-    msg.classList.remove('show');
-
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
     const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-
-    if (error) {
-      showMsg(msg, 'Mali ang email o password.', 'error');
-      btn.disabled = false; btn.textContent = 'Mag-Login'; return;
-    }
-
+    if (error) { showMsg(msg, 'Mali ang email o password.', 'error'); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
     const { data: user } = await db.from('users').select('*').eq('id', data.user.id).single();
-
-    if (user?.role !== 'customer') {
-      showMsg(msg, 'Hindi customer account ito.', 'error');
-      await db.auth.signOut();
-      btn.disabled = false; btn.textContent = 'Mag-Login'; return;
-    }
-
-    currentUser = user;
-    showBookingScreen();
+    if (user?.role !== 'customer') { showMsg(msg, 'Hindi customer account ito.', 'error'); await db.auth.signOut(); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
+    currentUser = user; showBookingScreen();
     btn.disabled = false; btn.textContent = 'Mag-Login';
   }
 
-  function showMsg(el, msg, type) {
-    el.textContent = msg;
-    el.className = 'msg-box show ' + type;
-  }
+  function showMsg(el, msg, type) { el.textContent = msg; el.className = 'msg-box show ' + type; }
 
-  // ---- BOOKING SCREEN ----
+  // =====================
+  // BOOKING SCREEN + MAP
+  // =====================
   function showBookingScreen() {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('bookingScreen').style.display = 'flex';
     document.getElementById('bkName').textContent = currentUser?.name || '';
-    document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
-    // Pre-fill name and phone
-    if (document.getElementById('cName')) document.getElementById('cName').value = currentUser?.name || '';
-    if (document.getElementById('cPhone')) document.getElementById('cPhone').value = currentUser?.phone || '';
+    document.getElementById('cName').value = currentUser?.name || '';
+    document.getElementById('cPhone').value = currentUser?.phone || '';
+    initMap();
     loadHistory();
     checkAcceptedBooking();
     subscribeBookingUpdates();
+  }
+
+  function initMap() {
+    if (map) return;
+    map = L.map('map', { center: COTABATO, zoom: 14, zoomControl: false });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+    map.on('click', onMapClick);
+    // Auto locate on load
+    setTimeout(() => locateMe(), 500);
+  }
+
+  const pickupIcon = L.divIcon({ html: `<div style="width:20px;height:20px;background:#22c55e;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`, iconSize:[20,20], iconAnchor:[10,10], className:'' });
+  const dropoffIcon = L.divIcon({ html: `<div style="width:20px;height:20px;background:#ef4444;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`, iconSize:[20,20], iconAnchor:[10,10], className:'' });
+
+  async function onMapClick(e) {
+    const { lat, lng } = e.latlng;
+    const addr = await reverseGeocode(lat, lng);
+    if (mapMode === 'pickup') {
+      setPickup(lat, lng, addr);
+      // Auto switch to destination after setting pickup
+      setMapMode('destination');
+    } else {
+      setDropoff(lat, lng, addr);
+    }
+  }
+
+  function setMapMode(mode) {
+    mapMode = mode;
+    document.getElementById('modePickup').className = 'map-mode-btn' + (mode === 'pickup' ? ' active' : '');
+    document.getElementById('modeDest').className = 'map-mode-btn' + (mode === 'destination' ? ' active-dest' : '');
+    const hint = document.getElementById('mapHint');
+    hint.textContent = mode === 'pickup' ? '🟢 I-click ang pickup location' : '🔴 I-click ang destinasyon';
+    hint.classList.remove('hide');
+    setTimeout(() => hint.classList.add('hide'), 3000);
+  }
+
+  function setPickup(lat, lng, addr) {
+    pickupCoords = { lat, lng };
+    document.getElementById('pickup').value = addr;
+    if (pickupMarker) map.removeLayer(pickupMarker);
+    pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup').openPopup();
+    drawRoute();
+  }
+
+  function setDropoff(lat, lng, addr) {
+    dropoffCoords = { lat, lng };
+    document.getElementById('dropoff').value = addr;
+    if (dropoffMarker) map.removeLayer(dropoffMarker);
+    dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map).bindPopup('🏁 Destinasyon').openPopup();
+    drawRoute();
+  }
+
+  function drawRoute() {
+    if (!pickupCoords || !dropoffCoords) return;
+    if (routeLine) map.removeLayer(routeLine);
+    routeLine = L.polyline([[pickupCoords.lat, pickupCoords.lng],[dropoffCoords.lat, dropoffCoords.lng]], { color: '#f97316', weight: 3, dashArray: '6,6', opacity: 0.8 }).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    computeFare();
+  }
+
+  function clearLocation(type) {
+    if (type === 'pickup') {
+      pickupCoords = null;
+      document.getElementById('pickup').value = '';
+      if (pickupMarker) { map.removeLayer(pickupMarker); pickupMarker = null; }
+    } else {
+      dropoffCoords = null;
+      document.getElementById('dropoff').value = '';
+      if (dropoffMarker) { map.removeLayer(dropoffMarker); dropoffMarker = null; }
+    }
+    if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+    document.getElementById('fareCard').classList.remove('show');
+  }
+
+  async function reverseGeocode(lat, lng) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const data = await res.json();
+      return data.display_name?.split(',').slice(0,3).join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    } catch { return `${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
+  }
+
+  function locateMe() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      map.setView([lat, lng], 16);
+      const addr = await reverseGeocode(lat, lng);
+      setPickup(lat, lng, addr);
+      setMapMode('destination');
+    }, () => {});
+  }
+
+  function onManualInput(type) {
+    // Allow manual typing too
+  }
+
+  // =====================
+  // FARE
+  // =====================
+  function haversine(a, b) {
+    const R = 6371;
+    const dLat = (b.lat - a.lat) * Math.PI / 180;
+    const dLng = (b.lng - a.lng) * Math.PI / 180;
+    const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+  }
+
+  function computeFare() {
+    if (!pickupCoords || !dropoffCoords) return null;
+    const km = haversine(pickupCoords, dropoffCoords);
+    const fare = Math.max(20, Math.round(km * 20));
+    document.getElementById('fareCard').classList.add('show');
+    document.getElementById('fareDistLabel').textContent = km.toFixed(2) + ' km · ₱20/km (min. ₱20)';
+    document.getElementById('fareAmount').textContent = '₱' + fare;
+    return { km: parseFloat(km.toFixed(2)), fare };
   }
 
   function setType(type, el) {
@@ -384,26 +532,9 @@
     computeFare();
   }
 
-  function computeFare() {
-    const pickup = document.getElementById('pickup').value.trim();
-    const dropoff = document.getElementById('dropoff').value.trim();
-
-    if (!pickup || !dropoff) {
-      document.getElementById('fareCard').classList.remove('show'); return;
-    }
-
-    // Fare: minimum ₱20 (1km), ₱20 per km
-    const km = (Math.random() * 4 + 1).toFixed(1);
-    const perKm = 20;
-    const minimum = 20;
-    const computed = Math.round(parseFloat(km) * perKm);
-    const fare = computed < minimum ? minimum : computed;
-    document.getElementById('fareCard').classList.add('show');
-    document.getElementById('fareDistLabel').textContent = km + ' km · ₱20/km (min. ₱20)';
-    document.getElementById('fareAmount').textContent = '₱' + fare;
-    return { km: parseFloat(km), fare };
-  }
-
+  // =====================
+  // BOOK
+  // =====================
   async function bookRide() {
     const pickup = document.getElementById('pickup').value.trim();
     const dropoff = document.getElementById('dropoff').value.trim();
@@ -412,15 +543,10 @@
     const cPhone = document.getElementById('cPhone').value.trim();
     const btn = document.getElementById('bookBtn');
 
-    if (!cName || !cPhone) {
-      alert('Ilagay ang iyong pangalan at cellphone number!'); return;
-    }
-    if (!pickup || !dropoff) {
-      alert('Ilagay ang pickup at destinasyon!'); return;
-    }
+    if (!cName || !cPhone) { alert('Ilagay ang iyong pangalan at cellphone number!'); return; }
+    if (!pickup || !dropoff) { alert('Itakda ang pickup at destinasyon sa mapa!'); return; }
 
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
 
     const fareData = computeFare();
 
@@ -428,7 +554,11 @@
       passenger_id: currentUser.id,
       type: bookingType,
       pickup_address: pickup,
+      pickup_lat: pickupCoords?.lat || null,
+      pickup_lng: pickupCoords?.lng || null,
       dropoff_address: dropoff,
+      dropoff_lat: dropoffCoords?.lat || null,
+      dropoff_lng: dropoffCoords?.lng || null,
       distance_km: fareData?.km || null,
       fare: fareData?.fare || null,
       notes: notes || null,
@@ -442,21 +572,21 @@
 
     if (error) { alert('Error: ' + error.message); return; }
 
-    // Reset form
-    document.getElementById('pickup').value = '';
-    document.getElementById('dropoff').value = '';
+    // Reset
+    clearLocation('pickup'); clearLocation('dropoff');
     document.getElementById('notes').value = '';
-    document.getElementById('fareCard').classList.remove('show');
+    map.setView(COTABATO, 14);
 
     document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
     document.getElementById('modalOverlay').classList.add('show');
     loadHistory();
   }
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('show');
-  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
+  // =====================
+  // RIDER DETAILS (real-time)
+  // =====================
   async function checkAcceptedBooking() {
     if (!currentUser) return;
     const { data } = await db.from('bookings')
@@ -475,42 +605,27 @@
       document.getElementById('rdPhone').textContent = '📞 ' + (data.rider.phone || '—');
       document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
       document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
-
-      // Update title and style based on status
-      const statusMessages = {
-        accepted: '🛵 Rider Papunta Na Sa Iyo!',
-        arrived: '📍 Nandito Na ang Rider!',
-        ongoing: '🚀 Trip In Progress!',
-        completed: '✅ Trip Completed!'
-      };
-      if (titleEl) titleEl.textContent = statusMessages[data.status] || 'Rider Info';
-
-      // Change border color based on status
-      const card = document.getElementById('riderDetailsCard');
-      if (data.status === 'completed') {
-        card.style.borderColor = 'rgba(59,130,246,0.4)';
-        titleEl.style.color = '#60a5fa';
-      } else {
-        card.style.borderColor = 'rgba(34,197,94,0.3)';
-        titleEl.style.color = 'var(--green)';
-      }
+      const msgs = { accepted: '🛵 Rider Papunta Na!', arrived: '📍 Nandito Na ang Rider!', ongoing: '🚀 Trip In Progress!', completed: '✅ Trip Completed!' };
+      if (titleEl) titleEl.textContent = msgs[data.status] || 'Rider Info';
+      if (data.status === 'completed') { card.style.borderColor = 'rgba(59,130,246,0.4)'; titleEl.style.color = '#60a5fa'; }
+      else { card.style.borderColor = 'rgba(34,197,94,0.3)'; titleEl.style.color = 'var(--green)'; }
       card.classList.add('show');
     } else {
-      document.getElementById('riderDetailsCard').classList.remove('show');
+      card.classList.remove('show');
     }
   }
 
-  // Real-time booking status update
   function subscribeBookingUpdates() {
     if (!currentUser) return;
-    db.channel('customer-booking-' + currentUser.id)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings',
-        filter: 'passenger_id=eq.' + currentUser.id }, () => {
-        checkAcceptedBooking();
-        loadHistory();
+    db.channel('customer-' + currentUser.id)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: 'passenger_id=eq.' + currentUser.id }, () => {
+        checkAcceptedBooking(); loadHistory();
       }).subscribe();
   }
 
+  // =====================
+  // HISTORY
+  // =====================
   async function loadHistory() {
     const { data } = await db.from('bookings')
       .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
@@ -519,9 +634,7 @@
       .limit(10);
 
     const list = document.getElementById('historyList');
-    if (!data || data.length === 0) {
-      list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return;
-    }
+    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return; }
 
     list.innerHTML = data.map(b => `
       <div class="history-card">
@@ -529,16 +642,13 @@
           <span class="history-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
           <span class="history-status s-${b.status}">${b.status.toUpperCase()}</span>
         </div>
-        <div class="history-route">
-          🟢 ${b.pickup_address || '—'}<br>
-          🔴 ${b.dropoff_address || '—'}
-        </div>
+        <div class="history-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
         <div class="history-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
         ${b.status === 'completed' && b.rider ? `
         <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a">
           <div style="font-size:10px;color:#60a5fa;font-weight:700;text-transform:uppercase;margin-bottom:8px">🛵 Rider na Nag-Hatid</div>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div style="width:36px;height:36px;background:rgba(249,115,22,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🛵</div>
+            <div style="width:34px;height:34px;background:rgba(249,115,22,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">🛵</div>
             <div>
               <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
               <div style="font-size:11px;color:#777">📞 ${b.rider.phone || '—'}</div>
@@ -562,6 +672,7 @@
   async function logout() {
     await db.auth.signOut();
     currentUser = null;
+    if (map) { map.remove(); map = null; }
     document.getElementById('bookingScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
   }
