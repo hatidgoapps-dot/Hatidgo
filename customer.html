@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>HatidGo – Mag-Book</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a; --card: #141414; --card2: #1c1c1c;
+      --border: #2a2a2a; --accent: #f97316; --accent2: #fbbf24;
+      --green: #22c55e; --red: #ef4444; --text: #f0f0f0; --muted: #777;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
+
+    /* ---- AUTH SCREEN ---- */
+    .auth-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100dvh; padding: 24px;
+    }
+    .auth-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+    .logo { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; text-align: center; }
+    .logo span { color: var(--accent); }
+    .logo-sub { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .city-pill { display: inline-block; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 6px; }
+    .auth-tabs { display: flex; width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; gap: 4px; }
+    .auth-tab { flex: 1; padding: 10px; border-radius: 10px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .auth-tab.active { background: var(--accent); color: #fff; }
+    .auth-card { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+    .auth-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .auth-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 15px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: #444; }
+    .btn-main { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 6px; transition: transform 0.12s; }
+    .btn-main:active { transform: scale(0.97); }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .msg-box { border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
+    .msg-box.show { display: block; }
+    .msg-box.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+    .msg-box.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+
+    /* ---- BOOKING SCREEN ---- */
+    .booking-screen { display: none; flex-direction: column; min-height: 100dvh; }
+    /* HEADER */
+    .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .bk-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
+    .bk-logo span { color: var(--accent); }
+    .bk-user { display: flex; align-items: center; gap: 10px; }
+    .bk-name { font-size: 13px; font-weight: 600; color: var(--muted); }
+    .bk-logout { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; }
+    /* CONTENT */
+    .bk-content { padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
+    .bk-greeting { margin-bottom: 20px; }
+    .bk-greeting h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+    .bk-greeting p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    /* TYPE TOGGLE */
+    .type-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+    .type-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .type-btn.active { border-color: var(--accent); background: rgba(249,115,22,0.1); color: var(--accent); }
+    /* LOCATION INPUTS */
+    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+    .loc-field { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+    .loc-field:not(:last-child) { border-bottom: 1px solid var(--border); }
+    .loc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: var(--green); }
+    .dot-red { background: var(--red); }
+    .loc-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+    .loc-field input::placeholder { color: var(--muted); }
+    /* NOTES */
+    .notes-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 14px; display: none; }
+    .notes-card.show { display: block; }
+    .notes-card textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; resize: none; height: 60px; }
+    .notes-card textarea::placeholder { color: var(--muted); }
+    .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
+    /* FARE BOX */
+    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 16px; display: none; }
+    .fare-card.show { display: flex; justify-content: space-between; align-items: center; }
+    .fare-label { font-size: 12px; color: var(--muted); }
+    .fare-dist { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .fare-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent); }
+    /* BOOK BTN */
+    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.12s, opacity 0.15s; }
+    .book-btn:active { transform: scale(0.97); }
+    .book-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* BOOKINGS HISTORY */
+    .history-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; margin: 20px 0 12px; }
+    .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .history-type { font-size: 12px; font-weight: 700; color: var(--accent); }
+    .history-status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
+    .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
+    .s-completed { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .s-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
+    .history-route { font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .history-fare { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--accent); margin-top: 6px; }
+    /* SUCCESS MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { width: 100%; max-width: 500px; background: #141414; border-radius: 24px 24px 0 0; border-top: 1px solid #2a2a2a; padding: 28px 24px 44px; text-align: center; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-icon { font-size: 52px; margin-bottom: 12px; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.6; }
+    .modal-id { background: var(--card2); border-radius: 10px; padding: 10px; font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: monospace; }
+    .modal-btn { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+    /* SPINNER */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <!-- AUTH SCREEN -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-wrap">
+      <div>
+        <div class="logo">🛵 Hatid<span>Go</span></div>
+        <div class="logo-sub">Motor · Sasakyan · Mabilis</div>
+        <div style="text-align:center"><div class="city-pill">📍 Cotabato City</div></div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="showAuthTab('signup', this)">Mag-Sign Up</button>
+        <button class="auth-tab" onclick="showAuthTab('login', this)">Mag-Login</button>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="auth-card" id="signupCard">
+        <div class="auth-title">Bagong Account 🎉</div>
+        <div class="auth-sub">Libre! Para sa mga customer ng HatidGo</div>
+        <div class="msg-box" id="signupMsg"></div>
+        <div class="field"><label>Pangalan</label><input type="text" id="sName" placeholder="Juan dela Cruz"/></div>
+        <div class="field"><label>Email</label><input type="email" id="sEmail" placeholder="juan@gmail.com"/></div>
+        <div class="field"><label>Phone</label><input type="tel" id="sPhone" placeholder="09xxxxxxxxx"/></div>
+        <div class="field"><label>Password</label><input type="password" id="sPass" placeholder="Minimum 6 characters"/></div>
+        <button class="btn-main" id="signupBtn" onclick="signUp()">Gumawa ng Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-card" id="loginCard" style="display:none">
+        <div class="auth-title">Mag-Login 🔐</div>
+        <div class="auth-sub">Para sa mga customer ng HatidGo</div>
+        <div class="msg-box" id="loginMsg"></div>
+        <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="juan@gmail.com"/></div>
+        <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"/></div>
+        <button class="btn-main" id="loginBtn" onclick="loginCustomer()">Mag-Login</button>
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);text-align:center">
+        Admin o Rider? <a href="/Hatidgo/index.html" style="color:var(--accent);font-weight:600">Dito mag-login →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING SCREEN -->
+  <div class="booking-screen" id="bookingScreen">
+    <div class="bk-header">
+      <div class="bk-logo">Hatid<span>Go</span></div>
+      <div class="bk-user">
+        <span class="bk-name" id="bkName"></span>
+        <button class="bk-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="bk-content">
+      <div class="bk-greeting">
+        <h2 id="greetingName">Saan ka pupunta? 🛵</h2>
+        <p>📍 Cotabato City</p>
+      </div>
+
+      <!-- TYPE -->
+      <div class="type-toggle">
+        <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
+        <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
+      </div>
+
+      <!-- LOCATIONS -->
+      <div class="location-card">
+        <div class="loc-field">
+          <div class="loc-dot dot-green"></div>
+          <input type="text" id="pickup" placeholder="Pickup location…" oninput="computeFare()"/>
+        </div>
+        <div class="loc-field">
+          <div class="loc-dot dot-red"></div>
+          <input type="text" id="dropoff" placeholder="Destinasyon…" oninput="computeFare()"/>
+        </div>
+      </div>
+
+      <!-- DELIVERY NOTES -->
+      <div class="notes-card" id="notesCard">
+        <div class="notes-label">📝 Detalye ng Padala</div>
+        <textarea id="notes" placeholder="Ano ang ipapadala? (hal. pagkain, damit…)"></textarea>
+      </div>
+
+      <!-- FARE -->
+      <div class="fare-card" id="fareCard">
+        <div>
+          <div class="fare-label">Estimated Fare</div>
+          <div class="fare-dist" id="fareDistLabel"></div>
+        </div>
+        <div class="fare-amount" id="fareAmount">₱0</div>
+      </div>
+
+      <!-- BOOK -->
+      <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
+
+      <!-- HISTORY -->
+      <div class="history-title">📋 Aking mga Booking</div>
+      <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
+    </div>
+  </div>
+
+  <!-- SUCCESS MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-icon">🎉</div>
+      <div class="modal-title">Nakapag-book na!</div>
+      <div class="modal-sub">Hinahanap na ang available na rider sa Cotabato City. Maghintay sandali.</div>
+      <div class="modal-id" id="bookingIdLabel"></div>
+      <button class="modal-btn" onclick="closeModal()">Sige, Salamat!</button>
+    </div>
+  </div>
+
+<script>
+  const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_yZCqrUNwBQPyTsuwrTWLHg_GTAjW5ui';
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let currentUser = null;
+  let bookingType = 'ride';
+
+  // Check if already logged in
+  db.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) return;
+    const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
+    if (data?.role === 'customer') {
+      currentUser = data;
+      showBookingScreen();
+    }
+  });
+
+  // ---- AUTH ----
+  function showAuthTab(tab, el) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('signupCard').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('loginCard').style.display = tab === 'login' ? 'block' : 'none';
+  }
+
+  async function signUp() {
+    const name = document.getElementById('sName').value.trim();
+    const email = document.getElementById('sEmail').value.trim();
+    const phone = document.getElementById('sPhone').value.trim();
+    const pass = document.getElementById('sPass').value;
+    const btn = document.getElementById('signupBtn');
+    const msg = document.getElementById('signupMsg');
+
+    if (!name || !email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
+    if (pass.length < 6) { showMsg(msg, 'Minimum 6 characters ang password.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
+    msg.classList.remove('show');
+
+    const { data, error } = await db.auth.signUp({ email, password: pass });
+
+    if (error) {
+      showMsg(msg, 'Error: ' + error.message, 'error');
+      btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return;
+    }
+
+    if (data.user) {
+      await db.from('users').upsert({ id: data.user.id, name, email, phone, role: 'customer' });
+      currentUser = { id: data.user.id, name, email, phone, role: 'customer' };
+      showBookingScreen();
+    }
+
+    btn.disabled = false; btn.textContent = 'Gumawa ng Account';
+  }
+
+  async function loginCustomer() {
+    const email = document.getElementById('lEmail').value.trim();
+    const pass = document.getElementById('lPass').value;
+    const btn = document.getElementById('loginBtn');
+    const msg = document.getElementById('loginMsg');
+
+    if (!email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
+    msg.classList.remove('show');
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+      showMsg(msg, 'Mali ang email o password.', 'error');
+      btn.disabled = false; btn.textContent = 'Mag-Login'; return;
+    }
+
+    const { data: user } = await db.from('users').select('*').eq('id', data.user.id).single();
+
+    if (user?.role !== 'customer') {
+      showMsg(msg, 'Hindi customer account ito.', 'error');
+      await db.auth.signOut();
+      btn.disabled = false; btn.textContent = 'Mag-Login'; return;
+    }
+
+    currentUser = user;
+    showBookingScreen();
+    btn.disabled = false; btn.textContent = 'Mag-Login';
+  }
+
+  function showMsg(el, msg, type) {
+    el.textContent = msg;
+    el.className = 'msg-box show ' + type;
+  }
+
+  // ---- BOOKING SCREEN ----
+  function showBookingScreen() {
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('bookingScreen').style.display = 'flex';
+    document.getElementById('bkName').textContent = currentUser?.name || '';
+    document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
+    loadHistory();
+  }
+
+  function setType(type, el) {
+    bookingType = type;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('notesCard').classList.toggle('show', type === 'delivery');
+    document.getElementById('bookBtn').textContent = type === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
+    computeFare();
+  }
+
+  function computeFare() {
+    const pickup = document.getElementById('pickup').value.trim();
+    const dropoff = document.getElementById('dropoff').value.trim();
+
+    if (!pickup || !dropoff) {
+      document.getElementById('fareCard').classList.remove('show'); return;
+    }
+
+    // Simple random estimate para sa demo (real GPS later)
+    const km = (Math.random() * 4 + 1).toFixed(1);
+    const base = bookingType === 'ride' ? 35 : 50;
+    const fare = Math.round(base + parseFloat(km) * 10);
+    document.getElementById('fareCard').classList.add('show');
+    document.getElementById('fareDistLabel').textContent = km + ' km (estimated)';
+    document.getElementById('fareAmount').textContent = '₱' + fare;
+    return { km: parseFloat(km), fare };
+  }
+
+  async function bookRide() {
+    const pickup = document.getElementById('pickup').value.trim();
+    const dropoff = document.getElementById('dropoff').value.trim();
+    const notes = document.getElementById('notes').value;
+    const btn = document.getElementById('bookBtn');
+
+    if (!pickup || !dropoff) {
+      alert('Ilagay ang pickup at destinasyon!'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
+
+    const fareData = computeFare();
+
+    const { data, error } = await db.from('bookings').insert({
+      passenger_id: currentUser.id,
+      type: bookingType,
+      pickup_address: pickup,
+      dropoff_address: dropoff,
+      distance_km: fareData?.km || null,
+      fare: fareData?.fare || null,
+      notes: notes || null,
+      status: 'pending'
+    }).select().single();
+
+    btn.disabled = false;
+    btn.textContent = bookingType === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
+
+    if (error) { alert('Error: ' + error.message); return; }
+
+    // Reset form
+    document.getElementById('pickup').value = '';
+    document.getElementById('dropoff').value = '';
+    document.getElementById('notes').value = '';
+    document.getElementById('fareCard').classList.remove('show');
+
+    document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
+    document.getElementById('modalOverlay').classList.add('show');
+    loadHistory();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  async function loadHistory() {
+    const { data } = await db.from('bookings')
+      .select('*')
+      .eq('passenger_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const list = document.getElementById('historyList');
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return;
+    }
+
+    list.innerHTML = data.map(b => `
+      <div class="history-card">
+        <div class="history-header">
+          <span class="history-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
+          <span class="history-status s-${b.status}">${b.status.toUpperCase()}</span>
+        </div>
+        <div class="history-route">
+          🟢 ${b.pickup_address || '—'}<br>
+          🔴 ${b.dropoff_address || '—'}
+        </div>
+        <div class="history-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
+      </div>
+    `).join('');
+  }
+
+  async function logout() {
+    await db.auth.signOut();
+    currentUser = null;
+    document.getElementById('bookingScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+</script>
+</body>
+</html>
