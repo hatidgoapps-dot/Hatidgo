@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fil">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>HatidGo – Mag-Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a; --card: #141414; --border: #2a2a2a;
+      --accent: #f97316; --accent2: #fbbf24;
+      --text: #f0f0f0; --muted: #777; --red: #ef4444; --green: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100dvh; padding: 20px;
+    }
+    .wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 28px; }
+    .logo-area { text-align: center; }
+    .logo { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+    .logo span { color: var(--accent); }
+    .logo-sub { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+    .city-pill {
+      display: inline-block; background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.3); border-radius: 20px;
+      padding: 4px 14px; font-size: 12px; font-weight: 600;
+      color: var(--accent); margin-top: 10px;
+    }
+    /* TABS */
+    .auth-tabs { display: flex; width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; gap: 4px; }
+    .auth-tab {
+      flex: 1; padding: 10px; border-radius: 10px; border: none;
+      background: transparent; color: var(--muted);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .auth-tab.active { background: var(--accent); color: #fff; }
+    .card { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+    .card-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field input {
+      width: 100%; background: #1a1a1a; border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 13px 15px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: var(--accent); }
+    .field input::placeholder { color: #444; }
+    .btn {
+      width: 100%; padding: 15px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 13px; color: #fff;
+      font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+      cursor: pointer; margin-top: 6px; transition: opacity 0.15s, transform 0.12s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.5; }
+    .error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 12px; display: none; }
+    .error-box.show { display: block; }
+    .success-box { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--green); margin-bottom: 12px; display: none; }
+    .success-box.show { display: block; }
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footer { font-size: 12px; color: var(--muted); text-align: center; }
+    .login-link { color: var(--accent); cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo-area">
+    <div class="logo">🛵 Hatid<span>Go</span></div>
+    <div class="logo-sub">Motor · Sasakyan · Mabilis</div>
+    <div class="city-pill">📍 Cotabato City</div>
+  </div>
+
+  <!-- TAB TOGGLE -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="showTab('signup', this)">Mag-Sign Up</button>
+    <button class="auth-tab" onclick="showTab('login', this)">Mag-Login</button>
+  </div>
+
+  <!-- SIGN UP FORM -->
+  <div class="card" id="signupCard">
+    <div class="card-title">Bagong Account 🎉</div>
+    <div class="card-sub">Para sa mga customer ng HatidGo</div>
+    <div class="error-box" id="signupError"></div>
+    <div class="success-box" id="signupSuccess"></div>
+    <div class="field">
+      <label>Pangalan</label>
+      <input type="text" id="sName" placeholder="Juan dela Cruz"/>
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="sEmail" placeholder="juan@gmail.com"/>
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="sPhone" placeholder="09xxxxxxxxx"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="sPassword" placeholder="Minimum 6 characters"/>
+    </div>
+    <button class="btn" id="signupBtn" onclick="signUp()">Gumawa ng Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="card" id="loginCard" style="display:none">
+    <div class="card-title">Mag-Login 🔐</div>
+    <div class="card-sub">Para sa mga customer ng HatidGo</div>
+    <div class="error-box" id="loginError"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="lEmail" placeholder="juan@gmail.com"/>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="lPassword" placeholder="••••••••"/>
+    </div>
+    <button class="btn" id="loginBtn" onclick="loginCustomer()">Mag-Login</button>
+  </div>
+
+  <div class="footer">
+    Admin o Rider? <span class="login-link" onclick="window.location.href='index.html'">Dito mag-login →</span>
+  </div>
+
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_yZCqrUNwBQPyTsuwrTWLHg_GTAjW5ui';
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // If customer already logged in, go to booking page
+  db.auth.getSession().then(async ({ data: { session } }) => {
+    if (!session) return;
+    const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
+    if (data?.role === 'customer') window.location.href = 'booking.html';
+  });
+
+  function showTab(tab, el) {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('signupCard').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('loginCard').style.display = tab === 'login' ? 'block' : 'none';
+  }
+
+  async function signUp() {
+    const name = document.getElementById('sName').value.trim();
+    const email = document.getElementById('sEmail').value.trim();
+    const phone = document.getElementById('sPhone').value.trim();
+    const password = document.getElementById('sPassword').value;
+    const btn = document.getElementById('signupBtn');
+    const errBox = document.getElementById('signupError');
+    const sucBox = document.getElementById('signupSuccess');
+
+    if (!name || !email || !password) {
+      errBox.textContent = 'Punan ang lahat ng fields.';
+      errBox.classList.add('show'); return;
+    }
+    if (password.length < 6) {
+      errBox.textContent = 'Minimum 6 characters ang password.';
+      errBox.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
+    errBox.classList.remove('show');
+    sucBox.classList.remove('show');
+
+    const { data, error } = await db.auth.signUp({ email, password });
+
+    if (error) {
+      errBox.textContent = 'Error: ' + error.message;
+      errBox.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return;
+    }
+
+    if (data.user) {
+      await db.from('users').upsert({
+        id: data.user.id, name, email, phone, role: 'customer'
+      });
+    }
+
+    sucBox.textContent = '✅ Matagumpay! I-check ang email mo para i-confirm ang account, tapos mag-login na.';
+    sucBox.classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Gumawa ng Account';
+  }
+
+  async function loginCustomer() {
+    const email = document.getElementById('lEmail').value.trim();
+    const password = document.getElementById('lPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const errBox = document.getElementById('loginError');
+
+    if (!email || !password) {
+      errBox.textContent = 'Punan ang lahat ng fields.';
+      errBox.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
+    errBox.classList.remove('show');
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      errBox.textContent = 'Mali ang email o password.';
+      errBox.classList.add('show');
+      btn.disabled = false; btn.textContent = 'Mag-Login'; return;
+    }
+
+    const { data: user } = await db.from('users').select('role').eq('id', data.user.id).single();
+    if (user?.role === 'customer') {
+      window.location.href = 'booking.html';
+    } else {
+      errBox.textContent = 'Hindi customer account ito. Pumunta sa Admin/Rider login.';
+      errBox.classList.add('show');
+      await db.auth.signOut();
+      btn.disabled = false; btn.textContent = 'Mag-Login';
+    }
+  }
+</script>
+</body>
+</html>
