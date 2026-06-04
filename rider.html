@@ -77,6 +77,11 @@
     .btn-accept:active { transform: scale(0.97); }
     .btn-decline { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 13px 16px; color: var(--red); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
     .btn-complete { width: 100%; background: var(--blue); border: none; border-radius: 12px; padding: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; }
+    .btn-arrived { width: 100%; background: var(--accent); border: none; border-radius: 12px; padding: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
+    .btn-start { width: 100%; background: var(--green); border: none; border-radius: 12px; padding: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
+    .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .s-arrived { background: rgba(249,115,22,0.15); color: var(--accent); }
+    .s-ongoing { background: rgba(59,130,246,0.15); color: var(--blue); }
     /* STATUS */
     .status-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
@@ -211,7 +216,7 @@
     // Get pending bookings with customer info
     const { data } = await db.from('bookings')
       .select('*, users:passenger_id(name, phone)')
-      .in('status', ['pending', 'accepted'])
+      .in('status', ['pending', 'accepted', 'arrived', 'ongoing'])
       .order('created_at', { ascending: false });
 
     if (!data || data.length === 0) {
@@ -222,6 +227,7 @@
     list.innerHTML = '<div class="booking-list">' + data.map(b => {
       const time = new Date(b.created_at).toLocaleTimeString('fil', { hour: '2-digit', minute: '2-digit' });
       const isMyAccepted = b.status === 'accepted' && b.rider_id === riderId;
+      const isMyRide = b.rider_id === riderId;
       const isPending = b.status === 'pending';
       const customerName = b.users?.name || 'Customer';
       const customerPhone = b.users?.phone || '—';
@@ -274,9 +280,22 @@
               <button class="btn-decline" onclick="declineBooking('${b.id}')">✕ Decline</button>
               <button class="btn-accept" onclick="acceptBooking('${b.id}')">✓ Tanggapin</button>
             </div>
-          ` : isMyAccepted ? `
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <span class="status-badge s-accepted">ACCEPTED ✓</span>
+          ` : b.status === 'accepted' && b.rider_id === riderId ? `
+            <div class="status-row">
+              <span class="status-badge s-accepted">✓ ACCEPTED</span>
+              <span style="font-size:11px;color:var(--muted)">Pumunta sa pickup</span>
+            </div>
+            <button class="btn-arrived" onclick="arrivedBooking('${b.id}')">📍 Arrived na sa Pickup</button>
+          ` : b.status === 'arrived' && b.rider_id === riderId ? `
+            <div class="status-row">
+              <span class="status-badge s-arrived">📍 ARRIVED</span>
+              <span style="font-size:11px;color:var(--muted)">Nandoon na sa pickup</span>
+            </div>
+            <button class="btn-start" onclick="startTrip('${b.id}')">🛵 Start Trip</button>
+          ` : b.status === 'ongoing' && b.rider_id === riderId ? `
+            <div class="status-row">
+              <span class="status-badge s-ongoing">🛵 ONGOING</span>
+              <span style="font-size:11px;color:var(--muted)">Trip in progress</span>
             </div>
             <button class="btn-complete" onclick="completeBooking('${b.id}', ${b.fare || 0})">✅ Tapos Na — I-complete</button>
           ` : `
@@ -306,6 +325,26 @@
     if (list && list.children.length === 0) {
       document.getElementById('bookingList').innerHTML = `<div class="empty"><div class="empty-icon">🎉</div>Wala pang bagong booking.</div>`;
     }
+  }
+
+  async function arrivedBooking(id) {
+    const { error } = await db.from('bookings')
+      .update({ status: 'arrived' })
+      .eq('id', id)
+      .eq('rider_id', riderId);
+    if (error) { showToast('May error!', 'error'); return; }
+    showToast('📍 Arrived na sa pickup!', 'success');
+    await loadBookings();
+  }
+
+  async function startTrip(id) {
+    const { error } = await db.from('bookings')
+      .update({ status: 'ongoing' })
+      .eq('id', id)
+      .eq('rider_id', riderId);
+    if (error) { showToast('May error!', 'error'); return; }
+    showToast('🛵 Trip started!', 'success');
+    await loadBookings();
   }
 
   async function completeBooking(id, fare) {
