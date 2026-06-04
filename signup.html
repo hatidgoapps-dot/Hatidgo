@@ -142,7 +142,7 @@
   db.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) return;
     const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
-    if (data?.role === 'customer') window.location.href = 'booking.html';
+    if (data?.role === 'customer') window.location.href = '/Hatidgo/booking.html';
   });
 
   function showTab(tab, el) {
@@ -220,7 +220,7 @@
 
     const { data: user } = await db.from('users').select('role').eq('id', data.user.id).single();
     if (user?.role === 'customer') {
-      window.location.href = 'booking.html';
+      window.location.href = '/Hatidgo/booking.html';
     } else {
       errBox.textContent = 'Hindi customer account ito. Pumunta sa Admin/Rider login.';
       errBox.classList.add('show');
