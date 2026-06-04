@@ -572,17 +572,22 @@
 
     if (error) { alert('Error: ' + error.message); return; }
 
-    // Reset
-    clearLocation('pickup'); clearLocation('dropoff');
+    // Reset form but keep map visible
     document.getElementById('notes').value = '';
-    map.setView(COTABATO, 14);
 
     document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
     document.getElementById('modalOverlay').classList.add('show');
     loadHistory();
   }
 
-  function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    // Reset map after closing modal
+    clearLocation('pickup');
+    clearLocation('dropoff');
+    map.setView(COTABATO, 14);
+    setMapMode('pickup');
+  }
 
   // =====================
   // RIDER DETAILS (real-time)
