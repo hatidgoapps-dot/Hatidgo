@@ -377,7 +377,7 @@
   async function loadStats() {
     const today = new Date(); today.setHours(0,0,0,0);
     const { data } = await db.from('bookings')
-      .select('fare, rider_earnings')
+      .select('fare, rider_earnings, admin_fee, is_paid_to_admin')
       .eq('rider_id', riderId)
       .eq('status', 'completed')
       .gte('created_at', today.toISOString());
@@ -385,6 +385,22 @@
     const total = (data || []).reduce((sum, b) => sum + (b.rider_earnings || Math.round((b.fare||0)*0.85)), 0);
     document.getElementById('statDone').textContent = (data || []).length;
     document.getElementById('statEarnings').textContent = '₱' + total;
+
+    // Compute admin fees
+    const { data: allCompleted } = await db.from('bookings')
+      .select('fare, admin_fee, is_paid_to_admin')
+      .eq('rider_id', riderId)
+      .eq('status', 'completed');
+
+    const unpaid = (allCompleted || [])
+      .filter(b => !b.is_paid_to_admin)
+      .reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+    const paid = (allCompleted || [])
+      .filter(b => b.is_paid_to_admin)
+      .reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+
+    document.getElementById('unpaidFeeAmount').textContent = '₱' + unpaid;
+    document.getElementById('paidFeeAmount').textContent = '₱' + paid;
   }
 
   // Real-time

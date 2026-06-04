@@ -107,6 +107,7 @@
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('riders', this)">🛵 Mga Rider</div>
+    <div class="tab" onclick="switchTab('fees', this)">💰 Fees</div>
     <div class="tab" onclick="switchTab('bookings', this)">📋 Bookings</div>
   </div>
 
@@ -126,6 +127,12 @@
 
     <div class="section-title">👥 Listahan ng Riders</div>
     <div class="rider-list" id="riderList"><div class="empty">Loading…</div></div>
+  </div>
+
+  <!-- FEES TAB -->
+  <div id="tabFees" style="display:none">
+    <div class="section-title">💰 Admin Fees per Rider</div>
+    <div id="feesList"><div class="empty">Loading…</div></div>
   </div>
 
   <!-- BOOKINGS TAB -->
@@ -354,7 +361,75 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('tabRiders').style.display = tab === 'riders' ? 'block' : 'none';
+    document.getElementById('tabFees').style.display = tab === 'fees' ? 'block' : 'none';
     document.getElementById('tabBookings').style.display = tab === 'bookings' ? 'block' : 'none';
+    if (tab === 'fees') loadFees();
+  }
+
+  async function loadFees() {
+    const list = document.getElementById('feesList');
+
+    // Get all riders
+    const { data: riders } = await db.from('users').select('id, name, phone').eq('role', 'rider');
+    if (!riders || riders.length === 0) {
+      list.innerHTML = '<div class="empty">Wala pang riders.</div>'; return;
+    }
+
+    // Get completed bookings with admin fees
+    const { data: bookings } = await db.from('bookings')
+      .select('rider_id, fare, admin_fee, is_paid_to_admin')
+      .eq('status', 'completed');
+
+    list.innerHTML = riders.map(r => {
+      const riderBookings = (bookings || []).filter(b => b.rider_id === r.id);
+      const unpaid = riderBookings
+        .filter(b => !b.is_paid_to_admin)
+        .reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+      const paid = riderBookings
+        .filter(b => b.is_paid_to_admin)
+        .reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+      const trips = riderBookings.length;
+
+      return `
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div style="width:42px;height:42px;background:rgba(249,115,22,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">🛵</div>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:600">${r.name || '—'}</div>
+              <div style="font-size:11px;color:var(--muted)">${r.phone || '—'} · ${trips} trips</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+            <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase">Hindi pa Bayad</div>
+              <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:var(--red)">₱${unpaid}</div>
+            </div>
+            <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:10px;text-align:center">
+              <div style="font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase">Nabayaran Na</div>
+              <div style="font-family:Syne,sans-serif;font-size:20px;font-weight:800;color:var(--green)">₱${paid}</div>
+            </div>
+          </div>
+          ${unpaid > 0 ? `
+          <button onclick="markAsPaid('${r.id}', '${r.name}')" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:10px;color:#fff;font-family:Syne,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+            ✅ Markahan Bilang Bayad (₱${unpaid})
+          </button>` : `
+          <div style="text-align:center;font-size:12px;color:var(--green);font-weight:600;padding:4px">✅ Lahat ay Nabayaran Na</div>`}
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function markAsPaid(riderId, riderName) {
+    const { error } = await db.from('bookings')
+      .update({ is_paid_to_admin: true })
+      .eq('rider_id', riderId)
+      .eq('status', 'completed')
+      .eq('is_paid_to_admin', false);
+
+    if (error) { alert('Error: ' + error.message); return; }
+    alert('✅ Na-mark na bilang bayad si ' + riderName + '!');
+    loadFees();
+    loadStats();
   }
 
   async function logout() {
