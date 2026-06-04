@@ -374,12 +374,14 @@
       document.getElementById('fareCard').classList.remove('show'); return;
     }
 
-    // Simple random estimate para sa demo (real GPS later)
+    // Fare: minimum ₱20 (1km), ₱20 per km
     const km = (Math.random() * 4 + 1).toFixed(1);
-    const base = bookingType === 'ride' ? 35 : 50;
-    const fare = Math.round(base + parseFloat(km) * 10);
+    const perKm = 20;
+    const minimum = 20;
+    const computed = Math.round(parseFloat(km) * perKm);
+    const fare = computed < minimum ? minimum : computed;
     document.getElementById('fareCard').classList.add('show');
-    document.getElementById('fareDistLabel').textContent = km + ' km (estimated)';
+    document.getElementById('fareDistLabel').textContent = km + ' km · ₱20/km (min. ₱20)';
     document.getElementById('fareAmount').textContent = '₱' + fare;
     return { km: parseFloat(km), fare };
   }
