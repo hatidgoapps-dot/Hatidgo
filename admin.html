@@ -12,25 +12,21 @@
       --border: #2a2a2a; --accent: #f97316; --accent2: #fbbf24;
       --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
       --text: #f0f0f0; --muted: #777;
-
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
-    .header {
-      background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 16px 20px; display: flex; align-items: center;
-      justify-content: space-between; position: sticky; top: 0; z-index: 10;
-
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
     .logo span { color: var(--accent); }
     .admin-badge { background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
     .logout-btn { background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 7px 12px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
-    .content { padding: 20px; max-width: 500px; margin: 0 auto; }
+    .content { padding: 20px; max-width: 500px; margin: 0 auto; padding-bottom: 40px; }
     .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 24px; }
     .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 12px; text-align: center; }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
     .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-    .tab { flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; }
+    .tab { flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
     .tab.active { border-color: var(--accent); color: var(--accent); background: rgba(249,115,22,0.1); }
     .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; margin-bottom: 14px; }
     .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
@@ -39,27 +35,35 @@
     .field input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 13px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
     .field input:focus { border-color: var(--accent); }
     .field input::placeholder { color: #444; }
-    .btn-add { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; }
-    .btn-add:disabled { opacity: 0.5; }
+    .btn-primary { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; transition: opacity 0.15s; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
     .feedback { border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
     .feedback.show { display: block; }
     .feedback.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
     .feedback.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
-    /* RIDER LIST */
     .rider-list { display: flex; flex-direction: column; gap: 10px; }
     .rider-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
-    .rider-top { display: flex; align-items: center; gap: 12px; }
+    .rider-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .rider-avatar { width: 42px; height: 42px; background: rgba(249,115,22,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-    .rider-info { flex: 1; }
+    .rider-info { flex: 1; min-width: 0; }
     .rider-name { font-size: 14px; font-weight: 600; }
-    .rider-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .rider-email { font-size: 11px; color: var(--muted); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .rider-phone { font-size: 11px; color: var(--muted); }
-    .avail-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.5px; }
+    .avail-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.5px; flex-shrink: 0; }
     .avail-badge.online { background: rgba(34,197,94,0.15); color: var(--green); }
     .avail-badge.offline { background: rgba(120,120,120,0.15); color: var(--muted); }
-    .rider-actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn-change-pass { flex: 1; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 8px; padding: 8px; color: #60a5fa; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .btn-delete { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 8px 12px; color: var(--red); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
+    .btn-change-pass { width: 100%; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 8px; padding: 8px; color: #60a5fa; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .booking-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+    .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .booking-type { font-size: 12px; font-weight: 700; color: var(--accent); }
+    .status-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
+    .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
+    .s-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .s-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
+    .booking-route { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
+    .booking-fare { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--accent); }
+    .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
     /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
@@ -74,24 +78,12 @@
     .modal-field input:focus { border-color: var(--accent); }
     .modal-btns { display: flex; gap: 10px; margin-top: 6px; }
     .modal-confirm { flex: 1; padding: 13px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; }
+    .modal-confirm:disabled { opacity: 0.5; }
     .modal-cancel { padding: 13px 18px; background: transparent; border: 1px solid #2a2a2a; border-radius: 12px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
     .modal-fb { border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
     .modal-fb.show { display: block; }
     .modal-fb.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
     .modal-fb.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
-    /* BOOKINGS */
-    .booking-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
-    .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .booking-type { font-size: 12px; font-weight: 700; color: var(--accent); }
-    .booking-status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
-    .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
-    .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
-    .s-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
-    .s-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
-    .booking-route { font-size: 12px; color: var(--muted); line-height: 1.6; }
-    .booking-fare { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--accent); margin-top: 6px; }
-    .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
-    .info-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; color: #93c5fd; line-height: 1.6; }
     .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -105,6 +97,7 @@
 </div>
 
 <div class="content">
+
   <div class="stats">
     <div class="stat-card"><div class="stat-num" id="statRiders">—</div><div class="stat-label">Mga Rider</div></div>
     <div class="stat-card"><div class="stat-num" id="statBookings">—</div><div class="stat-label">Bookings</div></div>
@@ -120,13 +113,12 @@
   <div id="tabRiders">
     <div class="section-title">➕ Mag-add ng Rider</div>
     <div class="form-card">
-      <div class="info-box">ℹ️ Ikaw ang gagawa ng account ng rider — hindi na kailangan ng email verification.</div>
       <div class="feedback" id="feedback"></div>
       <div class="field"><label>Pangalan</label><input type="text" id="rName" placeholder="Juan dela Cruz"/></div>
       <div class="field"><label>Email</label><input type="email" id="rEmail" placeholder="rider@gmail.com"/></div>
       <div class="field"><label>Phone</label><input type="tel" id="rPhone" placeholder="09xxxxxxxxx"/></div>
       <div class="field"><label>Password</label><input type="password" id="rPassword" placeholder="Minimum 6 characters"/></div>
-      <button class="btn-add" id="addBtn" onclick="addRider()">➕ I-add ang Rider</button>
+      <button class="btn-primary" id="addBtn" onclick="addRider()">➕ I-add ang Rider</button>
     </div>
 
     <div class="section-title">👥 Listahan ng Riders</div>
@@ -138,6 +130,7 @@
     <div class="section-title">📋 Lahat ng Bookings</div>
     <div id="bookingList"><div class="empty">Loading…</div></div>
   </div>
+
 </div>
 
 <!-- CHANGE PASSWORD MODAL -->
@@ -145,16 +138,10 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">🔑 Palitan ang Password</div>
-    <div class="modal-sub" id="modalRiderName">Rider</div>
+    <div class="modal-sub" id="modalRiderName"></div>
     <div class="modal-fb" id="modalFb"></div>
-    <div class="modal-field">
-      <label>Bagong Password</label>
-      <input type="password" id="newPassword" placeholder="Minimum 6 characters"/>
-    </div>
-    <div class="modal-field">
-      <label>Ulitin ang Password</label>
-      <input type="password" id="confirmPassword" placeholder="Pareho sa itaas"/>
-    </div>
+    <div class="modal-field"><label>Bagong Password</label><input type="password" id="newPassword" placeholder="Minimum 6 characters"/></div>
+    <div class="modal-field"><label>Ulitin ang Password</label><input type="password" id="confirmPassword" placeholder="Pareho sa itaas"/></div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Kanselahin</button>
       <button class="modal-confirm" id="confirmBtn" onclick="changePassword()">I-update</button>
@@ -170,6 +157,7 @@
 
   let selectedRiderId = null;
 
+  // Auth guard
   db.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) { window.location.href = '/Hatidgo/index.html'; return; }
     const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
@@ -196,8 +184,9 @@
     const { data } = await db.from('users').select('*').eq('role', 'rider').order('created_at', { ascending: false });
     const list = document.getElementById('riderList');
     if (!data || data.length === 0) {
-      list.innerHTML = '<div class="empty">Wala pang riders. Mag-add na! 🛵</div>'; return;
-
+      list.innerHTML = '<div class="empty">Wala pang riders. Mag-add na! 🛵</div>';
+      return;
+    }
     list.innerHTML = data.map(r => `
       <div class="rider-card">
         <div class="rider-top">
@@ -209,9 +198,7 @@
           </div>
           <span class="avail-badge ${r.is_available ? 'online' : 'offline'}">${r.is_available ? 'ONLINE' : 'OFFLINE'}</span>
         </div>
-        <div class="rider-actions">
-          <button class="btn-change-pass" onclick="openModal('${r.id}', '${r.name || 'Rider'}')">🔑 Palitan ang Password</button>
-        </div>
+        <button class="btn-change-pass" onclick="openModal('${r.id}', '${r.name || 'Rider'}')">🔑 Palitan ang Password</button>
       </div>
     `).join('');
   }
@@ -220,13 +207,14 @@
     const { data } = await db.from('bookings').select('*').order('created_at', { ascending: false }).limit(30);
     const list = document.getElementById('bookingList');
     if (!data || data.length === 0) {
-      list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return;
-
+      list.innerHTML = '<div class="empty">Wala pang bookings.</div>';
+      return;
+    }
     list.innerHTML = data.map(b => `
       <div class="booking-card">
         <div class="booking-header">
           <span class="booking-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
-          <span class="booking-status s-${b.status}">${b.status.toUpperCase()}</span>
+          <span class="status-badge s-${b.status}">${b.status.toUpperCase()}</span>
         </div>
         <div class="booking-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
         <div class="booking-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
@@ -241,12 +229,17 @@
     const password = document.getElementById('rPassword').value;
     const btn = document.getElementById('addBtn');
 
-    if (!name || !email || !password) { showFeedback('Punan ang lahat ng fields.', 'error'); return; }
-    if (password.length < 6) { showFeedback('Minimum 6 characters ang password.', 'error'); return; }
+    if (!name || !email || !password) {
+      showFeedback('Punan ang lahat ng fields.', 'error'); return;
+    }
+    if (password.length < 6) {
+      showFeedback('Minimum 6 characters ang password.', 'error'); return;
+    }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Nagda-dagdag…';
 
+    // Use RPC function para hindi mag-logout ang admin
     const { data, error } = await db.rpc('create_rider_account', {
       rider_email: email,
       rider_password: password,
@@ -256,20 +249,18 @@
 
     if (error || (data && !data.success)) {
       showFeedback('Error: ' + (error?.message || data?.error), 'error');
-      btn.disabled = false; btn.textContent = '➕ I-add ang Rider'; return;
+      btn.disabled = false;
+      btn.textContent = '➕ I-add ang Rider';
+      return;
     }
 
-
-
-
-
-
-    showFeedback(`✅ Na-add na si ${name}!`, 'success');
+    showFeedback('✅ Na-add na si ' + name + '!', 'success');
     document.getElementById('rName').value = '';
     document.getElementById('rEmail').value = '';
     document.getElementById('rPhone').value = '';
     document.getElementById('rPassword').value = '';
-    btn.disabled = false; btn.textContent = '➕ I-add ang Rider';
+    btn.disabled = false;
+    btn.textContent = '➕ I-add ang Rider';
     await loadAll();
   }
 
@@ -297,36 +288,41 @@
     if (!newPass || !confirmPass) {
       fb.textContent = 'Punan ang lahat ng fields.';
       fb.className = 'modal-fb show error'; return;
-
+    }
     if (newPass.length < 6) {
       fb.textContent = 'Minimum 6 characters ang password.';
       fb.className = 'modal-fb show error'; return;
-
+    }
     if (newPass !== confirmPass) {
       fb.textContent = 'Hindi magkapareho ang password!';
       fb.className = 'modal-fb show error'; return;
-
+    }
 
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>';
 
-    // Store new password in users table for rider to use
-    const { error } = await db.from('users').update({ temp_password: newPass }).eq('id', selectedRiderId);
+    const { error } = await db.rpc('change_rider_password', {
+      rider_id: selectedRiderId,
+      new_password: newPass
+    });
 
     if (error) {
       fb.textContent = 'Error: ' + error.message;
       fb.className = 'modal-fb show error';
- else {
-      fb.textContent = '✅ Na-update na! Ibigay ang bagong password sa rider.';
+    } else {
+      fb.textContent = '✅ Na-update na ang password!';
       fb.className = 'modal-fb show success';
       setTimeout(() => closeModal(), 2000);
+    }
 
-    btn.disabled = false; btn.textContent = 'I-update';
+    btn.disabled = false;
+    btn.textContent = 'I-update';
   }
 
   function showFeedback(msg, type) {
     const fb = document.getElementById('feedback');
-    fb.textContent = msg; fb.className = `feedback show ${type}`;
+    fb.textContent = msg;
+    fb.className = 'feedback show ' + type;
   }
 
   function switchTab(tab, el) {
