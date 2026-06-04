@@ -8,171 +8,93 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --card: #141414;
-      --card2: #1a1a1a;
-      --border: #2a2a2a;
-      --accent: #f97316;
-      --accent2: #fbbf24;
-      --green: #22c55e;
-      --red: #ef4444;
-      --blue: #3b82f6;
-      --text: #f0f0f0;
-      --muted: #777;
+      --bg: #0a0a0a; --card: #141414; --card2: #1a1a1a;
+      --border: #2a2a2a; --accent: #f97316; --accent2: #fbbf24;
+      --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+      --text: #f0f0f0; --muted: #777;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100dvh;
-    }
-    .header {
-      background: var(--card); border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
+    /* HEADER */
+    .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
     .logo span { color: var(--accent); }
-    .logout-btn {
-      background: transparent; border: 1px solid var(--border);
-      border-radius: 10px; padding: 7px 12px;
-      color: var(--muted); font-family: 'DM Sans', sans-serif;
-      font-size: 12px; cursor: pointer;
-    }
-    .content { padding: 20px; max-width: 500px; margin: 0 auto; }
+    .logout-btn { background: transparent; border: 1px solid var(--border); border-radius: 10px; padding: 7px 12px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
+    .content { padding: 20px; max-width: 500px; margin: 0 auto; padding-bottom: 40px; }
     /* PROFILE */
-    .profile-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 18px;
-      display: flex; align-items: center; gap: 14px;
-      margin-bottom: 20px;
-    }
-    .avatar {
-      width: 52px; height: 52px;
-      background: rgba(249,115,22,0.15);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-    }
+    .profile-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .avatar { width: 50px; height: 50px; background: rgba(249,115,22,0.15); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
     .profile-info { flex: 1; }
     .profile-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
-    .profile-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .profile-email { font-size: 11px; color: var(--muted); margin-top: 2px; }
     /* TOGGLE */
-    .toggle-wrap {
-      display: flex; align-items: center; gap: 10px;
-    }
-    .toggle-label { font-size: 12px; font-weight: 600; }
-    .toggle {
-      width: 46px; height: 26px;
-      background: var(--border); border-radius: 13px;
-      position: relative; cursor: pointer;
-      transition: background 0.2s;
-      border: none; outline: none;
-      flex-shrink: 0;
-    }
+    .toggle-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .toggle-label { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    .toggle { width: 48px; height: 27px; background: var(--border); border-radius: 14px; position: relative; cursor: pointer; border: none; outline: none; transition: background 0.2s; flex-shrink: 0; }
     .toggle.on { background: var(--green); }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 20px; height: 20px;
-      background: #fff; border-radius: 50%;
-      transition: left 0.2s;
-    }
-    .toggle.on::after { left: 23px; }
+    .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 21px; height: 21px; background: #fff; border-radius: 50%; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+    .toggle.on::after { left: 24px; }
     /* STATS */
     .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 20px; }
-    .stat-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px; text-align: center;
-    }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
     .stat-num { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+    .stat-num.green { color: var(--green); }
     .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
     /* SECTION */
-    .section-title {
-      font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
-      margin-bottom: 14px;
-    }
-    /* BOOKING CARDS */
-    .booking-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 16px;
-      margin-bottom: 12px;
-    }
-    .booking-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px;
-    }
+    .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+    .live-badge { display: flex; align-items: center; gap: 5px; background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.25); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--green); }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+    /* BOOKING CARD */
+    .booking-list { display: flex; flex-direction: column; gap: 12px; }
+    .booking-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: border-color 0.15s; }
+    .booking-card.new { border-color: rgba(249,115,22,0.4); animation: newCard 0.4s ease; }
+    @keyframes newCard { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .booking-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .booking-type { font-size: 13px; font-weight: 700; color: var(--accent); }
     .booking-time { font-size: 11px; color: var(--muted); }
-    .booking-route {
-      font-size: 12px; color: var(--muted); line-height: 1.7;
-      background: var(--card2); border-radius: 10px; padding: 10px 12px;
-      margin-bottom: 10px;
-    }
-    .booking-meta {
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .booking-fare {
-      font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800;
-      color: var(--accent);
-    }
-    .booking-dist { font-size: 11px; color: var(--muted); }
+    /* CUSTOMER INFO */
+    .customer-info { display: flex; align-items: center; gap: 10px; background: var(--card2); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; }
+    .customer-avatar { width: 34px; height: 34px; background: rgba(59,130,246,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .customer-name { font-size: 13px; font-weight: 600; }
+    .customer-phone { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    /* ROUTE */
+    .route { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .route-item { display: flex; align-items: flex-start; gap: 10px; }
+    .route-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+    .route-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .route-addr { font-size: 13px; font-weight: 500; margin-top: 1px; }
+    /* FARE */
+    .fare-row { display: flex; justify-content: space-between; align-items: center; background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.15); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; }
+    .fare-info { font-size: 12px; color: var(--muted); }
+    .fare-amount { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--accent); }
+    /* NOTES */
+    .notes-box { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.15); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; color: #93c5fd; }
+    /* BUTTONS */
     .action-btns { display: flex; gap: 8px; }
-    .btn-accept {
-      background: var(--green); border: none; border-radius: 10px;
-      padding: 9px 16px; color: #fff;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: opacity 0.15s;
-    }
-    .btn-decline {
-      background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 10px; padding: 9px 16px; color: var(--red);
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-      cursor: pointer;
-    }
-    .btn-complete {
-      background: var(--blue); border: none; border-radius: 10px;
-      padding: 9px 16px; color: #fff;
-      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-      cursor: pointer; width: 100%; margin-top: 8px;
-    }
-    /* STATUS BADGE */
-    .status-badge {
-      font-size: 10px; font-weight: 700; padding: 3px 9px;
-      border-radius: 20px; letter-spacing: 0.5px;
-    }
-    .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
+    .btn-accept { flex: 1; background: var(--green); border: none; border-radius: 12px; padding: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity 0.15s, transform 0.12s; }
+    .btn-accept:active { transform: scale(0.97); }
+    .btn-decline { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 13px 16px; color: var(--red); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-complete { width: 100%; background: var(--blue); border: none; border-radius: 12px; padding: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 8px; }
+    /* STATUS */
+    .status-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
-    .s-completed { background: rgba(59,130,246,0.15); color: var(--blue); }
     /* EMPTY */
-    .empty {
-      text-align: center; padding: 40px 20px;
-      color: var(--muted); font-size: 14px; line-height: 1.7;
-    }
-    .empty-icon { font-size: 40px; margin-bottom: 10px; }
-    /* PULSE */
-    .online-pulse {
-      display: inline-block;
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--green);
-      animation: pulse 1.5s ease-in-out infinite;
-      margin-right: 6px;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
+    .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; line-height: 1.8; }
+    .empty-icon { font-size: 44px; margin-bottom: 10px; }
+    /* OFFLINE MSG */
+    .offline-msg { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px 20px; text-align: center; }
+    .offline-msg .icon { font-size: 40px; margin-bottom: 12px; }
+    .offline-msg p { font-size: 13px; color: var(--muted); line-height: 1.6; }
     /* SPINNER */
-    .spinner {
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff; border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block; vertical-align: middle;
-    }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* TOAST */
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px 18px; font-size: 13px; font-weight: 600; z-index: 100; transition: transform 0.3s ease; white-space: nowrap; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error { border-color: var(--red); color: var(--red); }
   </style>
 </head>
 <body>
@@ -192,7 +114,7 @@
       <div class="profile-email" id="riderEmail"></div>
     </div>
     <div class="toggle-wrap">
-      <span class="toggle-label" id="toggleLabel">OFFLINE</span>
+      <span class="toggle-label" id="toggleLabel" style="color:var(--muted)">OFFLINE</span>
       <button class="toggle" id="availToggle" onclick="toggleAvail()"></button>
     </div>
   </div>
@@ -201,22 +123,29 @@
   <div class="stats">
     <div class="stat-card">
       <div class="stat-num" id="statDone">0</div>
-      <div class="stat-label">Natapos</div>
+      <div class="stat-label">Natapos Ngayon</div>
     </div>
     <div class="stat-card">
-      <div class="stat-num" id="statEarnings">₱0</div>
+      <div class="stat-num green" id="statEarnings">₱0</div>
       <div class="stat-label">Kita Ngayon</div>
     </div>
   </div>
 
-  <!-- PENDING BOOKINGS -->
-  <div class="section-title" id="bookingTitle">
-    <span class="online-pulse" id="pulse" style="display:none"></span>
-    Mga Bagong Booking
+  <!-- BOOKINGS -->
+  <div class="section-header">
+    <div class="section-title">Mga Booking</div>
+    <div class="live-badge" id="liveBadge" style="display:none">
+      <div class="live-dot"></div> LIVE
+    </div>
   </div>
-  <div id="bookingList"><div class="empty"><div class="empty-icon">🔄</div>Loading…</div></div>
+
+  <div id="bookingList">
+    <div class="empty"><div class="empty-icon">🔄</div>Loading…</div>
+  </div>
 
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
   const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
@@ -246,17 +175,17 @@
   function updateToggleUI() {
     const toggle = document.getElementById('availToggle');
     const label = document.getElementById('toggleLabel');
-    const pulse = document.getElementById('pulse');
+    const liveBadge = document.getElementById('liveBadge');
     if (riderAvail) {
       toggle.classList.add('on');
       label.textContent = 'ONLINE';
       label.style.color = 'var(--green)';
-      pulse.style.display = 'inline-block';
+      liveBadge.style.display = 'flex';
     } else {
       toggle.classList.remove('on');
       label.textContent = 'OFFLINE';
       label.style.color = 'var(--muted)';
-      pulse.style.display = 'none';
+      liveBadge.style.display = 'none';
     }
   }
 
@@ -264,72 +193,124 @@
     riderAvail = !riderAvail;
     await db.from('users').update({ is_available: riderAvail }).eq('id', riderId);
     updateToggleUI();
-    await loadBookings();
+    loadBookings();
   }
 
   async function loadBookings() {
     const list = document.getElementById('bookingList');
+
     if (!riderAvail) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">😴</div>Naka-offline ka.<br>I-on ang toggle para makita ang mga booking.</div>`;
+      list.innerHTML = `
+        <div class="offline-msg">
+          <div class="icon">😴</div>
+          <p>Naka-offline ka ngayon.<br>I-on ang toggle para makita ang mga bagong booking.</p>
+        </div>`;
       return;
     }
+
+    // Get pending bookings with customer info
     const { data } = await db.from('bookings')
-      .select('*')
+      .select('*, users:passenger_id(name, phone)')
       .in('status', ['pending', 'accepted'])
       .order('created_at', { ascending: false });
 
     if (!data || data.length === 0) {
-      list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div>Wala pang booking.<br>Hintayin ang susunod!</div>`;
+      list.innerHTML = `<div class="empty"><div class="empty-icon">🎉</div>Wala pang bagong booking.<br>Hintayin ang susunod!</div>`;
       return;
     }
 
-    list.innerHTML = data.map(b => {
+    list.innerHTML = '<div class="booking-list">' + data.map(b => {
       const time = new Date(b.created_at).toLocaleTimeString('fil', { hour: '2-digit', minute: '2-digit' });
-      const isAccepted = b.status === 'accepted' && b.rider_id === riderId;
+      const isMyAccepted = b.status === 'accepted' && b.rider_id === riderId;
+      const isPending = b.status === 'pending';
+      const customerName = b.users?.name || 'Customer';
+      const customerPhone = b.users?.phone || '—';
+
       return `
-        <div class="booking-card" id="book-${b.id}">
-          <div class="booking-header">
+        <div class="booking-card ${isPending ? 'new' : ''}" id="bk-${b.id}">
+          <div class="booking-top">
             <span class="booking-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span class="booking-time">${time}</span>
-              <span class="status-badge s-${b.status}">${b.status.toUpperCase()}</span>
-            </div>
+            <span class="booking-time">${time}</span>
           </div>
-          <div class="booking-route">
-            🟢 <strong>Pickup:</strong> ${b.pickup_address || '—'}<br>
-            🔴 <strong>Dropoff:</strong> ${b.dropoff_address || '—'}
-            ${b.notes ? `<br>📝 ${b.notes}` : ''}
-          </div>
-          <div class="booking-meta">
+
+          <!-- CUSTOMER -->
+          <div class="customer-info">
+            <div class="customer-avatar">👤</div>
             <div>
-              <div class="booking-fare">₱${b.fare || 0}</div>
-              <div class="booking-dist">${b.distance_km || 0} km</div>
-            </div>
-            <div class="action-btns">
-              ${b.status === 'pending' ? `
-                <button class="btn-decline" onclick="declineBooking('${b.id}')">✕</button>
-                <button class="btn-accept" onclick="acceptBooking('${b.id}')">Tanggapin ✓</button>
-              ` : isAccepted ? `
-                <button class="btn-complete" onclick="completeBooking('${b.id}', ${b.fare || 0})">✅ Tapos Na</button>
-              ` : '<span style="font-size:12px;color:var(--muted)">Iba nang nag-accept</span>'}
+              <div class="customer-name">${customerName}</div>
+              <div class="customer-phone">📞 ${customerPhone}</div>
             </div>
           </div>
+
+          <!-- ROUTE -->
+          <div class="route">
+            <div class="route-item">
+              <div class="route-dot" style="background:var(--green)"></div>
+              <div>
+                <div class="route-label">Pickup</div>
+                <div class="route-addr">${b.pickup_address || '—'}</div>
+              </div>
+            </div>
+            <div class="route-item">
+              <div class="route-dot" style="background:var(--red)"></div>
+              <div>
+                <div class="route-label">Destinasyon</div>
+                <div class="route-addr">${b.dropoff_address || '—'}</div>
+              </div>
+            </div>
+          </div>
+
+          ${b.notes ? `<div class="notes-box">📝 ${b.notes}</div>` : ''}
+
+          <!-- FARE -->
+          <div class="fare-row">
+            <div class="fare-info">${b.distance_km || 0} km · ${b.type === 'ride' ? 'Sakay' : 'Delivery'}</div>
+            <div class="fare-amount">₱${b.fare || 0}</div>
+          </div>
+
+          <!-- BUTTONS -->
+          ${isPending ? `
+            <div class="action-btns">
+              <button class="btn-decline" onclick="declineBooking('${b.id}')">✕ Decline</button>
+              <button class="btn-accept" onclick="acceptBooking('${b.id}')">✓ Tanggapin</button>
+            </div>
+          ` : isMyAccepted ? `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span class="status-badge s-accepted">ACCEPTED ✓</span>
+            </div>
+            <button class="btn-complete" onclick="completeBooking('${b.id}', ${b.fare || 0})">✅ Tapos Na — I-complete</button>
+          ` : `
+            <div style="text-align:center;font-size:12px;color:var(--muted);padding:4px">
+              Iba nang nag-accept nito
+            </div>
+          `}
         </div>
       `;
-    }).join('');
+    }).join('') + '</div>';
   }
 
   async function acceptBooking(id) {
-    await db.from('bookings').update({ status: 'accepted', rider_id: riderId }).eq('id', id);
+    const { error } = await db.from('bookings')
+      .update({ status: 'accepted', rider_id: riderId })
+      .eq('id', id)
+      .eq('status', 'pending');
+
+    if (error) { showToast('May error sa pag-accept!', 'error'); return; }
+    showToast('✅ Na-accept ang booking!', 'success');
     await loadBookings();
   }
 
-  async function declineBooking(id) {
-    document.getElementById('book-' + id)?.remove();
+  function declineBooking(id) {
+    document.getElementById('bk-' + id)?.remove();
+    const list = document.getElementById('bookingList').querySelector('.booking-list');
+    if (list && list.children.length === 0) {
+      document.getElementById('bookingList').innerHTML = `<div class="empty"><div class="empty-icon">🎉</div>Wala pang bagong booking.</div>`;
+    }
   }
 
   async function completeBooking(id, fare) {
     await db.from('bookings').update({ status: 'completed' }).eq('id', id);
+    showToast('🎉 Booking completed!', 'success');
     await loadBookings();
     await loadStats();
   }
@@ -347,13 +328,26 @@
     document.getElementById('statEarnings').textContent = '₱' + total;
   }
 
-  // Real-time updates
+  // Real-time
   function subscribeBookings() {
-    subscription = db.channel('bookings-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+    subscription = db.channel('rider-bookings')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
+        if (riderAvail) {
+          showToast('🛵 Bagong booking!', 'success');
+          loadBookings();
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings' }, () => {
         loadBookings();
       })
       .subscribe();
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    setTimeout(() => t.className = 'toast', 3000);
   }
 
   async function logout() {
