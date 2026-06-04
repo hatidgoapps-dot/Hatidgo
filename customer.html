@@ -104,8 +104,8 @@
     .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
 
     /* FARE */
-    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: none; }
-    .fare-card.show { display: flex; justify-content: space-between; align-items: center; }
+    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: none; justify-content: space-between; align-items: center; }
+    .fare-card.show { display: flex !important; }
     .fare-label { font-size: 12px; color: var(--muted); }
     .fare-dist { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .fare-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent); }
@@ -522,7 +522,6 @@
     const km = haversine(pickupCoords, dropoffCoords);
     const fare = Math.max(20, Math.round(km * 20));
     const fareCard = document.getElementById('fareCard');
-    fareCard.style.display = 'flex';
     fareCard.classList.add('show');
     document.getElementById('fareDistLabel').textContent = km.toFixed(2) + ' km · ₱20/km (min. ₱20)';
     document.getElementById('fareAmount').textContent = '₱' + fare;
