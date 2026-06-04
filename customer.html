@@ -182,6 +182,21 @@
         <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
       </div>
 
+      <!-- CUSTOMER CONTACT INFO -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">👤 Iyong Info</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px">
+            <span style="font-size:16px">👤</span>
+            <input type="text" id="cName" placeholder="Iyong pangalan…" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px">
+            <span style="font-size:16px">📞</span>
+            <input type="tel" id="cPhone" placeholder="Cellphone number…" style="flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px"/>
+          </div>
+        </div>
+      </div>
+
       <!-- LOCATIONS -->
       <div class="location-card">
         <div class="loc-field">
@@ -352,6 +367,9 @@
     document.getElementById('bookingScreen').style.display = 'flex';
     document.getElementById('bkName').textContent = currentUser?.name || '';
     document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
+    // Pre-fill name and phone
+    if (document.getElementById('cName')) document.getElementById('cName').value = currentUser?.name || '';
+    if (document.getElementById('cPhone')) document.getElementById('cPhone').value = currentUser?.phone || '';
     loadHistory();
     checkAcceptedBooking();
     subscribeBookingUpdates();
@@ -390,8 +408,13 @@
     const pickup = document.getElementById('pickup').value.trim();
     const dropoff = document.getElementById('dropoff').value.trim();
     const notes = document.getElementById('notes').value;
+    const cName = document.getElementById('cName').value.trim();
+    const cPhone = document.getElementById('cPhone').value.trim();
     const btn = document.getElementById('bookBtn');
 
+    if (!cName || !cPhone) {
+      alert('Ilagay ang iyong pangalan at cellphone number!'); return;
+    }
     if (!pickup || !dropoff) {
       alert('Ilagay ang pickup at destinasyon!'); return;
     }
@@ -409,7 +432,9 @@
       distance_km: fareData?.km || null,
       fare: fareData?.fare || null,
       notes: notes || null,
-      status: 'pending'
+      status: 'pending',
+      customer_name: cName,
+      customer_phone: cPhone
     }).select().single();
 
     btn.disabled = false;
@@ -437,7 +462,7 @@
     const { data } = await db.from('bookings')
       .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
       .eq('passenger_id', currentUser.id)
-      .in('status', ['accepted', 'arrived', 'ongoing'])
+      .in('status', ['accepted', 'arrived', 'ongoing', 'completed'])
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
@@ -451,17 +476,27 @@
       document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
       document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
 
-      // Update title based on status
+      // Update title and style based on status
       const statusMessages = {
         accepted: '🛵 Rider Papunta Na Sa Iyo!',
         arrived: '📍 Nandito Na ang Rider!',
         ongoing: '🚀 Trip In Progress!',
-        completed: '✅ Natapos na ang Trip!'
+        completed: '✅ Trip Completed!'
       };
-      if (titleEl) titleEl.textContent = statusMessages[data.status] || 'Rider na Papunta Sa Yo!';
+      if (titleEl) titleEl.textContent = statusMessages[data.status] || 'Rider Info';
+
+      // Change border color based on status
+      const card = document.getElementById('riderDetailsCard');
+      if (data.status === 'completed') {
+        card.style.borderColor = 'rgba(59,130,246,0.4)';
+        titleEl.style.color = '#60a5fa';
+      } else {
+        card.style.borderColor = 'rgba(34,197,94,0.3)';
+        titleEl.style.color = 'var(--green)';
+      }
       card.classList.add('show');
     } else {
-      card.classList.remove('show');
+      document.getElementById('riderDetailsCard').classList.remove('show');
     }
   }
 
@@ -478,7 +513,7 @@
 
   async function loadHistory() {
     const { data } = await db.from('bookings')
-      .select('*')
+      .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
       .eq('passenger_id', currentUser.id)
       .order('created_at', { ascending: false })
       .limit(10);
@@ -499,6 +534,27 @@
           🔴 ${b.dropoff_address || '—'}
         </div>
         <div class="history-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
+        ${b.status === 'completed' && b.rider ? `
+        <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a">
+          <div style="font-size:10px;color:#60a5fa;font-weight:700;text-transform:uppercase;margin-bottom:8px">🛵 Rider na Nag-Hatid</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:36px;height:36px;background:rgba(249,115,22,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🛵</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
+              <div style="font-size:11px;color:#777">📞 ${b.rider.phone || '—'}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div style="background:#141414;border-radius:8px;padding:7px 10px">
+              <div style="font-size:10px;color:#777;font-weight:600">🏍️ MOTOR</div>
+              <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.motor_model || '—'}</div>
+            </div>
+            <div style="background:#141414;border-radius:8px;padding:7px 10px">
+              <div style="font-size:10px;color:#777;font-weight:600">🔖 PLATE</div>
+              <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.plate_number || '—'}</div>
+            </div>
+          </div>
+        </div>` : ''}
       </div>
     `).join('');
   }
