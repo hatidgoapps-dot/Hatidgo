@@ -255,8 +255,12 @@
 <script>
   const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_yZCqrUNwBQPyTsuwrTWLHg_GTAjW5ui';
+  const SUPABASE_SERVICE_KEY = 'sb_secret_AOq82IqsYzqNQ0rPzaX3Og_6f0jtEDT';
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const adminDb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
 
   // Auth guard
   db.auth.getSession().then(async ({ data: { session } }) => {
@@ -342,8 +346,12 @@
     btn.innerHTML = '<span class="spinner"></span> Nagda-dagdag…';
     fb.classList.remove('show');
 
-    // Create auth user via admin (using service role is ideal, but using signUp as workaround)
-    const { data, error } = await db.auth.signUp({ email, password });
+    // Create auth user using service role (admin) — hindi mag-lo-logout ang admin
+    const { data, error } = await adminDb.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true
+    });
 
     if (error) {
       showFeedback('Error: ' + error.message, 'error');
@@ -353,7 +361,7 @@
 
     // Update user profile
     if (data.user) {
-      await db.from('users').upsert({
+      await adminDb.from('users').upsert({
         id: data.user.id,
         name, email, phone,
         role: 'rider',
