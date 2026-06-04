@@ -230,9 +230,9 @@
 
   // Auth guard
   db.auth.getSession().then(async ({ data: { session } }) => {
-    if (!session) { window.location.href = 'login.html'; return; }
+    if (!session) { window.location.href = '/Hatidgo/index.html'; return; }
     const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
-    if (data?.role !== 'rider') { window.location.href = 'login.html'; return; }
+    if (data?.role !== 'rider') { window.location.href = '/Hatidgo/index.html'; return; }
     riderId = session.user.id;
     riderAvail = data.is_available;
     document.getElementById('riderName').textContent = data.name || 'Rider';
@@ -359,7 +359,7 @@
   async function logout() {
     if (subscription) db.removeChannel(subscription);
     await db.auth.signOut();
-    window.location.href = 'login.html';
+    window.location.href = '/Hatidgo/index.html';
   }
 </script>
 </body>

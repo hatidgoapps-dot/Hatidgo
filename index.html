@@ -209,9 +209,9 @@
   async function redirect(userId) {
     const { data } = await db.from('users').select('role').eq('id', userId).single();
     if (data?.role === 'admin') {
-      window.location.href = 'admin.html';
+      window.location.href = '/Hatidgo/admin.html';
     } else if (data?.role === 'rider') {
-      window.location.href = 'rider.html';
+      window.location.href = '/Hatidgo/rider.html';
     } else {
       showError('Walang access ang account na ito.');
       await db.auth.signOut();

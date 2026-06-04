@@ -171,9 +171,9 @@
   let selectedRiderId = null;
 
   db.auth.getSession().then(async ({ data: { session } }) => {
-    if (!session) { window.location.href = 'index.html'; return; }
+    if (!session) { window.location.href = '/Hatidgo/index.html'; return; }
     const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
-    if (data?.role !== 'admin') { window.location.href = 'index.html'; return; }
+    if (data?.role !== 'admin') { window.location.href = '/Hatidgo/index.html'; return; }
     loadAll();
   });
 
@@ -332,7 +332,7 @@
 
   async function logout() {
     await db.auth.signOut();
-    window.location.href = 'index.html';
+    window.location.href = '/Hatidgo/index.html';
   }
 </script>
 </body>
