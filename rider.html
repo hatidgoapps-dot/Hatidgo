@@ -170,6 +170,7 @@
     riderId = session.user.id;
     riderAvail = data.is_available;
     requestNotificationPermission();
+    startLocationTracking();
     document.getElementById('riderName').textContent = data.name || 'Rider';
     document.getElementById('riderEmail').textContent = data.email || '';
     updateToggleUI();
@@ -406,6 +407,26 @@
     document.getElementById('paidFeeAmount').textContent = '₱' + paid;
   }
 
+  // LOCATION TRACKING
+  let locationWatcher = null;
+
+  function startLocationTracking() {
+    if (!navigator.geolocation) return;
+    // Update location every 10 seconds
+    locationWatcher = navigator.geolocation.watchPosition(async (pos) => {
+      if (!riderId) return;
+      await db.from('users').update({
+        current_lat: pos.coords.latitude,
+        current_lng: pos.coords.longitude,
+        last_seen: new Date().toISOString()
+      }).eq('id', riderId);
+    }, () => {}, { enableHighAccuracy: true, maximumAge: 10000 });
+  }
+
+  function stopLocationTracking() {
+    if (locationWatcher) navigator.geolocation.clearWatch(locationWatcher);
+  }
+
   // NOTIFICATIONS
   function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
@@ -476,6 +497,15 @@
   }
 
   async function logout() {
+    stopLocationTracking();
+    // Clear location on logout
+    if (riderId) {
+      await db.from('users').update({
+        current_lat: null,
+        current_lng: null,
+        is_available: false
+      }).eq('id', riderId);
+    }
     if (subscription) db.removeChannel(subscription);
     await db.auth.signOut();
     window.location.href = '/Hatidgo/index.html';

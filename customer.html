@@ -643,6 +643,16 @@
 
     const fareData = computeFare();
 
+    // Find nearest available rider
+    let nearestRiderId = null;
+    if (pickupCoords) {
+      const { data: nearestRider } = await db.rpc('find_nearest_rider', {
+        pickup_lat: pickupCoords.lat,
+        pickup_lng: pickupCoords.lng
+      });
+      nearestRiderId = nearestRider || null;
+    }
+
     const { data, error } = await db.from('bookings').insert({
       passenger_id: currentUser.id,
       type: bookingType,
@@ -655,7 +665,8 @@
       distance_km: fareData?.km || null,
       fare: fareData?.fare || null,
       notes: notes || null,
-      status: 'pending',
+      status: nearestRiderId ? 'accepted' : 'pending',
+      rider_id: nearestRiderId,
       customer_name: cName,
       customer_phone: cPhone
     }).select().single();
@@ -669,6 +680,13 @@
     document.getElementById('notes').value = '';
 
     document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
+    // Update modal message
+    const modalSub = document.querySelector('.modal-sub');
+    if (nearestRiderId) {
+      modalSub.textContent = '✅ Nahanap na ang pinakamalapit na rider sa iyo! Papunta na siya.';
+    } else {
+      modalSub.textContent = 'Hinahanap ang available na rider sa Cotabato City. Maghintay sandali.';
+    }
     document.getElementById('modalOverlay').classList.add('show');
     loadHistory();
   }
