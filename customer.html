@@ -501,13 +501,21 @@
 
   let geocodeTimer = null;
   function onManualInput(type) {
-    // Debounce geocoding
+    const pickup = document.getElementById('pickup').value.trim();
+    const dropoff = document.getElementById('dropoff').value.trim();
+
+    // Show estimated fare immediately if both fields have text
+    if (pickup.length > 2 && dropoff.length > 2) {
+      showEstimatedFare(pickup, dropoff);
+    }
+
+    // Try to geocode in background
     clearTimeout(geocodeTimer);
     geocodeTimer = setTimeout(async () => {
-      const val = document.getElementById(type === 'pickup' ? 'pickup' : 'dropoff').value.trim();
-      if (val.length < 4) return;
+      const val = type === 'pickup' ? pickup : dropoff;
+      if (val.length < 3) return;
       try {
-        const res = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato') + '&format=json&limit=1');
+        const res = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato City Philippines') + '&format=json&limit=1');
         const data = await res.json();
         if (data[0]) {
           const lat = parseFloat(data[0].lat);
@@ -521,11 +529,26 @@
             if (dropoffMarker) map.removeLayer(dropoffMarker);
             dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map);
           }
-          drawRoute();
-          computeFare();
+          if (pickupCoords && dropoffCoords) {
+            drawRoute();
+            computeFare();
+          }
         }
       } catch(e) {}
-    }, 800);
+    }, 1000);
+  }
+
+  function showEstimatedFare(pickup, dropoff) {
+    // If no GPS coords yet, show estimated fare based on text length as rough estimate
+    if (pickupCoords && dropoffCoords) {
+      computeFare();
+      return;
+    }
+    // Fallback: show minimum fare estimate
+    const fareCard = document.getElementById('fareCard');
+    fareCard.classList.add('show');
+    document.getElementById('fareDistLabel').textContent = 'Estimated · ₱20/km (min. ₱20)';
+    document.getElementById('fareAmount').textContent = '₱20+';
   }
 
   // =====================
