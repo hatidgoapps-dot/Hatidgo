@@ -531,10 +531,13 @@
     clearTimeout(searchTimers[type]);
     searchTimers[type] = setTimeout(async () => {
       try {
+        // Search biased toward Cotabato City coordinates (7.2047, 124.2311)
         const res = await fetch(
           'https://nominatim.openstreetmap.org/search?q=' +
-          encodeURIComponent(val + ' Cotabato City') +
-          '&format=json&limit=6&countrycodes=ph&addressdetails=1'
+          encodeURIComponent(val) +
+          '&format=json&limit=6&countrycodes=ph&addressdetails=1' +
+          '&viewbox=124.1500,7.1500,124.3500,7.2800&bounded=0' +
+          '&lat=7.2047&lon=124.2311'
         );
         const data = await res.json();
 
