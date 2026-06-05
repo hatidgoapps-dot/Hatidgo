@@ -143,18 +143,31 @@
 
 </div>
 
-<!-- CHANGE PASSWORD MODAL -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">🔑 Palitan ang Password</div>
+    <div class="modal-title" id="modalTitle">🔑 Palitan ang Password</div>
     <div class="modal-sub" id="modalRiderName"></div>
     <div class="modal-fb" id="modalFb"></div>
-    <div class="modal-field"><label>Bagong Password</label><input type="password" id="newPassword" placeholder="Minimum 6 characters"/></div>
-    <div class="modal-field"><label>Ulitin ang Password</label><input type="password" id="confirmPassword" placeholder="Pareho sa itaas"/></div>
+
+    <!-- PASSWORD FIELDS -->
+    <div id="passwordFields">
+      <div class="modal-field"><label>Bagong Password</label><input type="password" id="newPassword" placeholder="Minimum 6 characters"/></div>
+      <div class="modal-field"><label>Ulitin ang Password</label><input type="password" id="confirmPassword" placeholder="Pareho sa itaas"/></div>
+    </div>
+
+    <!-- EDIT FIELDS -->
+    <div id="editFields" style="display:none">
+      <div class="modal-field"><label>Pangalan</label><input type="text" id="editName" placeholder="Juan dela Cruz"/></div>
+      <div class="modal-field"><label>Phone</label><input type="tel" id="editPhone" placeholder="09xxxxxxxxx"/></div>
+      <div class="modal-field"><label>Motor Model</label><input type="text" id="editMotor" placeholder="Honda Click 125"/></div>
+      <div class="modal-field"><label>Plate Number</label><input type="text" id="editPlate" placeholder="ABC 1234"/></div>
+    </div>
+
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Kanselahin</button>
-      <button class="modal-confirm" id="confirmBtn" onclick="changePassword()">I-update</button>
+      <button class="modal-confirm" id="confirmBtn">I-update</button>
     </div>
   </div>
 </div>
@@ -215,7 +228,13 @@
           </div>
           <span class="avail-badge ${r.is_available ? 'online' : 'offline'}">${r.is_available ? 'ONLINE' : 'OFFLINE'}</span>
         </div>
-        <button class="btn-change-pass" onclick="openModal('${r.id}', '${r.name || 'Rider'}')">🔑 Palitan ang Password</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px">
+          <button class="btn-change-pass" onclick="openModal('${r.id}', '${r.name || 'Rider'}', 'password')">🔑 Password</button>
+          <button class="btn-change-pass" onclick="openModal('${r.id}', '${r.name || 'Rider'}', 'edit')" style="color:var(--accent2);border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)">✏️ I-edit</button>
+        </div>
+        <button onclick="toggleBlock('${r.id}', ${r.is_blocked || false}, '${r.name || 'Rider'}')" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid ${r.is_blocked ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'};background:${r.is_blocked ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'};color:${r.is_blocked ? 'var(--green)' : 'var(--red)'};font-family:DM Sans,sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+          ${r.is_blocked ? '✅ I-unblock' : '🚫 I-block (Hindi pa Nakabayad)'}
+        </button>
       </div>
     `).join('');
   }
@@ -317,14 +336,78 @@
     await loadAll();
   }
 
-  // CHANGE PASSWORD
-  function openModal(riderId, riderName) {
+  // CHANGE PASSWORD / EDIT
+  function openModal(riderId, riderName, type) {
     selectedRiderId = riderId;
-    document.getElementById('modalRiderName').textContent = 'Para kay ' + riderName;
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
     document.getElementById('modalFb').className = 'modal-fb';
+
+    if (type === 'password') {
+      document.getElementById('modalTitle').textContent = '🔑 Palitan ang Password';
+      document.getElementById('modalRiderName').textContent = 'Para kay ' + riderName;
+      document.getElementById('passwordFields').style.display = 'block';
+      document.getElementById('editFields').style.display = 'none';
+      document.getElementById('confirmBtn').textContent = 'I-update';
+      document.getElementById('confirmBtn').onclick = changePassword;
+    } else {
+      document.getElementById('modalTitle').textContent = '✏️ I-edit ang Info';
+      document.getElementById('modalRiderName').textContent = riderName;
+      document.getElementById('passwordFields').style.display = 'none';
+      document.getElementById('editFields').style.display = 'block';
+      document.getElementById('confirmBtn').textContent = 'I-save';
+      document.getElementById('confirmBtn').onclick = saveEdit;
+      loadRiderInfo(riderId);
+    }
     document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  async function loadRiderInfo(riderId) {
+    const { data } = await db.from('users').select('*').eq('id', riderId).single();
+    if (data) {
+      document.getElementById('editName').value = data.name || '';
+      document.getElementById('editPhone').value = data.phone || '';
+      document.getElementById('editMotor').value = data.motor_model || '';
+      document.getElementById('editPlate').value = data.plate_number || '';
+    }
+  }
+
+  async function saveEdit() {
+    const name = document.getElementById('editName').value.trim();
+    const phone = document.getElementById('editPhone').value.trim();
+    const motor = document.getElementById('editMotor').value.trim();
+    const plate = document.getElementById('editPlate').value.trim();
+    const btn = document.getElementById('confirmBtn');
+    const fb = document.getElementById('modalFb');
+
+    if (!name) { fb.textContent = 'Kailangan ang pangalan.'; fb.className = 'modal-fb show error'; return; }
+
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+
+    const { error } = await db.from('users').update({
+      name, phone, motor_model: motor, plate_number: plate
+    }).eq('id', selectedRiderId);
+
+    if (error) {
+      fb.textContent = 'Error: ' + error.message;
+      fb.className = 'modal-fb show error';
+    } else {
+      fb.textContent = '✅ Na-update na ang info!';
+      fb.className = 'modal-fb show success';
+      setTimeout(() => { closeModal(); loadAll(); }, 1500);
+    }
+    btn.disabled = false; btn.textContent = 'I-save';
+  }
+
+  async function toggleBlock(riderId, isBlocked, riderName) {
+    const newStatus = !isBlocked;
+    const reason = newStatus ? 'Hindi pa nakabayad ng fee sa Admin.' : '';
+    const { error } = await db.from('users').update({
+      is_blocked: newStatus,
+      block_reason: reason
+    }).eq('id', riderId);
+
+    if (error) { alert('Error: ' + error.message); return; }
+    alert(newStatus ? '🚫 Na-block na si ' + riderName : '✅ Na-unblock na si ' + riderName);
+    loadAll();
   }
 
   function closeModal() {

@@ -213,7 +213,12 @@
   }
 
   async function redirect(userId) {
-    const { data } = await db.from('users').select('role').eq('id', userId).single();
+    const { data } = await db.from('users').select('role, is_blocked, block_reason').eq('id', userId).single();
+    if (data?.is_blocked) {
+      showError('❌ Naka-block ang account mo. Dahil: ' + (data.block_reason || 'Hindi pa nakabayad ng fee sa Admin.'));
+      await db.auth.signOut();
+      return;
+    }
     if (data?.role === 'admin') {
       window.location.href = '/Hatidgo/admin.html';
     } else if (data?.role === 'rider') {
