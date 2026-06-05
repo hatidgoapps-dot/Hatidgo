@@ -159,6 +159,17 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
     .leaflet-control-attribution { display: none !important; }
+    /* AUTOCOMPLETE */
+    .search-wrap { position: relative; }
+    .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 999; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; }
+    .suggestions.show { display: block; }
+    .suggestion-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 10px; }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:active { background: #2a2a2a; }
+    .suggestion-icon { font-size: 16px; flex-shrink: 0; }
+    .suggestion-name { font-weight: 600; font-size: 13px; }
+    .suggestion-addr { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .searching-indicator { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
   </style>
 </head>
 <body>
@@ -251,14 +262,16 @@
         <div class="location-card">
           <div class="loc-field">
             <div class="loc-dot dot-green"></div>
-            <input type="text" id="pickup" placeholder="Pickup location… (i-click sa mapa o i-type)" oninput="onManualInput('pickup')"/>
+            <input type="text" id="pickup" placeholder="Pickup… (i-click mapa o i-type)" oninput="onSearch('pickup')" autocomplete="off"/>
             <span class="loc-clear" onclick="clearLocation('pickup')">✕</span>
           </div>
+          <div class="suggestions" id="pickupSuggestions"></div>
           <div class="loc-field">
             <div class="loc-dot dot-red"></div>
-            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click sa mapa o i-type)" oninput="onManualInput('dropoff')"/>
+            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click mapa o i-type)" oninput="onSearch('dropoff')" autocomplete="off"/>
             <span class="loc-clear" onclick="clearLocation('dropoff')">✕</span>
           </div>
+          <div class="suggestions" id="dropoffSuggestions"></div>
         </div>
 
         <!-- NOTES -->
@@ -499,56 +512,79 @@
     }, () => {});
   }
 
-  let geocodeTimer = null;
-  function onManualInput(type) {
-    const pickup = document.getElementById('pickup').value.trim();
-    const dropoff = document.getElementById('dropoff').value.trim();
+  let searchTimers = {};
 
-    // Show estimated fare immediately if both fields have text
-    if (pickup.length > 2 && dropoff.length > 2) {
-      showEstimatedFare(pickup, dropoff);
-    }
+  function onSearch(type) {
+    const val = document.getElementById(type).value.trim();
+    const suggestionsEl = document.getElementById(type + 'Suggestions');
 
-    // Try to geocode in background
-    clearTimeout(geocodeTimer);
-    geocodeTimer = setTimeout(async () => {
-      const val = type === 'pickup' ? pickup : dropoff;
-      if (val.length < 3) return;
-      try {
-        const res = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato City Philippines') + '&format=json&limit=1');
-        const data = await res.json();
-        if (data[0]) {
-          const lat = parseFloat(data[0].lat);
-          const lng = parseFloat(data[0].lon);
-          if (type === 'pickup') {
-            pickupCoords = { lat, lng };
-            if (pickupMarker) map.removeLayer(pickupMarker);
-            pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map);
-          } else {
-            dropoffCoords = { lat, lng };
-            if (dropoffMarker) map.removeLayer(dropoffMarker);
-            dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map);
-          }
-          if (pickupCoords && dropoffCoords) {
-            drawRoute();
-            computeFare();
-          }
-        }
-      } catch(e) {}
-    }, 1000);
-  }
-
-  function showEstimatedFare(pickup, dropoff) {
-    // If no GPS coords yet, show estimated fare based on text length as rough estimate
-    if (pickupCoords && dropoffCoords) {
-      computeFare();
+    if (val.length < 2) {
+      suggestionsEl.classList.remove('show');
+      suggestionsEl.innerHTML = '';
       return;
     }
-    // Fallback: show minimum fare estimate
-    const fareCard = document.getElementById('fareCard');
-    fareCard.classList.add('show');
-    document.getElementById('fareDistLabel').textContent = 'Estimated · ₱20/km (min. ₱20)';
-    document.getElementById('fareAmount').textContent = '₱20+';
+
+    // Show searching indicator
+    suggestionsEl.innerHTML = '<div class="searching-indicator">🔍 Naghahanap…</div>';
+    suggestionsEl.classList.add('show');
+
+    clearTimeout(searchTimers[type]);
+    searchTimers[type] = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          'https://nominatim.openstreetmap.org/search?q=' +
+          encodeURIComponent(val + ' Cotabato City') +
+          '&format=json&limit=6&countrycodes=ph&addressdetails=1'
+        );
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+          suggestionsEl.innerHTML = '<div class="searching-indicator">Walang nahanap. Subukan ulit.</div>';
+          return;
+        }
+
+        suggestionsEl.innerHTML = data.map((item, i) => {
+          const name = item.name || item.display_name.split(',')[0];
+          const addr = item.display_name.split(',').slice(1, 3).join(',').trim();
+          return `<div class="suggestion-item" onclick="selectSuggestion('${type}', ${item.lat}, ${item.lon}, '${name.replace(/'/g, "\'")} - ${addr.replace(/'/g, "\'")}')">
+            <span class="suggestion-icon">📍</span>
+            <div>
+              <div class="suggestion-name">${name}</div>
+              <div class="suggestion-addr">${addr}</div>
+            </div>
+          </div>`;
+        }).join('');
+        suggestionsEl.classList.add('show');
+
+      } catch(e) {
+        suggestionsEl.innerHTML = '<div class="searching-indicator">Error sa paghahanap.</div>';
+      }
+    }, 500);
+  }
+
+  function selectSuggestion(type, lat, lng, label) {
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    document.getElementById(type).value = label;
+    document.getElementById(type + 'Suggestions').classList.remove('show');
+
+    if (type === 'pickup') {
+      pickupCoords = { lat, lng };
+      if (pickupMarker) map.removeLayer(pickupMarker);
+      pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup').openPopup();
+      if (!dropoffCoords) setMapMode('destination');
+    } else {
+      dropoffCoords = { lat, lng };
+      if (dropoffMarker) map.removeLayer(dropoffMarker);
+      dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map).bindPopup('🏁 Destinasyon').openPopup();
+    }
+
+    if (pickupCoords && dropoffCoords) {
+      drawRoute();
+      computeFare();
+    } else {
+      map.setView([lat, lng], 15);
+    }
   }
 
   // =====================
@@ -727,6 +763,13 @@
       </div>
     `).join('');
   }
+
+  // Close suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.location-card')) {
+      document.querySelectorAll('.suggestions').forEach(s => s.classList.remove('show'));
+    }
+  });
 
   async function logout() {
     await db.auth.signOut();
