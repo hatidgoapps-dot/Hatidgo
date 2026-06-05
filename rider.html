@@ -169,6 +169,7 @@
     if (data?.role !== 'rider') { window.location.href = '/Hatidgo/index.html'; return; }
     riderId = session.user.id;
     riderAvail = data.is_available;
+    requestNotificationPermission();
     document.getElementById('riderName').textContent = data.name || 'Rider';
     document.getElementById('riderEmail').textContent = data.email || '';
     updateToggleUI();
@@ -405,12 +406,59 @@
     document.getElementById('paidFeeAmount').textContent = '₱' + paid;
   }
 
+  // NOTIFICATIONS
+  function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }
+
+  function sendNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const notif = new Notification(title, {
+        body: body,
+        icon: 'https://hatidgoapps-dot.github.io/Hatidgo/favicon.ico',
+        badge: 'https://hatidgoapps-dot.github.io/Hatidgo/favicon.ico',
+        vibrate: [200, 100, 200],
+        tag: 'hatidgo-booking',
+        requireInteraction: true
+      });
+      notif.onclick = () => { window.focus(); notif.close(); };
+    }
+    // Also play sound
+    playAlertSound();
+  }
+
+  function playAlertSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Play 3 beeps
+      [0, 0.3, 0.6].forEach(delay => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.25);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 0.25);
+      });
+    } catch(e) {}
+  }
+
   // Real-time
   function subscribeBookings() {
     subscription = db.channel('rider-bookings')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
         if (riderAvail) {
+          const b = payload.new;
           showToast('🛵 Bagong booking!', 'success');
+          sendNotification(
+            '🛵 Bagong Booking! — HatidGo',
+            (b.customer_name || 'Customer') + ' · ' + (b.pickup_address || 'Pickup') + ' → ' + (b.dropoff_address || 'Destination') + ' · ₱' + (b.fare || 0)
+          );
           loadBookings();
         }
       })
