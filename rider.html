@@ -402,9 +402,13 @@
     const paid = (allCompleted || [])
       .filter(b => b.is_paid_to_admin)
       .reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+    const totalEarnings = (allCompleted || [])
+      .reduce((sum, b) => sum + (b.rider_earnings || Math.round((b.fare||0)*0.85)), 0);
 
     document.getElementById('unpaidFeeAmount').textContent = '₱' + unpaid;
     document.getElementById('paidFeeAmount').textContent = '₱' + paid;
+    if (document.getElementById('totalRiderEarnings'))
+      document.getElementById('totalRiderEarnings').textContent = '₱' + totalEarnings;
   }
 
   // LOCATION TRACKING

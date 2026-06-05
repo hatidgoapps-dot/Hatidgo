@@ -502,14 +502,34 @@
   }
 
   function locateMe() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      alert('Hindi supported ang GPS sa iyong browser. I-type na lang ang pickup location.');
+      return;
+    }
+    const hint = document.getElementById('mapHint');
+    hint.textContent = '📍 Kinukuha ang iyong location…';
+    hint.classList.remove('hide');
+
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude: lat, longitude: lng } = pos.coords;
       map.setView([lat, lng], 16);
       const addr = await reverseGeocode(lat, lng);
       setPickup(lat, lng, addr);
       setMapMode('destination');
-    }, () => {});
+      hint.classList.add('hide');
+    }, (err) => {
+      hint.classList.add('hide');
+      // Show helpful message for Android
+      let msg = 'Hindi makuha ang location. ';
+      if (err.code === 1) msg += 'I-allow ang location permission sa browser settings.';
+      else if (err.code === 2) msg += 'Hindi available ang GPS. I-type na lang ang address.';
+      else msg += 'I-type na lang ang pickup address sa field sa ibaba.';
+      alert(msg);
+    }, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    });
   }
 
   let searchTimers = {};

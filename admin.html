@@ -102,7 +102,22 @@
     <div class="stat-card"><div class="stat-num" id="statRiders">—</div><div class="stat-label">Mga Rider</div></div>
     <div class="stat-card"><div class="stat-num" id="statBookings">—</div><div class="stat-label">Bookings</div></div>
     <div class="stat-card"><div class="stat-num" id="statPending">—</div><div class="stat-label">Pending</div></div>
-    <div class="stat-card" style="grid-column:span 3"><div class="stat-num" id="statAdminIncome" style="color:var(--accent)">₱0</div><div class="stat-label">Admin Income (15%)</div></div>
+    <div class="stat-card" style="grid-column:span 3">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="text-align:center">
+          <div class="stat-num" id="statAdminIncome" style="color:var(--accent)">₱0</div>
+          <div class="stat-label">Admin Income (15%)</div>
+        </div>
+        <div style="text-align:center">
+          <div class="stat-num" id="statTotalFare" style="color:var(--accent2)">₱0</div>
+          <div class="stat-label">Kabuoang Fare</div>
+        </div>
+        <div style="text-align:center">
+          <div class="stat-num" id="statTotalRiderEarnings" style="color:#22c55e">₱0</div>
+          <div class="stat-label">Kita ng Riders</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -212,12 +227,16 @@
     document.getElementById('statBookings').textContent = b.count ?? 0;
     document.getElementById('statPending').textContent = p.count ?? 0;
 
-    // Compute total admin income
+    // Compute all totals
     const { data: completedBookings } = await db.from('bookings')
-      .select('fare, admin_fee')
+      .select('fare, admin_fee, rider_earnings')
       .eq('status', 'completed');
     const adminTotal = (completedBookings || []).reduce((sum, b) => sum + (b.admin_fee || Math.round((b.fare||0)*0.15)), 0);
+    const fareTotal = (completedBookings || []).reduce((sum, b) => sum + (b.fare || 0), 0);
+    const riderTotal = (completedBookings || []).reduce((sum, b) => sum + (b.rider_earnings || Math.round((b.fare||0)*0.85)), 0);
     document.getElementById('statAdminIncome').textContent = '₱' + adminTotal;
+    document.getElementById('statTotalFare').textContent = '₱' + fareTotal;
+    document.getElementById('statTotalRiderEarnings').textContent = '₱' + riderTotal;
   }
 
   async function loadRiders() {
