@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>HatidGo – Mag-Book</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -15,12 +13,12 @@
       --green: #22c55e; --red: #ef4444; --text: #f0f0f0; --muted: #777;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
 
-    /* ---- AUTH SCREEN ---- */
-    .auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 24px; overflow-y: auto; }
-    .auth-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px 0; }
+    /* AUTH */
+    .auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100dvh; padding: 24px; }
+    .auth-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
     .logo { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; text-align: center; }
     .logo span { color: var(--accent); }
     .logo-sub { font-size: 12px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
@@ -36,96 +34,89 @@
     .field input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 15px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
     .field input:focus { border-color: var(--accent); }
     .field input::placeholder { color: #444; }
-    .btn-main { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 6px; transition: transform 0.12s; }
-    .btn-main:active { transform: scale(0.97); }
-    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-main { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 13px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 6px; }
+    .btn-main:disabled { opacity: 0.5; }
     .msg-box { border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; display: none; }
     .msg-box.show { display: block; }
     .msg-box.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
     .msg-box.success { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
 
-    /* ---- BOOKING SCREEN ---- */
-    .booking-screen { display: none; flex-direction: column; height: 100dvh; overflow: hidden; }
-    .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
+    /* BOOKING SCREEN */
+    .booking-screen { display: none; flex-direction: column; min-height: 100dvh; }
+    .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .bk-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
     .bk-logo span { color: var(--accent); }
     .bk-user { display: flex; align-items: center; gap: 10px; }
-    .bk-name { font-size: 12px; font-weight: 600; color: var(--muted); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bk-name { font-size: 12px; font-weight: 600; color: var(--muted); }
     .bk-logout { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; }
-
-    /* MAP */
-    #map { height: 240px; width: 100%; flex-shrink: 0; z-index: 1; }
-    .map-hint { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(13,17,23,0.85); backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 10px; padding: 6px 14px; font-size: 11px; font-weight: 600; color: var(--text); z-index: 5; white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
-    .map-hint.hide { opacity: 0; }
-    .locate-fab { position: absolute; bottom: 10px; right: 10px; z-index: 5; background: var(--card); border: 1px solid var(--border); border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
-    .map-wrap { position: relative; flex-shrink: 0; }
-
-    /* BOTTOM PANEL */
-    .bottom-panel { flex: 1; overflow-y: auto; scrollbar-width: none; }
-    .bottom-panel::-webkit-scrollbar { display: none; }
-    .panel-content { padding: 16px 18px 40px; max-width: 500px; margin: 0 auto; }
-
-    /* MAP MODE INDICATOR */
-    .map-mode-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .map-mode-btn { flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
-    .map-mode-btn.active { border-color: var(--green); background: rgba(34,197,94,0.1); color: var(--green); }
-    .map-mode-btn.active-dest { border-color: var(--red); background: rgba(239,68,68,0.1); color: var(--red); }
+    .bk-content { padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
+    .bk-greeting { margin-bottom: 20px; }
+    .bk-greeting h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+    .bk-greeting p { font-size: 13px; color: var(--muted); margin-top: 3px; }
 
     /* TYPE TOGGLE */
     .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
-    .type-btn { flex: 1; padding: 11px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .type-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
     .type-btn.active { border-color: var(--accent); background: rgba(249,115,22,0.1); color: var(--accent); }
 
     /* CONTACT INFO */
     .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
     .info-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .info-input { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; transition: border-color 0.15s; }
-    .info-input:focus-within { border-color: var(--accent); }
+    .info-input { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; }
     .info-input:last-child { margin-bottom: 0; }
     .info-input input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
     .info-input input::placeholder { color: #444; }
 
-    /* LOCATION CARD */
-    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
-    .loc-field { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+    /* LOCATION */
+    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; position: relative; }
+    .loc-field { display: flex; align-items: center; gap: 10px; padding: 8px 0; position: relative; }
     .loc-field:not(:last-child) { border-bottom: 1px solid var(--border); }
     .loc-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
     .dot-green { background: var(--green); }
     .dot-red { background: var(--red); }
     .loc-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
     .loc-field input::placeholder { color: var(--muted); }
-    .loc-clear { font-size: 16px; cursor: pointer; color: var(--muted); padding: 2px; }
+
+    /* SUGGESTIONS */
+    .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 99; max-height: 220px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; margin-top: 4px; }
+    .suggestions.show { display: block; }
+    .suggestion-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: flex-start; gap: 10px; }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:active { background: #2a2a2a; }
+    .sug-name { font-weight: 600; font-size: 13px; }
+    .sug-addr { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .sug-loading { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
 
     /* NOTES */
     .notes-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: none; }
     .notes-card.show { display: block; }
+    .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
     .notes-card textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; resize: none; height: 55px; }
     .notes-card textarea::placeholder { color: var(--muted); }
-    .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
 
     /* FARE */
-    .fare-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 14px; display: none; justify-content: space-between; align-items: center; }
-    .fare-card.show { display: flex !important; }
+    .fare-card { background: var(--card); border: 1px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: none; justify-content: space-between; align-items: center; }
+    .fare-card.show { display: flex; }
     .fare-label { font-size: 12px; color: var(--muted); }
     .fare-dist { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .fare-amount { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent); }
+    .fare-amount { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
 
     /* BOOK BTN */
-    .book-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; transition: transform 0.12s; margin-bottom: 20px; }
+    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.12s; margin-bottom: 20px; }
     .book-btn:active { transform: scale(0.97); }
     .book-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* RIDER DETAILS */
     .rider-details { background: var(--card); border: 1.5px solid rgba(34,197,94,0.3); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: none; }
     .rider-details.show { display: block; }
-    .rider-details-title { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .rd-title { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
     .rd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s ease-in-out infinite; }
-    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
-    .rider-info-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-    .rider-big-avatar { width: 44px; height: 44px; background: rgba(249,115,22,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-    .rider-detail-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
-    .rider-detail-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .rider-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+    .rd-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .rd-avatar { width: 44px; height: 44px; background: rgba(249,115,22,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .rd-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+    .rd-phone { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .rd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .rd-item { background: var(--card2); border-radius: 10px; padding: 9px 12px; }
     .rd-item-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 3px; }
     .rd-item-value { font-size: 13px; font-weight: 600; }
@@ -141,7 +132,6 @@
     .s-arrived { background: rgba(249,115,22,0.15); color: var(--accent); }
     .s-ongoing { background: rgba(59,130,246,0.15); color: #60a5fa; }
     .s-completed { background: rgba(59,130,246,0.15); color: #60a5fa; }
-    .s-cancelled { background: rgba(239,68,68,0.15); color: var(--red); }
     .history-route { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 6px; }
     .history-fare { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; color: var(--accent); }
 
@@ -158,183 +148,145 @@
     .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
-    .leaflet-control-attribution { display: none !important; }
-    /* AUTOCOMPLETE */
-    .search-wrap { position: relative; }
-    .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 999; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; }
-    .suggestions.show { display: block; }
-    .suggestion-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 10px; }
-    .suggestion-item:last-child { border-bottom: none; }
-    .suggestion-item:active { background: #2a2a2a; }
-    .suggestion-icon { font-size: 16px; flex-shrink: 0; }
-    .suggestion-name { font-weight: 600; font-size: 13px; }
-    .suggestion-addr { font-size: 11px; color: var(--muted); margin-top: 1px; }
-    .searching-indicator { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- AUTH SCREEN -->
-  <div class="auth-screen" id="authScreen">
-    <div class="auth-wrap">
-      <div style="text-align:center">
-        <div class="logo">🛵 Hatid<span>Go</span></div>
-        <div class="logo-sub">Motor · Sasakyan · Mabilis</div>
-        <div class="city-pill">📍 Cotabato City</div>
-      </div>
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="showAuthTab('signup', this)">Mag-Sign Up</button>
-        <button class="auth-tab" onclick="showAuthTab('login', this)">Mag-Login</button>
-      </div>
-      <!-- SIGN UP -->
-      <div class="auth-card" id="signupCard">
-        <div class="auth-title">Bagong Account 🎉</div>
-        <div class="auth-sub">Libre! Para sa mga customer ng HatidGo</div>
-        <div class="msg-box" id="signupMsg"></div>
-        <div class="field"><label>Pangalan</label><input type="text" id="sName" placeholder="Juan dela Cruz"/></div>
-        <div class="field"><label>Email</label><input type="email" id="sEmail" placeholder="juan@gmail.com"/></div>
-        <div class="field"><label>Phone</label><input type="tel" id="sPhone" placeholder="09xxxxxxxxx"/></div>
-        <div class="field"><label>Password</label><input type="password" id="sPass" placeholder="Minimum 6 characters"/></div>
-        <button class="btn-main" id="signupBtn" onclick="signUp()">Gumawa ng Account</button>
-      </div>
-      <!-- LOGIN -->
-      <div class="auth-card" id="loginCard" style="display:none">
-        <div class="auth-title">Mag-Login 🔐</div>
-        <div class="auth-sub">Para sa mga customer ng HatidGo</div>
-        <div class="msg-box" id="loginMsg"></div>
-        <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="juan@gmail.com"/></div>
-        <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"/></div>
-        <button class="btn-main" id="loginBtn" onclick="loginCustomer()">Mag-Login</button>
-      </div>
-      <div style="font-size:12px;color:var(--muted);text-align:center">
-        Admin o Rider? <a href="/Hatidgo/index.html" style="color:var(--accent);font-weight:600">Dito mag-login →</a>
-      </div>
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-wrap">
+    <div style="text-align:center">
+      <div class="logo">🛵 Hatid<span>Go</span></div>
+      <div class="logo-sub">Motor · Sasakyan · Mabilis</div>
+      <div class="city-pill">📍 Cotabato City</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('signup', this)">Mag-Sign Up</button>
+      <button class="auth-tab" onclick="showAuthTab('login', this)">Mag-Login</button>
+    </div>
+    <div class="auth-card" id="signupCard">
+      <div class="auth-title">Bagong Account 🎉</div>
+      <div class="auth-sub">Libre! Para sa mga customer ng HatidGo</div>
+      <div class="msg-box" id="signupMsg"></div>
+      <div class="field"><label>Pangalan</label><input type="text" id="sName" placeholder="Juan dela Cruz"/></div>
+      <div class="field"><label>Email</label><input type="email" id="sEmail" placeholder="juan@gmail.com"/></div>
+      <div class="field"><label>Phone</label><input type="tel" id="sPhone" placeholder="09xxxxxxxxx"/></div>
+      <div class="field"><label>Password</label><input type="password" id="sPass" placeholder="Minimum 6 characters"/></div>
+      <button class="btn-main" id="signupBtn" onclick="signUp()">Gumawa ng Account</button>
+    </div>
+    <div class="auth-card" id="loginCard" style="display:none">
+      <div class="auth-title">Mag-Login 🔐</div>
+      <div class="auth-sub">Para sa mga customer ng HatidGo</div>
+      <div class="msg-box" id="loginMsg"></div>
+      <div class="field"><label>Email</label><input type="email" id="lEmail" placeholder="juan@gmail.com"/></div>
+      <div class="field"><label>Password</label><input type="password" id="lPass" placeholder="••••••••"/></div>
+      <button class="btn-main" id="loginBtn" onclick="loginCustomer()">Mag-Login</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);text-align:center">
+      Admin o Rider? <a href="/Hatidgo/index.html" style="color:var(--accent);font-weight:600">Dito mag-login →</a>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING SCREEN -->
+<div class="booking-screen" id="bookingScreen">
+  <div class="bk-header">
+    <div class="bk-logo">Hatid<span>Go</span></div>
+    <div class="bk-user">
+      <span class="bk-name" id="bkName"></span>
+      <button class="bk-logout" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- BOOKING SCREEN -->
-  <div class="booking-screen" id="bookingScreen">
-    <div class="bk-header">
-      <div class="bk-logo">Hatid<span>Go</span></div>
-      <div class="bk-user">
-        <span class="bk-name" id="bkName"></span>
-        <button class="bk-logout" onclick="logout()">Logout</button>
+  <div class="bk-content">
+    <div class="bk-greeting">
+      <h2 id="greetingName">Saan ka pupunta? 🛵</h2>
+      <p>📍 Cotabato City</p>
+    </div>
+
+    <!-- TYPE -->
+    <div class="type-toggle">
+      <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
+      <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
+    </div>
+
+    <!-- CONTACT INFO -->
+    <div class="info-card">
+      <div class="info-label">👤 Iyong Info</div>
+      <div class="info-input">
+        <span>👤</span>
+        <input type="text" id="cName" placeholder="Iyong pangalan…"/>
+      </div>
+      <div class="info-input">
+        <span>📞</span>
+        <input type="tel" id="cPhone" placeholder="Cellphone number…"/>
       </div>
     </div>
 
-    <!-- MAP -->
-    <div class="map-wrap">
-      <div id="map"></div>
-      <div class="map-hint" id="mapHint">📍 Kinukuha ang iyong location…</div>
-      <div class="locate-fab" onclick="locateMe()" title="Kunin ang aking lokasyon">📍</div>
+    <!-- LOCATIONS -->
+    <div class="location-card">
+      <div class="loc-field">
+        <div class="loc-dot dot-green"></div>
+        <input type="text" id="pickup" placeholder="Pickup location…" oninput="onSearch('pickup')" autocomplete="off"/>
+      </div>
+      <div class="suggestions" id="pickupSuggestions"></div>
+      <div class="loc-field">
+        <div class="loc-dot dot-red"></div>
+        <input type="text" id="dropoff" placeholder="Destinasyon…" oninput="onSearch('dropoff')" autocomplete="off"/>
+      </div>
+      <div class="suggestions" id="dropoffSuggestions"></div>
     </div>
 
-    <!-- BOTTOM PANEL -->
-    <div class="bottom-panel">
-      <div class="panel-content">
+    <!-- NOTES -->
+    <div class="notes-card" id="notesCard">
+      <div class="notes-label">📝 Detalye ng Padala</div>
+      <textarea id="notes" placeholder="Ano ang ipapadala?"></textarea>
+    </div>
 
-        <!-- MAP MODE BUTTONS - hidden, auto GPS pickup -->
-        <div class="map-mode-row" style="display:none">
-          <button class="map-mode-btn active" id="modePickup" onclick="setMapMode('pickup')">🟢 Itakda Pickup</button>
-          <button class="map-mode-btn" id="modeDest" onclick="setMapMode('destination')">🔴 Itakda Destinasyon</button>
+    <!-- FARE -->
+    <div class="fare-card" id="fareCard">
+      <div>
+        <div class="fare-label">Estimated Fare</div>
+        <div class="fare-dist" id="fareDistLabel"></div>
+      </div>
+      <div class="fare-amount" id="fareAmount">₱0</div>
+    </div>
+
+    <!-- RIDER DETAILS -->
+    <div class="rider-details" id="riderDetailsCard">
+      <div class="rd-title"><div class="rd-dot"></div><span id="riderDetailsTitle">Rider Papunta Na!</span></div>
+      <div class="rd-row">
+        <div class="rd-avatar">🛵</div>
+        <div>
+          <div class="rd-name" id="rdName">—</div>
+          <div class="rd-phone" id="rdPhone">—</div>
         </div>
-
-        <!-- TYPE -->
-        <div class="type-toggle">
-          <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
-          <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
-        </div>
-
-        <!-- CONTACT INFO -->
-        <div class="info-card">
-          <div class="info-label">👤 Iyong Info</div>
-          <div class="info-input">
-            <span>👤</span>
-            <input type="text" id="cName" placeholder="Iyong pangalan…"/>
-          </div>
-          <div class="info-input">
-            <span>📞</span>
-            <input type="tel" id="cPhone" placeholder="Cellphone number…"/>
-          </div>
-        </div>
-
-        <!-- LOCATIONS -->
-        <div class="location-card">
-          <div class="loc-field">
-            <div class="loc-dot dot-green"></div>
-            <input type="text" id="pickup" placeholder="Pickup… (i-click mapa o i-type)" oninput="onSearch('pickup')" autocomplete="off"/>
-            <span class="loc-clear" onclick="clearLocation('pickup')">✕</span>
-          </div>
-          <div class="suggestions" id="pickupSuggestions"></div>
-          <div class="loc-field">
-            <div class="loc-dot dot-red"></div>
-            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click mapa o i-type)" oninput="onSearch('dropoff')" autocomplete="off"/>
-            <span class="loc-clear" onclick="clearLocation('dropoff')">✕</span>
-          </div>
-          <div class="suggestions" id="dropoffSuggestions"></div>
-        </div>
-
-        <!-- NOTES -->
-        <div class="notes-card" id="notesCard">
-          <div class="notes-label">📝 Detalye ng Padala</div>
-          <textarea id="notes" placeholder="Ano ang ipapadala?"></textarea>
-        </div>
-
-        <!-- FARE -->
-        <div class="fare-card" id="fareCard">
-          <div>
-            <div class="fare-label">Estimated Fare</div>
-            <div class="fare-dist" id="fareDistLabel"></div>
-          </div>
-          <div class="fare-amount" id="fareAmount">₱0</div>
-        </div>
-
-        <!-- RIDER DETAILS (shown when accepted) -->
-        <div class="rider-details" id="riderDetailsCard">
-          <div class="rider-details-title">
-            <div class="rd-dot"></div>
-            <span id="riderDetailsTitle">Rider Papunta Na!</span>
-          </div>
-          <div class="rider-info-row">
-            <div class="rider-big-avatar">🛵</div>
-            <div>
-              <div class="rider-detail-name" id="rdName">—</div>
-              <div class="rider-detail-sub" id="rdPhone">—</div>
-            </div>
-          </div>
-          <div class="rider-detail-grid">
-            <div class="rd-item">
-              <div class="rd-item-label">🏍️ Motor</div>
-              <div class="rd-item-value" id="rdMotor">—</div>
-            </div>
-            <div class="rd-item">
-              <div class="rd-item-label">🔖 Plate</div>
-              <div class="rd-item-value" id="rdPlate">—</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BOOK -->
-        <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
-
-        <!-- HISTORY -->
-        <div class="history-title">📋 Aking mga Booking</div>
-        <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
-
+      </div>
+      <div class="rd-grid">
+        <div class="rd-item"><div class="rd-item-label">🏍️ Motor</div><div class="rd-item-value" id="rdMotor">—</div></div>
+        <div class="rd-item"><div class="rd-item-label">🔖 Plate</div><div class="rd-item-value" id="rdPlate">—</div></div>
       </div>
     </div>
-  </div>
 
-  <!-- SUCCESS MODAL -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-      <div class="modal-icon">🎉</div>
-      <div class="modal-title">Nakapag-book na!</div>
-      <div class="modal-sub">Hinahanap na ang available na rider sa Cotabato City.</div>
-      <div class="modal-id" id="bookingIdLabel"></div>
-      <button class="modal-btn" onclick="closeModal()">Sige, Salamat!</button>
-    </div>
+    <!-- BOOK -->
+    <button class="book-btn" id="bookBtn" onclick="bookRide()">Mag-Book ng Sakay 🛵</button>
+
+    <!-- HISTORY -->
+    <div class="history-title">📋 Aking mga Booking</div>
+    <div id="historyList"><div class="empty">Wala pang bookings.</div></div>
   </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon">🎉</div>
+    <div class="modal-title">Nakapag-book na!</div>
+    <div class="modal-sub" id="modalSub">Hinahanap na ang available na rider sa Cotabato City.</div>
+    <div class="modal-id" id="bookingIdLabel"></div>
+    <button class="modal-btn" onclick="closeModal()">Sige, Salamat!</button>
+  </div>
+</div>
 
 <script>
   const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
@@ -342,25 +294,18 @@
   const { createClient } = supabase;
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const COTABATO = [7.2047, 124.2311];
   let currentUser = null;
   let bookingType = 'ride';
-  let mapMode = 'pickup'; // 'pickup' or 'destination'
   let pickupCoords = null, dropoffCoords = null;
-  let pickupMarker = null, dropoffMarker = null;
-  let routeLine = null;
-  let map = null;
 
-  // Check if already logged in
+  // Check session
   db.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) return;
     const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
     if (data?.role === 'customer') { currentUser = data; showBookingScreen(); }
   });
 
-  // =====================
   // AUTH
-  // =====================
   function showAuthTab(tab, el) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
@@ -405,218 +350,80 @@
 
   function showMsg(el, msg, type) { el.textContent = msg; el.className = 'msg-box show ' + type; }
 
-  // =====================
-  // BOOKING SCREEN + MAP
-  // =====================
+  // BOOKING SCREEN
   function showBookingScreen() {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('bookingScreen').style.display = 'flex';
     document.getElementById('bkName').textContent = currentUser?.name || '';
+    document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
     document.getElementById('cName').value = currentUser?.name || '';
     document.getElementById('cPhone').value = currentUser?.phone || '';
-    initMap();
     loadHistory();
     checkAcceptedBooking();
     subscribeBookingUpdates();
   }
 
-  function initMap() {
-    if (map) return;
-    map = L.map('map', { center: COTABATO, zoom: 14, zoomControl: false });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-    map.on('click', onMapClick);
-    // Auto locate pickup on load
-    setTimeout(() => locateMe(), 500);
-    // Map click = set destination by default
-    setMapMode('destination');
-  }
-
-  const pickupIcon = L.divIcon({ html: `<div style="width:20px;height:20px;background:#22c55e;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`, iconSize:[20,20], iconAnchor:[10,10], className:'' });
-  const dropoffIcon = L.divIcon({ html: `<div style="width:20px;height:20px;background:#ef4444;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`, iconSize:[20,20], iconAnchor:[10,10], className:'' });
-
-  async function onMapClick(e) {
-    const { lat, lng } = e.latlng;
-    const addr = await reverseGeocode(lat, lng);
-    if (mapMode === 'pickup') {
-      setPickup(lat, lng, addr);
-      // Auto switch to destination after setting pickup
-      setMapMode('destination');
-    } else {
-      setDropoff(lat, lng, addr);
-    }
-  }
-
-  function setMapMode(mode) {
-    mapMode = mode;
-    document.getElementById('modePickup').className = 'map-mode-btn' + (mode === 'pickup' ? ' active' : '');
-    document.getElementById('modeDest').className = 'map-mode-btn' + (mode === 'destination' ? ' active-dest' : '');
-    const hint = document.getElementById('mapHint');
-    hint.textContent = mode === 'pickup' ? '🟢 I-click ang pickup location' : '🔴 I-click ang destinasyon';
-    hint.classList.remove('hide');
-    setTimeout(() => hint.classList.add('hide'), 3000);
-  }
-
-  function setPickup(lat, lng, addr) {
-    pickupCoords = { lat, lng };
-    document.getElementById('pickup').value = addr;
-    if (pickupMarker) map.removeLayer(pickupMarker);
-    pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup').openPopup();
-    drawRoute();
-    computeFare();
-  }
-
-  function setDropoff(lat, lng, addr) {
-    dropoffCoords = { lat, lng };
-    document.getElementById('dropoff').value = addr;
-    if (dropoffMarker) map.removeLayer(dropoffMarker);
-    dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map).bindPopup('🏁 Destinasyon').openPopup();
-    drawRoute();
-    computeFare();
-  }
-
-  function drawRoute() {
-    if (!pickupCoords || !dropoffCoords) return;
-    if (routeLine) map.removeLayer(routeLine);
-    routeLine = L.polyline([[pickupCoords.lat, pickupCoords.lng],[dropoffCoords.lat, dropoffCoords.lng]], { color: '#f97316', weight: 3, dashArray: '6,6', opacity: 0.8 }).addTo(map);
-    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
-  }
-
-  function clearLocation(type) {
-    if (type === 'pickup') {
-      pickupCoords = null;
-      document.getElementById('pickup').value = '';
-      if (pickupMarker) { map.removeLayer(pickupMarker); pickupMarker = null; }
-    } else {
-      dropoffCoords = null;
-      document.getElementById('dropoff').value = '';
-      if (dropoffMarker) { map.removeLayer(dropoffMarker); dropoffMarker = null; }
-    }
-    if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
-    document.getElementById('fareCard').classList.remove('show');
-  }
-
-  async function reverseGeocode(lat, lng) {
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
-      const data = await res.json();
-      return data.display_name?.split(',').slice(0,3).join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    } catch { return `${lat.toFixed(5)}, ${lng.toFixed(5)}`; }
-  }
-
-  function locateMe() {
-    if (!navigator.geolocation) {
-      document.getElementById('pickup').placeholder = 'I-type ang pickup location…';
-      return;
-    }
-    const hint = document.getElementById('mapHint');
-    hint.textContent = '📍 Kinukuha ang iyong location…';
-    hint.classList.remove('hide');
-
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude: lat, longitude: lng } = pos.coords;
-      map.setView([lat, lng], 16);
-      const addr = await reverseGeocode(lat, lng);
-      setPickup(lat, lng, addr);
-      // After getting pickup, map click = destination
-      setMapMode('destination');
-      hint.textContent = '🔴 I-click ang destinasyon sa mapa';
-      hint.classList.remove('hide');
-      setTimeout(() => hint.classList.add('hide'), 3000);
-    }, (err) => {
-      hint.classList.add('hide');
-      document.getElementById('pickup').placeholder = 'I-type ang pickup location…';
-      const hint2 = document.getElementById('mapHint');
-      hint2.textContent = '⚠️ I-type ang pickup location sa ibaba';
-      hint2.classList.remove('hide');
-      setTimeout(() => hint2.classList.add('hide'), 4000);
-    }, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
-    });
-  }
-
+  // SEARCH AUTOCOMPLETE
   let searchTimers = {};
-
   function onSearch(type) {
     const val = document.getElementById(type).value.trim();
-    const suggestionsEl = document.getElementById(type + 'Suggestions');
+    const sugEl = document.getElementById(type + 'Suggestions');
 
-    if (val.length < 2) {
-      suggestionsEl.classList.remove('show');
-      suggestionsEl.innerHTML = '';
-      return;
-    }
+    // Clear coords if user is typing again
+    if (type === 'pickup') pickupCoords = null;
+    else dropoffCoords = null;
+    document.getElementById('fareCard').classList.remove('show');
 
-    // Show searching indicator
-    suggestionsEl.innerHTML = '<div class="searching-indicator">🔍 Naghahanap…</div>';
-    suggestionsEl.classList.add('show');
+    if (val.length < 2) { sugEl.classList.remove('show'); return; }
+
+    sugEl.innerHTML = '<div class="sug-loading">🔍 Naghahanap…</div>';
+    sugEl.classList.add('show');
 
     clearTimeout(searchTimers[type]);
     searchTimers[type] = setTimeout(async () => {
       try {
-        // Search biased toward Cotabato City coordinates (7.2047, 124.2311)
         const res = await fetch(
-          'https://nominatim.openstreetmap.org/search?q=' +
-          encodeURIComponent(val) +
-          '&format=json&limit=6&countrycodes=ph&addressdetails=1' +
-          '&viewbox=124.1500,7.1500,124.3500,7.2800&bounded=0' +
-          '&lat=7.2047&lon=124.2311'
+          'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato City Philippines') +
+          '&format=json&limit=5&countrycodes=ph&addressdetails=1' +
+          '&viewbox=124.15,7.15,124.35,7.28&bounded=0'
         );
         const data = await res.json();
-
         if (!data || data.length === 0) {
-          suggestionsEl.innerHTML = '<div class="searching-indicator">Walang nahanap. Subukan ulit.</div>';
-          return;
+          sugEl.innerHTML = '<div class="sug-loading">Walang nahanap. Subukan ulit.</div>'; return;
         }
-
-        suggestionsEl.innerHTML = data.map((item, i) => {
+        sugEl.innerHTML = data.map(item => {
           const name = item.name || item.display_name.split(',')[0];
           const addr = item.display_name.split(',').slice(1, 3).join(',').trim();
-          return `<div class="suggestion-item" onclick="selectSuggestion('${type}', ${item.lat}, ${item.lon}, '${name.replace(/'/g, "\'")} - ${addr.replace(/'/g, "\'")}')">
-            <span class="suggestion-icon">📍</span>
-            <div>
-              <div class="suggestion-name">${name}</div>
-              <div class="suggestion-addr">${addr}</div>
-            </div>
+          return `<div class="suggestion-item" onclick="selectPlace('${type}', ${item.lat}, ${item.lon}, \`${item.display_name.replace(/`/g,'')}\`)">
+            <span style="font-size:16px;flex-shrink:0">📍</span>
+            <div><div class="sug-name">${name}</div><div class="sug-addr">${addr}</div></div>
           </div>`;
         }).join('');
-        suggestionsEl.classList.add('show');
-
+        sugEl.classList.add('show');
       } catch(e) {
-        suggestionsEl.innerHTML = '<div class="searching-indicator">Error sa paghahanap.</div>';
+        sugEl.innerHTML = '<div class="sug-loading">Error. Subukan ulit.</div>';
       }
-    }, 500);
+    }, 600);
   }
 
-  function selectSuggestion(type, lat, lng, label) {
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
-    document.getElementById(type).value = label;
+  function selectPlace(type, lat, lng, label) {
+    lat = parseFloat(lat); lng = parseFloat(lng);
+    const short = label.split(',').slice(0,2).join(',');
+    document.getElementById(type).value = short;
     document.getElementById(type + 'Suggestions').classList.remove('show');
-
-    if (type === 'pickup') {
-      pickupCoords = { lat, lng };
-      if (pickupMarker) map.removeLayer(pickupMarker);
-      pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map).bindPopup('📍 Pickup').openPopup();
-      if (!dropoffCoords) setMapMode('destination');
-    } else {
-      dropoffCoords = { lat, lng };
-      if (dropoffMarker) map.removeLayer(dropoffMarker);
-      dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map).bindPopup('🏁 Destinasyon').openPopup();
-    }
-
-    if (pickupCoords && dropoffCoords) {
-      drawRoute();
-      computeFare();
-    } else {
-      map.setView([lat, lng], 15);
-    }
+    if (type === 'pickup') pickupCoords = { lat, lng };
+    else dropoffCoords = { lat, lng };
+    computeFare();
   }
 
-  // =====================
+  // Close suggestions on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.location-card')) {
+      document.querySelectorAll('.suggestions').forEach(s => s.classList.remove('show'));
+    }
+  });
+
   // FARE
-  // =====================
   function haversine(a, b) {
     const R = 6371;
     const dLat = (b.lat - a.lat) * Math.PI / 180;
@@ -626,30 +433,21 @@
   }
 
   function computeFare() {
-    if (!pickupCoords || !dropoffCoords) {
-      document.getElementById('fareCard').classList.remove('show');
-      return null;
-    }
+    if (!pickupCoords || !dropoffCoords) return null;
     const km = haversine(pickupCoords, dropoffCoords);
-
-    // Fare: ₱70 up to 2km, ₱100 for 3km+
-    let fare;
-    let fareLabel;
+    let fare, label;
     if (km <= 2) {
       fare = 70;
-      fareLabel = km.toFixed(2) + ' km · Minimum ₱70 (hanggang 2km)';
+      label = km.toFixed(2) + ' km · Minimum ₱70 (0–2km)';
     } else if (km < 3) {
-      // Between 2-3km, interpolate
-      fare = 70 + Math.round((km - 2) * 30);
-      fareLabel = km.toFixed(2) + ' km · ₱70 base + dagdag';
+      fare = Math.round(70 + (km - 2) * 30);
+      label = km.toFixed(2) + ' km · ₱70–₱100';
     } else {
-      fare = 100 + Math.round((km - 3) * 20);
-      fareLabel = km.toFixed(2) + ' km · ₱100 (3km+)';
+      fare = Math.round(100 + (km - 3) * 20);
+      label = km.toFixed(2) + ' km · ₱100 base (3km+)';
     }
-
-    const fareCard = document.getElementById('fareCard');
-    fareCard.classList.add('show');
-    document.getElementById('fareDistLabel').textContent = fareLabel;
+    document.getElementById('fareCard').classList.add('show');
+    document.getElementById('fareDistLabel').textContent = label;
     document.getElementById('fareAmount').textContent = '₱' + fare;
     return { km: parseFloat(km.toFixed(2)), fare };
   }
@@ -660,12 +458,9 @@
     el.classList.add('active');
     document.getElementById('notesCard').classList.toggle('show', type === 'delivery');
     document.getElementById('bookBtn').textContent = type === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
-    computeFare();
   }
 
-  // =====================
   // BOOK
-  // =====================
   async function bookRide() {
     const pickup = document.getElementById('pickup').value.trim();
     const dropoff = document.getElementById('dropoff').value.trim();
@@ -675,20 +470,19 @@
     const btn = document.getElementById('bookBtn');
 
     if (!cName || !cPhone) { alert('Ilagay ang iyong pangalan at cellphone number!'); return; }
-    if (!pickup || !dropoff) { alert('Itakda ang pickup at destinasyon sa mapa!'); return; }
+    if (!pickup || !dropoff) { alert('Ilagay ang pickup at destinasyon!'); return; }
 
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
 
     const fareData = computeFare();
 
-    // Find nearest available rider
+    // Find nearest rider
     let nearestRiderId = null;
     if (pickupCoords) {
-      const { data: nearestRider } = await db.rpc('find_nearest_rider', {
-        pickup_lat: pickupCoords.lat,
-        pickup_lng: pickupCoords.lng
+      const { data: nearest } = await db.rpc('find_nearest_rider', {
+        pickup_lat: pickupCoords.lat, pickup_lng: pickupCoords.lng
       });
-      nearestRiderId = nearestRider || null;
+      nearestRiderId = nearest || null;
     }
 
     const { data, error } = await db.from('bookings').insert({
@@ -714,33 +508,23 @@
 
     if (error) { alert('Error: ' + error.message); return; }
 
-    // Reset form but keep map visible
+    document.getElementById('pickup').value = '';
+    document.getElementById('dropoff').value = '';
     document.getElementById('notes').value = '';
+    document.getElementById('fareCard').classList.remove('show');
+    pickupCoords = null; dropoffCoords = null;
 
     document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
-    // Update modal message
-    const modalSub = document.querySelector('.modal-sub');
-    if (nearestRiderId) {
-      modalSub.textContent = '✅ Nahanap na ang pinakamalapit na rider sa iyo! Papunta na siya.';
-    } else {
-      modalSub.textContent = 'Hinahanap ang available na rider sa Cotabato City. Maghintay sandali.';
-    }
+    document.getElementById('modalSub').textContent = nearestRiderId
+      ? '✅ Nahanap na ang pinakamalapit na rider! Papunta na siya.'
+      : 'Hinahanap na ang available na rider sa Cotabato City.';
     document.getElementById('modalOverlay').classList.add('show');
     loadHistory();
   }
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('show');
-    // Reset map after closing modal
-    clearLocation('pickup');
-    clearLocation('dropoff');
-    map.setView(COTABATO, 14);
-    setMapMode('pickup');
-  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
-  // =====================
-  // RIDER DETAILS (real-time)
-  // =====================
+  // RIDER DETAILS
   async function checkAcceptedBooking() {
     if (!currentUser) return;
     const { data } = await db.from('bookings')
@@ -753,16 +537,15 @@
 
     const card = document.getElementById('riderDetailsCard');
     const titleEl = document.getElementById('riderDetailsTitle');
-
     if (data && data.rider) {
       document.getElementById('rdName').textContent = data.rider.name || '—';
       document.getElementById('rdPhone').textContent = '📞 ' + (data.rider.phone || '—');
       document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
       document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
-      const msgs = { accepted: '🛵 Rider Papunta Na!', arrived: '📍 Nandito Na ang Rider!', ongoing: '🚀 Trip In Progress!', completed: '✅ Trip Completed!' };
-      if (titleEl) titleEl.textContent = msgs[data.status] || 'Rider Info';
-      if (data.status === 'completed') { card.style.borderColor = 'rgba(59,130,246,0.4)'; titleEl.style.color = '#60a5fa'; }
-      else { card.style.borderColor = 'rgba(34,197,94,0.3)'; titleEl.style.color = 'var(--green)'; }
+      const msgs = { accepted:'🛵 Rider Papunta Na!', arrived:'📍 Nandito Na ang Rider!', ongoing:'🚀 Trip In Progress!', completed:'✅ Trip Completed!' };
+      titleEl.textContent = msgs[data.status] || 'Rider Info';
+      card.style.borderColor = data.status === 'completed' ? 'rgba(59,130,246,0.4)' : 'rgba(34,197,94,0.3)';
+      titleEl.style.color = data.status === 'completed' ? '#60a5fa' : 'var(--green)';
       card.classList.add('show');
     } else {
       card.classList.remove('show');
@@ -772,14 +555,13 @@
   function subscribeBookingUpdates() {
     if (!currentUser) return;
     db.channel('customer-' + currentUser.id)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: 'passenger_id=eq.' + currentUser.id }, () => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings',
+        filter: 'passenger_id=eq.' + currentUser.id }, () => {
         checkAcceptedBooking(); loadHistory();
       }).subscribe();
   }
 
-  // =====================
   // HISTORY
-  // =====================
   async function loadHistory() {
     const { data } = await db.from('bookings')
       .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
@@ -789,7 +571,6 @@
 
     const list = document.getElementById('historyList');
     if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return; }
-
     list.innerHTML = data.map(b => `
       <div class="history-card">
         <div class="history-header">
@@ -801,14 +582,9 @@
         ${b.status === 'completed' && b.rider ? `
         <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a">
           <div style="font-size:10px;color:#60a5fa;font-weight:700;text-transform:uppercase;margin-bottom:8px">🛵 Rider na Nag-Hatid</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div style="width:34px;height:34px;background:rgba(249,115,22,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px">🛵</div>
-            <div>
-              <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
-              <div style="font-size:11px;color:#777">📞 ${b.rider.phone || '—'}</div>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
+          <div style="font-size:11px;color:#777;margin-top:2px">📞 ${b.rider.phone || '—'}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
             <div style="background:#141414;border-radius:8px;padding:7px 10px">
               <div style="font-size:10px;color:#777;font-weight:600">🏍️ MOTOR</div>
               <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.motor_model || '—'}</div>
@@ -823,17 +599,9 @@
     `).join('');
   }
 
-  // Close suggestions when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.location-card')) {
-      document.querySelectorAll('.suggestions').forEach(s => s.classList.remove('show'));
-    }
-  });
-
   async function logout() {
     await db.auth.signOut();
     currentUser = null;
-    if (map) { map.remove(); map = null; }
     document.getElementById('bookingScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
   }
