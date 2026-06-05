@@ -225,7 +225,7 @@
     }
 
     list.innerHTML = '<div class="booking-list">' + data.map(b => {
-      const time = new Date(b.created_at).toLocaleTimeString('fil', { hour: '2-digit', minute: '2-digit' });
+      const time = new Date(b.created_at).toLocaleTimeString('fil', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' });
       const isMyAccepted = b.status === 'accepted' && b.rider_id === riderId;
       const isMyRide = b.rider_id === riderId;
       const isPending = b.status === 'pending';
