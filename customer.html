@@ -225,7 +225,7 @@
     <!-- MAP -->
     <div class="map-wrap">
       <div id="map"></div>
-      <div class="map-hint" id="mapHint">📍 I-click ang mapa para itakda ang pickup</div>
+      <div class="map-hint" id="mapHint">📍 Kinukuha ang iyong location…</div>
       <div class="locate-fab" onclick="locateMe()" title="Kunin ang aking lokasyon">📍</div>
     </div>
 
@@ -233,8 +233,8 @@
     <div class="bottom-panel">
       <div class="panel-content">
 
-        <!-- MAP MODE BUTTONS -->
-        <div class="map-mode-row">
+        <!-- MAP MODE BUTTONS - hidden, auto GPS pickup -->
+        <div class="map-mode-row" style="display:none">
           <button class="map-mode-btn active" id="modePickup" onclick="setMapMode('pickup')">🟢 Itakda Pickup</button>
           <button class="map-mode-btn" id="modeDest" onclick="setMapMode('destination')">🔴 Itakda Destinasyon</button>
         </div>
@@ -425,8 +425,10 @@
     map = L.map('map', { center: COTABATO, zoom: 14, zoomControl: false });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
     map.on('click', onMapClick);
-    // Auto locate on load
+    // Auto locate pickup on load
     setTimeout(() => locateMe(), 500);
+    // Map click = set destination by default
+    setMapMode('destination');
   }
 
   const pickupIcon = L.divIcon({ html: `<div style="width:20px;height:20px;background:#22c55e;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5)"></div>`, iconSize:[20,20], iconAnchor:[10,10], className:'' });
@@ -503,7 +505,7 @@
 
   function locateMe() {
     if (!navigator.geolocation) {
-      alert('Hindi supported ang GPS sa iyong browser. I-type na lang ang pickup location.');
+      document.getElementById('pickup').placeholder = 'I-type ang pickup location…';
       return;
     }
     const hint = document.getElementById('mapHint');
@@ -515,16 +517,18 @@
       map.setView([lat, lng], 16);
       const addr = await reverseGeocode(lat, lng);
       setPickup(lat, lng, addr);
+      // After getting pickup, map click = destination
       setMapMode('destination');
-      hint.classList.add('hide');
+      hint.textContent = '🔴 I-click ang destinasyon sa mapa';
+      hint.classList.remove('hide');
+      setTimeout(() => hint.classList.add('hide'), 3000);
     }, (err) => {
       hint.classList.add('hide');
-      // Show helpful message for Android
-      let msg = 'Hindi makuha ang location. ';
-      if (err.code === 1) msg += 'I-allow ang location permission sa browser settings.';
-      else if (err.code === 2) msg += 'Hindi available ang GPS. I-type na lang ang address.';
-      else msg += 'I-type na lang ang pickup address sa field sa ibaba.';
-      alert(msg);
+      document.getElementById('pickup').placeholder = 'I-type ang pickup location…';
+      const hint2 = document.getElementById('mapHint');
+      hint2.textContent = '⚠️ I-type ang pickup location sa ibaba';
+      hint2.classList.remove('hide');
+      setTimeout(() => hint2.classList.add('hide'), 4000);
     }, {
       enableHighAccuracy: true,
       timeout: 10000,
@@ -627,12 +631,26 @@
       return null;
     }
     const km = haversine(pickupCoords, dropoffCoords);
-    const fare = Math.max(20, Math.round(km * 20));
+
+    // Fare: ₱70 up to 2km, ₱100 for 3km+
+    let fare;
+    let fareLabel;
+    if (km <= 2) {
+      fare = 70;
+      fareLabel = km.toFixed(2) + ' km · Minimum ₱70 (hanggang 2km)';
+    } else if (km < 3) {
+      // Between 2-3km, interpolate
+      fare = 70 + Math.round((km - 2) * 30);
+      fareLabel = km.toFixed(2) + ' km · ₱70 base + dagdag';
+    } else {
+      fare = 100 + Math.round((km - 3) * 20);
+      fareLabel = km.toFixed(2) + ' km · ₱100 (3km+)';
+    }
+
     const fareCard = document.getElementById('fareCard');
     fareCard.classList.add('show');
-    document.getElementById('fareDistLabel').textContent = km.toFixed(2) + ' km · ₱20/km (min. ₱20)';
+    document.getElementById('fareDistLabel').textContent = fareLabel;
     document.getElementById('fareAmount').textContent = '₱' + fare;
-    console.log('Fare computed:', fare, 'Distance:', km);
     return { km: parseFloat(km.toFixed(2)), fare };
   }
 
