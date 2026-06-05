@@ -251,12 +251,12 @@
         <div class="location-card">
           <div class="loc-field">
             <div class="loc-dot dot-green"></div>
-            <input type="text" id="pickup" placeholder="Pickup location… (i-click sa mapa)" oninput="onManualInput('pickup')"/>
+            <input type="text" id="pickup" placeholder="Pickup location… (i-click sa mapa o i-type)" oninput="onManualInput('pickup')"/>
             <span class="loc-clear" onclick="clearLocation('pickup')">✕</span>
           </div>
           <div class="loc-field">
             <div class="loc-dot dot-red"></div>
-            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click sa mapa)" oninput="onManualInput('dropoff')"/>
+            <input type="text" id="dropoff" placeholder="Destinasyon… (i-click sa mapa o i-type)" oninput="onManualInput('dropoff')"/>
             <span class="loc-clear" onclick="clearLocation('dropoff')">✕</span>
           </div>
         </div>
@@ -499,8 +499,33 @@
     }, () => {});
   }
 
+  let geocodeTimer = null;
   function onManualInput(type) {
-    // Allow manual typing too
+    // Debounce geocoding
+    clearTimeout(geocodeTimer);
+    geocodeTimer = setTimeout(async () => {
+      const val = document.getElementById(type === 'pickup' ? 'pickup' : 'dropoff').value.trim();
+      if (val.length < 4) return;
+      try {
+        const res = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato') + '&format=json&limit=1');
+        const data = await res.json();
+        if (data[0]) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          if (type === 'pickup') {
+            pickupCoords = { lat, lng };
+            if (pickupMarker) map.removeLayer(pickupMarker);
+            pickupMarker = L.marker([lat, lng], { icon: pickupIcon }).addTo(map);
+          } else {
+            dropoffCoords = { lat, lng };
+            if (dropoffMarker) map.removeLayer(dropoffMarker);
+            dropoffMarker = L.marker([lat, lng], { icon: dropoffIcon }).addTo(map);
+          }
+          drawRoute();
+          computeFare();
+        }
+      } catch(e) {}
+    }, 800);
   }
 
   // =====================
