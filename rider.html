@@ -488,54 +488,24 @@
   let pollInterval = null;
 
   function subscribeBookings() {
-    // Real-time subscription
-    subscription = db.channel('rider-bookings-' + riderId)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'bookings'
-      }, (payload) => {
-        if (!riderAvail) return;
-        const b = payload.new;
-        showToast('🛵 Bagong booking!', 'success');
-        sendNotification(
-          '🛵 Bagong Booking! — HatidGo',
-          (b.customer_name || 'Customer') + '
-' +
-          '📍 ' + (b.pickup_address || '—') + '
-' +
-          '🏁 ' + (b.dropoff_address || '—') + '
-' +
-          '₱' + (b.fare || 0)
-        );
-        loadBookings();
-      })
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'bookings'
-      }, () => {
-        loadBookings();
-      })
-      .subscribe((status) => {
-        console.log('Realtime status:', status);
-      });
-
-    // Polling fallback every 15 seconds
+    // Polling every 8 seconds - simple at reliable
     pollInterval = setInterval(async () => {
       if (!riderAvail) return;
       try {
-        const { count } = await db.from('bookings')
-          .select('id', { count: 'exact' })
-          .eq('status', 'pending');
-        if (count > lastBookingCount && lastBookingCount > 0) {
+        const { data } = await db.from('bookings')
+          .select('id, status')
+          .in('status', ['pending', 'accepted', 'arrived', 'ongoing']);
+        
+        const pendingCount = (data || []).filter(b => b.status === 'pending').length;
+        
+        if (pendingCount > lastBookingCount && lastBookingCount >= 0) {
           showToast('🛵 Bagong booking!', 'success');
-          playAlertSound();
+          sendNotification('🛵 Bagong Booking! — HatidGo', 'May bagong booking para sa iyo!');
           loadBookings();
         }
-        lastBookingCount = count || 0;
+        lastBookingCount = pendingCount;
       } catch(e) {}
-    }, 15000);
+    }, 8000);
   }
 
   function showToast(msg, type) {
