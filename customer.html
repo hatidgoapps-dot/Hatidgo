@@ -13,7 +13,6 @@
       --green: #22c55e; --red: #ef4444; --text: #f0f0f0; --muted: #777;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100dvh; }
 
     /* AUTH */
@@ -46,72 +45,60 @@
     .bk-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
     .bk-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
     .bk-logo span { color: var(--accent); }
-    .bk-user { display: flex; align-items: center; gap: 10px; }
     .bk-name { font-size: 12px; font-weight: 600; color: var(--muted); }
     .bk-logout { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 11px; cursor: pointer; }
     .bk-content { padding: 20px; max-width: 500px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
-    .bk-greeting { margin-bottom: 20px; }
-    .bk-greeting h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
-    .bk-greeting p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .bk-greeting h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .bk-greeting p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
 
-    /* TYPE TOGGLE */
+    /* TYPE */
     .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
     .type-btn { flex: 1; padding: 12px 8px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--card); color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
     .type-btn.active { border-color: var(--accent); background: rgba(249,115,22,0.1); color: var(--accent); }
 
-    /* CONTACT INFO */
-    .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
-    .info-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .info-input { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; }
-    .info-input:last-child { margin-bottom: 0; }
-    .info-input input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
-    .info-input input::placeholder { color: #444; }
+    /* FORM CARD */
+    .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .input-wrap { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; position: relative; transition: border-color 0.15s; }
+    .input-wrap:focus-within { border-color: var(--accent); }
+    .input-wrap:last-child { margin-bottom: 0; }
+    .input-wrap input, .input-wrap textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
+    .input-wrap textarea { resize: none; height: 50px; }
+    .input-wrap input::placeholder, .input-wrap textarea::placeholder { color: #444; }
 
-    /* LOCATION */
-    .location-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; position: relative; }
-    .loc-field { display: flex; align-items: center; gap: 10px; padding: 8px 0; position: relative; }
-    .loc-field:not(:last-child) { border-bottom: 1px solid var(--border); }
-    .loc-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
-    .dot-green { background: var(--green); }
-    .dot-red { background: var(--red); }
-    .loc-field input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
-    .loc-field input::placeholder { color: var(--muted); }
+    /* BARANGAY SEARCH */
+    .brgy-wrap { position: relative; margin-bottom: 8px; }
+    .brgy-input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
+    .brgy-input:focus { border-color: var(--accent); }
+    .brgy-input::placeholder { color: #444; }
+    .brgy-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 99; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; margin-top: 4px; }
+    .brgy-dropdown.show { display: block; }
+    .brgy-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; }
+    .brgy-item:last-child { border-bottom: none; }
+    .brgy-item:active, .brgy-item:hover { background: #2a2a2a; }
+    .brgy-item-name { font-weight: 600; }
+    .brgy-item-area { font-size: 11px; color: var(--muted); }
+    .brgy-selected { background: rgba(249,115,22,0.08); border-color: var(--accent); }
 
-    /* SUGGESTIONS */
-    .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 99; max-height: 220px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; margin-top: 4px; }
-    .suggestions.show { display: block; }
-    .suggestion-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: flex-start; gap: 10px; }
-    .suggestion-item:last-child { border-bottom: none; }
-    .suggestion-item:active { background: #2a2a2a; }
-    .sug-name { font-weight: 600; font-size: 13px; }
-    .sug-addr { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .sug-loading { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
-
-    /* NOTES */
-    .notes-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: none; }
-    .notes-card.show { display: block; }
-    .notes-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
-    .notes-card textarea { width: 100%; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; resize: none; height: 55px; }
-    .notes-card textarea::placeholder { color: var(--muted); }
-
-    /* FARE */
-    .fare-card { background: var(--card); border: 1px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: none; justify-content: space-between; align-items: center; }
-    .fare-card.show { display: flex; }
+    /* FARE BOX */
+    .fare-box { background: var(--card); border: 1.5px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: none; }
+    .fare-box.show { display: block; }
+    .fare-row { display: flex; justify-content: space-between; align-items: center; }
     .fare-label { font-size: 12px; color: var(--muted); }
-    .fare-dist { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .fare-amount { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--accent); }
+    .fare-route { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .fare-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent); }
 
     /* BOOK BTN */
-    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.12s; margin-bottom: 20px; }
+    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 20px; transition: transform 0.12s; }
     .book-btn:active { transform: scale(0.97); }
     .book-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* RIDER DETAILS */
-    .rider-details { background: var(--card); border: 1.5px solid rgba(34,197,94,0.3); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: none; }
-    .rider-details.show { display: block; }
-    .rd-title { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-    .rd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s ease-in-out infinite; }
-    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.2; } }
+    .rider-card { background: var(--card); border: 1.5px solid rgba(34,197,94,0.3); border-radius: 16px; padding: 16px; margin-bottom: 16px; display: none; }
+    .rider-card.show { display: block; }
+    .rider-card-title { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .rd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.2} }
     .rd-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
     .rd-avatar { width: 44px; height: 44px; background: rgba(249,115,22,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
     .rd-name { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
@@ -126,7 +113,7 @@
     .history-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px; }
     .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .history-type { font-size: 12px; font-weight: 700; color: var(--accent); }
-    .history-status { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+    .hstatus { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
     .s-pending { background: rgba(251,191,36,0.15); color: var(--accent2); }
     .s-accepted { background: rgba(34,197,94,0.15); color: var(--green); }
     .s-arrived { background: rgba(249,115,22,0.15); color: var(--accent); }
@@ -139,20 +126,21 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.show { display: flex; }
     .modal { width: 100%; max-width: 500px; background: #141414; border-radius: 24px 24px 0 0; border-top: 1px solid #2a2a2a; padding: 28px 24px 44px; text-align: center; animation: slideUp 0.3s ease; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
     .modal-icon { font-size: 52px; margin-bottom: 12px; }
     .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; line-height: 1.6; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
     .modal-id { background: var(--card2); border-radius: 10px; padding: 10px; font-size: 12px; color: var(--muted); margin-bottom: 20px; font-family: monospace; }
     .modal-btn { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: #fff; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
     .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; vertical-align: middle; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin { to{transform:rotate(360deg)} }
     .empty { text-align: center; padding: 20px; color: var(--muted); font-size: 13px; }
+    .note-tip { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #93c5fd; margin-bottom: 12px; }
   </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div class="auth-screen" id="authScreen">
   <div class="auth-wrap">
     <div style="text-align:center">
@@ -161,8 +149,8 @@
       <div class="city-pill">📍 Cotabato City</div>
     </div>
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="showAuthTab('signup', this)">Mag-Sign Up</button>
-      <button class="auth-tab" onclick="showAuthTab('login', this)">Mag-Login</button>
+      <button class="auth-tab active" onclick="showAuthTab('signup',this)">Mag-Sign Up</button>
+      <button class="auth-tab" onclick="showAuthTab('login',this)">Mag-Login</button>
     </div>
     <div class="auth-card" id="signupCard">
       <div class="auth-title">Bagong Account 🎉</div>
@@ -192,7 +180,7 @@
 <div class="booking-screen" id="bookingScreen">
   <div class="bk-header">
     <div class="bk-logo">Hatid<span>Go</span></div>
-    <div class="bk-user">
+    <div style="display:flex;align-items:center;gap:10px">
       <span class="bk-name" id="bkName"></span>
       <button class="bk-logout" onclick="logout()">Logout</button>
     </div>
@@ -206,55 +194,67 @@
 
     <!-- TYPE -->
     <div class="type-toggle">
-      <button class="type-btn active" onclick="setType('ride', this)">🛵 Sakay</button>
-      <button class="type-btn" onclick="setType('delivery', this)">📦 Delivery</button>
+      <button class="type-btn active" onclick="setType('ride',this)">🛵 Sakay</button>
+      <button class="type-btn" onclick="setType('delivery',this)">📦 Delivery</button>
     </div>
 
     <!-- CONTACT INFO -->
-    <div class="info-card">
-      <div class="info-label">👤 Iyong Info</div>
-      <div class="info-input">
-        <span>👤</span>
-        <input type="text" id="cName" placeholder="Iyong pangalan…"/>
+    <div class="form-card">
+      <div class="form-label">👤 Iyong Info</div>
+      <div class="input-wrap"><span>👤</span><input type="text" id="cName" placeholder="Iyong pangalan…"/></div>
+      <div class="input-wrap"><span>📞</span><input type="tel" id="cPhone" placeholder="Cellphone number…"/></div>
+    </div>
+
+    <!-- PICKUP -->
+    <div class="form-card">
+      <div class="form-label">🟢 Pickup Location</div>
+      <div class="brgy-wrap">
+        <input class="brgy-input" id="pickupInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('pickup')" onclick="showDropdown('pickup')" autocomplete="off" readonly/>
+        <div class="brgy-dropdown" id="pickupDropdown"></div>
       </div>
-      <div class="info-input">
-        <span>📞</span>
-        <input type="tel" id="cPhone" placeholder="Cellphone number…"/>
+      <div class="input-wrap" style="margin-top:4px">
+        <span>📌</span>
+        <input type="text" id="pickupLandmark" placeholder="Landmark / Purok / Kalsada (e.g. Tapat ng Mercury Drug)"/>
       </div>
     </div>
 
-    <!-- LOCATIONS -->
-    <div class="location-card">
-      <div class="loc-field">
-        <div class="loc-dot dot-green"></div>
-        <input type="text" id="pickup" placeholder="Pickup location…" oninput="onSearch('pickup')" autocomplete="off"/>
+    <!-- DESTINATION -->
+    <div class="form-card">
+      <div class="form-label">🔴 Destination</div>
+      <div class="brgy-wrap">
+        <input class="brgy-input" id="dropoffInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('dropoff')" onclick="showDropdown('dropoff')" autocomplete="off" readonly/>
+        <div class="brgy-dropdown" id="dropoffDropdown"></div>
       </div>
-      <div class="suggestions" id="pickupSuggestions"></div>
-      <div class="loc-field">
-        <div class="loc-dot dot-red"></div>
-        <input type="text" id="dropoff" placeholder="Destinasyon…" oninput="onSearch('dropoff')" autocomplete="off"/>
+      <div class="input-wrap" style="margin-top:4px">
+        <span>📌</span>
+        <input type="text" id="dropoffLandmark" placeholder="Landmark / Purok / Kalsada (e.g. Harap ng SM)"/>
       </div>
-      <div class="suggestions" id="dropoffSuggestions"></div>
     </div>
 
-    <!-- NOTES -->
-    <div class="notes-card" id="notesCard">
-      <div class="notes-label">📝 Detalye ng Padala</div>
-      <textarea id="notes" placeholder="Ano ang ipapadala?"></textarea>
+    <!-- NOTE TO RIDER -->
+    <div class="form-card">
+      <div class="form-label">📝 Note sa Rider</div>
+      <div class="input-wrap">
+        <textarea id="notes" placeholder="Halimbawa: Blue gate, katabi ng bakery. O kung delivery, ano ang ipadala."></textarea>
+      </div>
     </div>
+
+    <div class="note-tip">ℹ️ Pakilagay ang pinakamalapit na landmark, purok, o kalsada para madaling mahanap ng rider.</div>
 
     <!-- FARE -->
-    <div class="fare-card" id="fareCard">
-      <div>
-        <div class="fare-label">Estimated Fare</div>
-        <div class="fare-dist" id="fareDistLabel"></div>
+    <div class="fare-box" id="fareBox">
+      <div class="fare-row">
+        <div>
+          <div class="fare-label">Estimated Fare</div>
+          <div class="fare-route" id="fareRoute"></div>
+        </div>
+        <div class="fare-amount" id="fareAmount">₱0</div>
       </div>
-      <div class="fare-amount" id="fareAmount">₱0</div>
     </div>
 
     <!-- RIDER DETAILS -->
-    <div class="rider-details" id="riderDetailsCard">
-      <div class="rd-title"><div class="rd-dot"></div><span id="riderDetailsTitle">Rider Papunta Na!</span></div>
+    <div class="rider-card" id="riderCard">
+      <div class="rider-card-title"><div class="rd-dot"></div><span id="riderTitle">Rider Papunta Na!</span></div>
       <div class="rd-row">
         <div class="rd-avatar">🛵</div>
         <div>
@@ -282,329 +282,384 @@
   <div class="modal">
     <div class="modal-icon">🎉</div>
     <div class="modal-title">Nakapag-book na!</div>
-    <div class="modal-sub" id="modalSub">Hinahanap na ang available na rider sa Cotabato City.</div>
+    <div class="modal-sub" id="modalSub">Hinahanap na ang available na rider.</div>
     <div class="modal-id" id="bookingIdLabel"></div>
     <button class="modal-btn" onclick="closeModal()">Sige, Salamat!</button>
   </div>
 </div>
 
 <script>
-  const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_yZCqrUNwBQPyTsuwrTWLHg_GTAjW5ui';
-  const { createClient } = supabase;
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://wholbbjtdzbqycczlcss.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_yZCqrUNwBQPyTsuwrTWLHg_GTAjW5ui';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let currentUser = null;
-  let bookingType = 'ride';
-  let pickupCoords = null, dropoffCoords = null;
+let currentUser = null;
+let bookingType = 'ride';
+let selectedPickup = null;  // { name, area, zone }
+let selectedDropoff = null;
 
-  // Check session
-  db.auth.getSession().then(async ({ data: { session } }) => {
-    if (!session) return;
-    const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
-    if (data?.role === 'customer') { currentUser = data; showBookingScreen(); }
-  });
+// =====================
+// BARANGAY DATA
+// =====================
+const BARANGAYS = [
+  // BAGUA
+  { name:'Bagua Mother', area:'Bagua', zone:'bagua' },
+  { name:'Bagua I', area:'Bagua', zone:'bagua' },
+  { name:'Bagua II', area:'Bagua', zone:'bagua' },
+  { name:'Bagua III', area:'Bagua', zone:'bagua' },
+  // KALANGANAN
+  { name:'Kalanganan Mother', area:'Kalanganan', zone:'kalanganan' },
+  { name:'Kalanganan I', area:'Kalanganan', zone:'kalanganan' },
+  { name:'Kalanganan II', area:'Kalanganan', zone:'kalanganan' },
+  // POBLACION
+  { name:'Poblacion Mother', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion I', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion II', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion III', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion IV', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion V', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion VI', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion VII', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion VIII', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion IX', area:'Poblacion', zone:'poblacion' },
+  // ROSARY HEIGHTS
+  { name:'Rosary Heights Mother', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights I', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights II', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights III', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights IV', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights V', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights VI', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights VII', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights VIII', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights IX', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights X', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights XI', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights XII', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights XIII', area:'Rosary Heights', zone:'rosary' },
+  // TAMONTAKA
+  { name:'Tamontaka Mother', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka I', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka II', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka III', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka IV', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka V', area:'Tamontaka', zone:'tamontaka' },
+];
 
-  // AUTH
-  function showAuthTab(tab, el) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('signupCard').style.display = tab === 'signup' ? 'block' : 'none';
-    document.getElementById('loginCard').style.display = tab === 'login' ? 'block' : 'none';
-  }
+// =====================
+// FARE MATRIX (zone to zone)
+// =====================
+function computeZoneFare(fromZone, toZone) {
+  if (fromZone === toZone) return 70; // Same area
+  const routes = {
+    'poblacion-rosary': 120,
+    'rosary-poblacion': 120,
+    'poblacion-tamontaka': 140,
+    'tamontaka-poblacion': 140,
+    'poblacion-bagua': 100,
+    'bagua-poblacion': 100,
+    'poblacion-kalanganan': 140,
+    'kalanganan-poblacion': 140,
+    'rosary-tamontaka': 130,
+    'tamontaka-rosary': 130,
+    'rosary-bagua': 120,
+    'bagua-rosary': 120,
+    'rosary-kalanganan': 160,
+    'kalanganan-rosary': 160,
+    'tamontaka-bagua': 120,
+    'bagua-tamontaka': 120,
+    'tamontaka-kalanganan': 140,
+    'kalanganan-tamontaka': 140,
+    'bagua-kalanganan': 140,
+    'kalanganan-bagua': 140,
+  };
+  return routes[fromZone + '-' + toZone] || 100;
+}
 
-  async function signUp() {
-    const name = document.getElementById('sName').value.trim();
-    const email = document.getElementById('sEmail').value.trim();
-    const phone = document.getElementById('sPhone').value.trim();
-    const pass = document.getElementById('sPass').value;
-    const btn = document.getElementById('signupBtn');
-    const msg = document.getElementById('signupMsg');
-    if (!name || !email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
-    if (pass.length < 6) { showMsg(msg, 'Minimum 6 characters ang password.', 'error'); return; }
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
-    const { data, error } = await db.auth.signUp({ email, password: pass });
-    if (error) { showMsg(msg, 'Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return; }
-    if (data.user) {
-      await db.from('users').upsert({ id: data.user.id, name, email, phone, role: 'customer' });
-      currentUser = { id: data.user.id, name, email, phone, role: 'customer' };
-      showBookingScreen();
-    }
-    btn.disabled = false; btn.textContent = 'Gumawa ng Account';
-  }
+// =====================
+// BARANGAY SEARCH
+// =====================
+let filterText = { pickup: '', dropoff: '' };
 
-  async function loginCustomer() {
-    const email = document.getElementById('lEmail').value.trim();
-    const pass = document.getElementById('lPass').value;
-    const btn = document.getElementById('loginBtn');
-    const msg = document.getElementById('loginMsg');
-    if (!email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
-    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-    if (error) { showMsg(msg, 'Mali ang email o password.', 'error'); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
-    const { data: user } = await db.from('users').select('*').eq('id', data.user.id).single();
-    if (user?.role !== 'customer') { showMsg(msg, 'Hindi customer account ito.', 'error'); await db.auth.signOut(); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
-    currentUser = user; showBookingScreen();
-    btn.disabled = false; btn.textContent = 'Mag-Login';
-  }
+function showDropdown(type) {
+  renderDropdown(type, BARANGAYS);
+}
 
-  function showMsg(el, msg, type) { el.textContent = msg; el.className = 'msg-box show ' + type; }
+function filterBrgy(type) {
+  // handled by readonly input — use separate search
+}
 
-  // BOOKING SCREEN
-  function showBookingScreen() {
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('bookingScreen').style.display = 'flex';
-    document.getElementById('bkName').textContent = currentUser?.name || '';
-    document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
-    document.getElementById('cName').value = currentUser?.name || '';
-    document.getElementById('cPhone').value = currentUser?.phone || '';
-    loadHistory();
-    checkAcceptedBooking();
-    subscribeBookingUpdates();
-  }
-
-  // SEARCH AUTOCOMPLETE
-  let searchTimers = {};
-  function onSearch(type) {
-    const val = document.getElementById(type).value.trim();
-    const sugEl = document.getElementById(type + 'Suggestions');
-
-    // Clear coords if user is typing again
-    if (type === 'pickup') pickupCoords = null;
-    else dropoffCoords = null;
-    document.getElementById('fareCard').classList.remove('show');
-
-    if (val.length < 2) { sugEl.classList.remove('show'); return; }
-
-    sugEl.innerHTML = '<div class="sug-loading">🔍 Naghahanap…</div>';
-    sugEl.classList.add('show');
-
-    clearTimeout(searchTimers[type]);
-    searchTimers[type] = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(val + ' Cotabato City Philippines') +
-          '&format=json&limit=5&countrycodes=ph&addressdetails=1' +
-          '&viewbox=124.15,7.15,124.35,7.28&bounded=0'
-        );
-        const data = await res.json();
-        if (!data || data.length === 0) {
-          sugEl.innerHTML = '<div class="sug-loading">Walang nahanap. Subukan ulit.</div>'; return;
-        }
-        sugEl.innerHTML = data.map(item => {
-          const name = item.name || item.display_name.split(',')[0];
-          const addr = item.display_name.split(',').slice(1, 3).join(',').trim();
-          return `<div class="suggestion-item" onclick="selectPlace('${type}', ${item.lat}, ${item.lon}, \`${item.display_name.replace(/`/g,'')}\`)">
-            <span style="font-size:16px;flex-shrink:0">📍</span>
-            <div><div class="sug-name">${name}</div><div class="sug-addr">${addr}</div></div>
-          </div>`;
-        }).join('');
-        sugEl.classList.add('show');
-      } catch(e) {
-        sugEl.innerHTML = '<div class="sug-loading">Error. Subukan ulit.</div>';
-      }
-    }, 600);
-  }
-
-  function selectPlace(type, lat, lng, label) {
-    lat = parseFloat(lat); lng = parseFloat(lng);
-    const short = label.split(',').slice(0,2).join(',');
-    document.getElementById(type).value = short;
-    document.getElementById(type + 'Suggestions').classList.remove('show');
-    if (type === 'pickup') pickupCoords = { lat, lng };
-    else dropoffCoords = { lat, lng };
-    computeFare();
-  }
-
-  // Close suggestions on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.location-card')) {
-      document.querySelectorAll('.suggestions').forEach(s => s.classList.remove('show'));
-    }
-  });
-
-  // FARE
-  function haversine(a, b) {
-    const R = 6371;
-    const dLat = (b.lat - a.lat) * Math.PI / 180;
-    const dLng = (b.lng - a.lng) * Math.PI / 180;
-    const x = Math.sin(dLat/2)**2 + Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-  }
-
-  function computeFare() {
-    if (!pickupCoords || !dropoffCoords) return null;
-    const km = haversine(pickupCoords, dropoffCoords);
-    let fare, label;
-    if (km <= 2) {
-      fare = 70;
-      label = km.toFixed(2) + ' km · Minimum ₱70 (0–2km)';
-    } else if (km < 3) {
-      fare = Math.round(70 + (km - 2) * 30);
-      label = km.toFixed(2) + ' km · ₱70–₱100';
-    } else {
-      fare = Math.round(100 + (km - 3) * 20);
-      label = km.toFixed(2) + ' km · ₱100 base (3km+)';
-    }
-    document.getElementById('fareCard').classList.add('show');
-    document.getElementById('fareDistLabel').textContent = label;
-    document.getElementById('fareAmount').textContent = '₱' + fare;
-    return { km: parseFloat(km.toFixed(2)), fare };
-  }
-
-  function setType(type, el) {
-    bookingType = type;
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('notesCard').classList.toggle('show', type === 'delivery');
-    document.getElementById('bookBtn').textContent = type === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
-  }
-
-  // BOOK
-  async function bookRide() {
-    const pickup = document.getElementById('pickup').value.trim();
-    const dropoff = document.getElementById('dropoff').value.trim();
-    const notes = document.getElementById('notes').value;
-    const cName = document.getElementById('cName').value.trim();
-    const cPhone = document.getElementById('cPhone').value.trim();
-    const btn = document.getElementById('bookBtn');
-
-    if (!cName || !cPhone) { alert('Ilagay ang iyong pangalan at cellphone number!'); return; }
-    if (!pickup || !dropoff) { alert('Ilagay ang pickup at destinasyon!'); return; }
-
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
-
-    const fareData = computeFare();
-
-    // Find nearest rider
-    let nearestRiderId = null;
-    if (pickupCoords) {
-      const { data: nearest } = await db.rpc('find_nearest_rider', {
-        pickup_lat: pickupCoords.lat, pickup_lng: pickupCoords.lng
-      });
-      nearestRiderId = nearest || null;
-    }
-
-    const { data, error } = await db.from('bookings').insert({
-      passenger_id: currentUser.id,
-      type: bookingType,
-      pickup_address: pickup,
-      pickup_lat: pickupCoords?.lat || null,
-      pickup_lng: pickupCoords?.lng || null,
-      dropoff_address: dropoff,
-      dropoff_lat: dropoffCoords?.lat || null,
-      dropoff_lng: dropoffCoords?.lng || null,
-      distance_km: fareData?.km || null,
-      fare: fareData?.fare || null,
-      notes: notes || null,
-      status: nearestRiderId ? 'accepted' : 'pending',
-      rider_id: nearestRiderId,
-      customer_name: cName,
-      customer_phone: cPhone
-    }).select().single();
-
-    btn.disabled = false;
-    btn.textContent = bookingType === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
-
-    if (error) { alert('Error: ' + error.message); return; }
-
-    document.getElementById('pickup').value = '';
-    document.getElementById('dropoff').value = '';
-    document.getElementById('notes').value = '';
-    document.getElementById('fareCard').classList.remove('show');
-    pickupCoords = null; dropoffCoords = null;
-
-    document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
-    document.getElementById('modalSub').textContent = nearestRiderId
-      ? '✅ Nahanap na ang pinakamalapit na rider! Papunta na siya.'
-      : 'Hinahanap na ang available na rider sa Cotabato City.';
-    document.getElementById('modalOverlay').classList.add('show');
-    loadHistory();
-  }
-
-  function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-
-  // RIDER DETAILS
-  async function checkAcceptedBooking() {
-    if (!currentUser) return;
-    const { data } = await db.from('bookings')
-      .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
-      .eq('passenger_id', currentUser.id)
-      .in('status', ['accepted', 'arrived', 'ongoing', 'completed'])
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    const card = document.getElementById('riderDetailsCard');
-    const titleEl = document.getElementById('riderDetailsTitle');
-    if (data && data.rider) {
-      document.getElementById('rdName').textContent = data.rider.name || '—';
-      document.getElementById('rdPhone').textContent = '📞 ' + (data.rider.phone || '—');
-      document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
-      document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
-      const msgs = { accepted:'🛵 Rider Papunta Na!', arrived:'📍 Nandito Na ang Rider!', ongoing:'🚀 Trip In Progress!', completed:'✅ Trip Completed!' };
-      titleEl.textContent = msgs[data.status] || 'Rider Info';
-      card.style.borderColor = data.status === 'completed' ? 'rgba(59,130,246,0.4)' : 'rgba(34,197,94,0.3)';
-      titleEl.style.color = data.status === 'completed' ? '#60a5fa' : 'var(--green)';
-      card.classList.add('show');
-    } else {
-      card.classList.remove('show');
-    }
-  }
-
-  function subscribeBookingUpdates() {
-    if (!currentUser) return;
-    db.channel('customer-' + currentUser.id)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings',
-        filter: 'passenger_id=eq.' + currentUser.id }, () => {
-        checkAcceptedBooking(); loadHistory();
-      }).subscribe();
-  }
-
-  // HISTORY
-  async function loadHistory() {
-    const { data } = await db.from('bookings')
-      .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
-      .eq('passenger_id', currentUser.id)
-      .order('created_at', { ascending: false })
-      .limit(10);
-
-    const list = document.getElementById('historyList');
-    if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return; }
-    list.innerHTML = data.map(b => `
-      <div class="history-card">
-        <div class="history-header">
-          <span class="history-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
-          <span class="history-status s-${b.status}">${b.status.toUpperCase()}</span>
+function renderDropdown(type, list) {
+  const dd = document.getElementById(type + 'Dropdown');
+  if (list.length === 0) {
+    dd.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--muted)">Walang nahanap.</div>';
+  } else {
+    dd.innerHTML = list.map(b => `
+      <div class="brgy-item" onclick="selectBrgy('${type}', '${b.name}', '${b.area}', '${b.zone}')">
+        <div>
+          <div class="brgy-item-name">${b.name}</div>
+          <div class="brgy-item-area">${b.area}</div>
         </div>
-        <div class="history-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
-        <div class="history-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
-        ${b.status === 'completed' && b.rider ? `
-        <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a">
-          <div style="font-size:10px;color:#60a5fa;font-weight:700;text-transform:uppercase;margin-bottom:8px">🛵 Rider na Nag-Hatid</div>
-          <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
-          <div style="font-size:11px;color:#777;margin-top:2px">📞 ${b.rider.phone || '—'}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
-            <div style="background:#141414;border-radius:8px;padding:7px 10px">
-              <div style="font-size:10px;color:#777;font-weight:600">🏍️ MOTOR</div>
-              <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.motor_model || '—'}</div>
-            </div>
-            <div style="background:#141414;border-radius:8px;padding:7px 10px">
-              <div style="font-size:10px;color:#777;font-weight:600">🔖 PLATE</div>
-              <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.plate_number || '—'}</div>
-            </div>
-          </div>
-        </div>` : ''}
+        <span style="font-size:11px;color:var(--accent)">₱${computeZoneFare(b.zone, b.zone)}+</span>
       </div>
     `).join('');
   }
+  dd.classList.add('show');
+}
 
-  async function logout() {
-    await db.auth.signOut();
-    currentUser = null;
-    document.getElementById('bookingScreen').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'flex';
+// Make input writable for search
+document.addEventListener('DOMContentLoaded', () => {
+  ['pickup','dropoff'].forEach(type => {
+    const input = document.getElementById(type + 'Input');
+    input.removeAttribute('readonly');
+    input.addEventListener('input', () => {
+      const val = input.value.toLowerCase();
+      const filtered = val.length === 0 ? BARANGAYS : BARANGAYS.filter(b =>
+        b.name.toLowerCase().includes(val) || b.area.toLowerCase().includes(val)
+      );
+      renderDropdown(type, filtered);
+    });
+  });
+});
+
+function selectBrgy(type, name, area, zone) {
+  document.getElementById(type + 'Input').value = name;
+  document.getElementById(type + 'Dropdown').classList.remove('show');
+  if (type === 'pickup') selectedPickup = { name, area, zone };
+  else selectedDropoff = { name, area, zone };
+  updateFare();
+}
+
+function updateFare() {
+  if (!selectedPickup || !selectedDropoff) return;
+  const fare = computeZoneFare(selectedPickup.zone, selectedDropoff.zone);
+  document.getElementById('fareBox').classList.add('show');
+  document.getElementById('fareRoute').textContent = selectedPickup.name + ' → ' + selectedDropoff.name;
+  document.getElementById('fareAmount').textContent = '₱' + fare;
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.brgy-wrap') && !e.target.closest('.brgy-input')) {
+    document.querySelectorAll('.brgy-dropdown').forEach(d => d.classList.remove('show'));
   }
+});
+
+// =====================
+// AUTH
+// =====================
+db.auth.getSession().then(async ({ data: { session } }) => {
+  if (!session) return;
+  const { data } = await db.from('users').select('*').eq('id', session.user.id).single();
+  if (data?.role === 'customer') { currentUser = data; showBookingScreen(); }
+});
+
+function showAuthTab(tab, el) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('signupCard').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('loginCard').style.display = tab === 'login' ? 'block' : 'none';
+}
+
+async function signUp() {
+  const name = document.getElementById('sName').value.trim();
+  const email = document.getElementById('sEmail').value.trim();
+  const phone = document.getElementById('sPhone').value.trim();
+  const pass = document.getElementById('sPass').value;
+  const btn = document.getElementById('signupBtn');
+  const msg = document.getElementById('signupMsg');
+  if (!name || !email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
+  if (pass.length < 6) { showMsg(msg, 'Minimum 6 characters ang password.', 'error'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Gumagawa…';
+  const { data, error } = await db.auth.signUp({ email, password: pass });
+  if (error) { showMsg(msg, 'Error: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Gumawa ng Account'; return; }
+  if (data.user) {
+    await db.from('users').upsert({ id: data.user.id, name, email, phone, role: 'customer' });
+    currentUser = { id: data.user.id, name, email, phone, role: 'customer' };
+    showBookingScreen();
+  }
+  btn.disabled = false; btn.textContent = 'Gumawa ng Account';
+}
+
+async function loginCustomer() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass = document.getElementById('lPass').value;
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  if (!email || !pass) { showMsg(msg, 'Punan ang lahat ng fields.', 'error'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Naglo-login…';
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+  if (error) { showMsg(msg, 'Mali ang email o password.', 'error'); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
+  const { data: user } = await db.from('users').select('*').eq('id', data.user.id).single();
+  if (user?.role !== 'customer') { showMsg(msg, 'Hindi customer account ito.', 'error'); await db.auth.signOut(); btn.disabled = false; btn.textContent = 'Mag-Login'; return; }
+  currentUser = user; showBookingScreen();
+  btn.disabled = false; btn.textContent = 'Mag-Login';
+}
+
+function showMsg(el, msg, type) { el.textContent = msg; el.className = 'msg-box show ' + type; }
+
+function showBookingScreen() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('bookingScreen').style.display = 'flex';
+  document.getElementById('bkName').textContent = currentUser?.name || '';
+  document.getElementById('greetingName').textContent = 'Kamusta, ' + (currentUser?.name?.split(' ')[0] || '') + '! 👋';
+  document.getElementById('cName').value = currentUser?.name || '';
+  document.getElementById('cPhone').value = currentUser?.phone || '';
+  loadHistory();
+  checkAcceptedBooking();
+  subscribeBookingUpdates();
+}
+
+function setType(type, el) {
+  bookingType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('bookBtn').textContent = type === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
+}
+
+// =====================
+// BOOK
+// =====================
+async function bookRide() {
+  const cName = document.getElementById('cName').value.trim();
+  const cPhone = document.getElementById('cPhone').value.trim();
+  const pickupLandmark = document.getElementById('pickupLandmark').value.trim();
+  const dropoffLandmark = document.getElementById('dropoffLandmark').value.trim();
+  const notes = document.getElementById('notes').value;
+  const btn = document.getElementById('bookBtn');
+
+  if (!cName || !cPhone) { alert('Ilagay ang iyong pangalan at cellphone number!'); return; }
+  if (!selectedPickup) { alert('Piliin ang pickup barangay!'); return; }
+  if (!selectedDropoff) { alert('Piliin ang destination barangay!'); return; }
+  if (!pickupLandmark) { alert('Ilagay ang landmark sa pickup!'); return; }
+  if (!dropoffLandmark) { alert('Ilagay ang landmark sa destination!'); return; }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
+
+  const fare = computeZoneFare(selectedPickup.zone, selectedDropoff.zone);
+  const pickupFull = selectedPickup.name + ' - ' + pickupLandmark;
+  const dropoffFull = selectedDropoff.name + ' - ' + dropoffLandmark;
+
+  const { data, error } = await db.from('bookings').insert({
+    passenger_id: currentUser.id,
+    type: bookingType,
+    pickup_address: pickupFull,
+    dropoff_address: dropoffFull,
+    fare: fare,
+    notes: notes || null,
+    status: 'pending',
+    customer_name: cName,
+    customer_phone: cPhone
+  }).select().single();
+
+  btn.disabled = false;
+  btn.textContent = bookingType === 'ride' ? 'Mag-Book ng Sakay 🛵' : 'Mag-Book ng Delivery 📦';
+
+  if (error) { alert('Error: ' + error.message); return; }
+
+  // Reset
+  document.getElementById('pickupInput').value = '';
+  document.getElementById('dropoffInput').value = '';
+  document.getElementById('pickupLandmark').value = '';
+  document.getElementById('dropoffLandmark').value = '';
+  document.getElementById('notes').value = '';
+  document.getElementById('fareBox').classList.remove('show');
+  selectedPickup = null; selectedDropoff = null;
+
+  document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
+  document.getElementById('modalSub').textContent = 'Hinahanap na ang available na rider sa Cotabato City. Maghintay sandali.';
+  document.getElementById('modalOverlay').classList.add('show');
+  loadHistory();
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+// =====================
+// RIDER DETAILS
+// =====================
+async function checkAcceptedBooking() {
+  if (!currentUser) return;
+  const { data } = await db.from('bookings')
+    .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
+    .eq('passenger_id', currentUser.id)
+    .in('status', ['accepted','arrived','ongoing','completed'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  const card = document.getElementById('riderCard');
+  const titleEl = document.getElementById('riderTitle');
+  if (data && data.rider) {
+    document.getElementById('rdName').textContent = data.rider.name || '—';
+    document.getElementById('rdPhone').textContent = '📞 ' + (data.rider.phone || '—');
+    document.getElementById('rdMotor').textContent = data.rider.motor_model || '—';
+    document.getElementById('rdPlate').textContent = data.rider.plate_number || '—';
+    const msgs = { accepted:'🛵 Rider Papunta Na!', arrived:'📍 Nandito Na ang Rider!', ongoing:'🚀 Trip In Progress!', completed:'✅ Trip Completed!' };
+    titleEl.textContent = msgs[data.status] || 'Rider Info';
+    card.style.borderColor = data.status === 'completed' ? 'rgba(59,130,246,0.4)' : 'rgba(34,197,94,0.3)';
+    titleEl.style.color = data.status === 'completed' ? '#60a5fa' : 'var(--green)';
+    card.classList.add('show');
+  } else {
+    card.classList.remove('show');
+  }
+}
+
+function subscribeBookingUpdates() {
+  if (!currentUser) return;
+  db.channel('customer-' + currentUser.id)
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'bookings',
+      filter:'passenger_id=eq.' + currentUser.id }, () => {
+      checkAcceptedBooking(); loadHistory();
+    }).subscribe();
+}
+
+// =====================
+// HISTORY
+// =====================
+async function loadHistory() {
+  const { data } = await db.from('bookings')
+    .select('*, rider:rider_id(name, phone, motor_model, plate_number)')
+    .eq('passenger_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const list = document.getElementById('historyList');
+  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">Wala pang bookings.</div>'; return; }
+  list.innerHTML = data.map(b => `
+    <div class="history-card">
+      <div class="history-header">
+        <span class="history-type">${b.type === 'ride' ? '🛵 Sakay' : '📦 Delivery'}</span>
+        <span class="hstatus s-${b.status}">${b.status.toUpperCase()}</span>
+      </div>
+      <div class="history-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
+      <div class="history-fare">₱${b.fare || 0}</div>
+      ${b.status === 'completed' && b.rider ? `
+      <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a">
+        <div style="font-size:10px;color:#60a5fa;font-weight:700;text-transform:uppercase;margin-bottom:6px">🛵 Rider na Nag-Hatid</div>
+        <div style="font-size:13px;font-weight:600">${b.rider.name || '—'}</div>
+        <div style="font-size:11px;color:#777;margin-top:2px">📞 ${b.rider.phone || '—'}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+          <div style="background:#141414;border-radius:8px;padding:7px 10px">
+            <div style="font-size:10px;color:#777;font-weight:600">🏍️ MOTOR</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.motor_model || '—'}</div>
+          </div>
+          <div style="background:#141414;border-radius:8px;padding:7px 10px">
+            <div style="font-size:10px;color:#777;font-weight:600">🔖 PLATE</div>
+            <div style="font-size:12px;font-weight:600;margin-top:2px">${b.rider.plate_number || '—'}</div>
+          </div>
+        </div>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function logout() {
+  await db.auth.signOut();
+  currentUser = null;
+  document.getElementById('bookingScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
 </script>
 </body>
 </html>
