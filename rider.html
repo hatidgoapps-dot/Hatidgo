@@ -169,9 +169,8 @@
     if (data?.role !== 'rider') { window.location.href = '/Hatidgo/index.html'; return; }
     riderId = session.user.id;
     riderAvail = data.is_available;
-    // Delay non-critical functions so UI loads first
-    setTimeout(() => requestNotificationPermission(), 2000);
-    setTimeout(() => startLocationTracking(), 5000);
+    // Delay notification permission
+    setTimeout(() => requestNotificationPermission(), 3000);
     document.getElementById('riderName').textContent = data.name || 'Rider';
     document.getElementById('riderEmail').textContent = data.email || '';
     updateToggleUI();
@@ -548,14 +547,8 @@
 
   async function logout() {
     if (pollInterval) clearInterval(pollInterval);
-    stopLocationTracking();
-    // Clear location on logout
     if (riderId) {
-      await db.from('users').update({
-        current_lat: null,
-        current_lng: null,
-        is_available: false
-      }).eq('id', riderId);
+      await db.from('users').update({ is_available: false }).eq('id', riderId);
     }
     if (subscription) db.removeChannel(subscription);
     await db.auth.signOut();
