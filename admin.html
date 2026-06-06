@@ -329,7 +329,10 @@
           <span class="status-badge s-${b.status}">${b.status.toUpperCase()}</span>
         </div>
         <div class="booking-route">🟢 ${b.pickup_address || '—'}<br>🔴 ${b.dropoff_address || '—'}</div>
-        <div class="booking-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <div class="booking-fare">₱${b.fare || 0} · ${b.distance_km || 0} km</div>
+          <button onclick="deleteBooking('${b.id}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:5px 10px;color:var(--red);font-family:DM Sans,sans-serif;font-size:11px;font-weight:600;cursor:pointer">🗑️ Delete</button>
+        </div>
         ${b.status === 'completed' ? `
         <div style="display:flex;gap:8px;margin-top:8px">
           <div style="flex:1;font-size:11px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:8px;padding:6px 10px;color:#22c55e;text-align:center">
@@ -538,6 +541,14 @@
 
     btn.disabled = false;
     btn.textContent = 'I-update';
+  }
+
+  async function deleteBooking(bookingId) {
+    if (!confirm('I-delete ang booking na ito?')) return;
+    const { error } = await db.from('bookings').delete().eq('id', bookingId);
+    if (error) { alert('Error: ' + error.message); return; }
+    loadBookings();
+    loadStats();
   }
 
   function showFeedback(msg, type) {
