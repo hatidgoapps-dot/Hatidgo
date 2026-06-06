@@ -345,6 +345,9 @@ const BARANGAYS = [
   { name:'Tamontaka III', area:'Tamontaka', zone:'tamontaka' },
   { name:'Tamontaka IV', area:'Tamontaka', zone:'tamontaka' },
   { name:'Tamontaka V', area:'Tamontaka', zone:'tamontaka' },
+  // AWANG
+  { name:'Awang', area:'Awang, Datu Odin Sinsuat', zone:'awang' },
+  { name:'Awang Dos', area:'Maguindanao', zone:'awang' },
 ];
 
 // =====================
@@ -373,6 +376,17 @@ function computeZoneFare(fromZone, toZone) {
     'kalanganan-tamontaka': 140,
     'bagua-kalanganan': 140,
     'kalanganan-bagua': 140,
+    // Awang routes
+    'awang-poblacion': 160,
+    'poblacion-awang': 160,
+    'awang-rosary': 160,
+    'rosary-awang': 160,
+    'awang-tamontaka': 140,
+    'tamontaka-awang': 140,
+    'awang-bagua': 150,
+    'bagua-awang': 150,
+    'awang-kalanganan': 170,
+    'kalanganan-awang': 170,
   };
   return routes[fromZone + '-' + toZone] || 100;
 }

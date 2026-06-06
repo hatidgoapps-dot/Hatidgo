@@ -264,6 +264,9 @@
         <button onclick="toggleBlock('${r.id}', ${r.is_blocked || false}, '${r.name || 'Rider'}')" style="width:100%;margin-top:8px;padding:8px;border-radius:8px;border:1px solid ${r.is_blocked ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'};background:${r.is_blocked ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'};color:${r.is_blocked ? 'var(--green)' : 'var(--red)'};font-family:DM Sans,sans-serif;font-size:12px;font-weight:700;cursor:pointer">
           ${r.is_blocked ? '✅ I-unblock' : '🚫 I-block (Hindi pa Nakabayad)'}
         </button>
+        <button onclick="deleteRider('${r.id}', '${r.name || 'Rider'}')" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.12);color:var(--red);font-family:DM Sans,sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+          🗑️ I-delete ang Rider
+        </button>
       </div>
     `).join('');
   }
@@ -424,6 +427,15 @@
       setTimeout(() => { closeModal(); loadAll(); }, 1500);
     }
     btn.disabled = false; btn.textContent = 'I-save';
+  }
+
+  async function deleteRider(riderId, riderName) {
+    if (!confirm('I-delete si ' + riderName + '? Hindi na ito mababawi.')) return;
+    // Delete from public.users
+    const { error } = await db.from('users').delete().eq('id', riderId);
+    if (error) { alert('Error: ' + error.message); return; }
+    alert('🗑️ Na-delete na si ' + riderName + '.');
+    loadAll();
   }
 
   async function toggleBlock(riderId, isBlocked, riderName) {
