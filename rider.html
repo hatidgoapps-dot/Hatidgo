@@ -169,8 +169,9 @@
     if (data?.role !== 'rider') { window.location.href = '/Hatidgo/index.html'; return; }
     riderId = session.user.id;
     riderAvail = data.is_available;
-    requestNotificationPermission();
-    startLocationTracking();
+    // Delay non-critical functions so UI loads first
+    setTimeout(() => requestNotificationPermission(), 2000);
+    setTimeout(() => startLocationTracking(), 5000);
     document.getElementById('riderName').textContent = data.name || 'Rider';
     document.getElementById('riderEmail').textContent = data.email || '';
     updateToggleUI();
@@ -411,23 +412,33 @@
       document.getElementById('totalRiderEarnings').textContent = '₱' + totalEarnings;
   }
 
-  // LOCATION TRACKING
+  // LOCATION TRACKING - optional, non-blocking
   let locationWatcher = null;
+  let locationInterval = null;
 
   function startLocationTracking() {
     if (!navigator.geolocation) return;
-    // Update location every 10 seconds
-    locationWatcher = navigator.geolocation.watchPosition(async (pos) => {
-      if (!riderId) return;
-      await db.from('users').update({
-        current_lat: pos.coords.latitude,
-        current_lng: pos.coords.longitude,
-        last_seen: new Date().toISOString()
-      }).eq('id', riderId);
-    }, () => {}, { enableHighAccuracy: true, maximumAge: 10000 });
+    // Use setInterval instead of watchPosition to prevent freezing
+    locationInterval = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        if (!riderId) return;
+        try {
+          await db.from('users').update({
+            current_lat: pos.coords.latitude,
+            current_lng: pos.coords.longitude,
+            last_seen: new Date().toISOString()
+          }).eq('id', riderId);
+        } catch(e) {}
+      }, () => {}, { 
+        enableHighAccuracy: false, 
+        timeout: 5000, 
+        maximumAge: 30000 
+      });
+    }, 30000); // every 30 seconds lang
   }
 
   function stopLocationTracking() {
+    if (locationInterval) clearInterval(locationInterval);
     if (locationWatcher) navigator.geolocation.clearWatch(locationWatcher);
   }
 
@@ -511,19 +522,21 @@
         console.log('Realtime status:', status);
       });
 
-    // Polling fallback every 10 seconds para siguradong makita ang bagong booking
+    // Polling fallback every 15 seconds
     pollInterval = setInterval(async () => {
       if (!riderAvail) return;
-      const { count } = await db.from('bookings')
-        .select('id', { count: 'exact' })
-        .eq('status', 'pending');
-      if (count > lastBookingCount && lastBookingCount > 0) {
-        showToast('🛵 Bagong booking!', 'success');
-        playAlertSound();
-        loadBookings();
-      }
-      lastBookingCount = count || 0;
-    }, 10000);
+      try {
+        const { count } = await db.from('bookings')
+          .select('id', { count: 'exact' })
+          .eq('status', 'pending');
+        if (count > lastBookingCount && lastBookingCount > 0) {
+          showToast('🛵 Bagong booking!', 'success');
+          playAlertSound();
+          loadBookings();
+        }
+        lastBookingCount = count || 0;
+      } catch(e) {}
+    }, 15000);
   }
 
   function showToast(msg, type) {
