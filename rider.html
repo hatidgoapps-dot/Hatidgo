@@ -474,23 +474,56 @@
   }
 
   // Real-time
+  let lastBookingCount = 0;
+  let pollInterval = null;
+
   function subscribeBookings() {
-    subscription = db.channel('rider-bookings')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
-        if (riderAvail) {
-          const b = payload.new;
-          showToast('🛵 Bagong booking!', 'success');
-          sendNotification(
-            '🛵 Bagong Booking! — HatidGo',
-            (b.customer_name || 'Customer') + ' · ' + (b.pickup_address || 'Pickup') + ' → ' + (b.dropoff_address || 'Destination') + ' · ₱' + (b.fare || 0)
-          );
-          loadBookings();
-        }
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings' }, () => {
+    // Real-time subscription
+    subscription = db.channel('rider-bookings-' + riderId)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'bookings'
+      }, (payload) => {
+        if (!riderAvail) return;
+        const b = payload.new;
+        showToast('🛵 Bagong booking!', 'success');
+        sendNotification(
+          '🛵 Bagong Booking! — HatidGo',
+          (b.customer_name || 'Customer') + '
+' +
+          '📍 ' + (b.pickup_address || '—') + '
+' +
+          '🏁 ' + (b.dropoff_address || '—') + '
+' +
+          '₱' + (b.fare || 0)
+        );
         loadBookings();
       })
-      .subscribe();
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'bookings'
+      }, () => {
+        loadBookings();
+      })
+      .subscribe((status) => {
+        console.log('Realtime status:', status);
+      });
+
+    // Polling fallback every 10 seconds para siguradong makita ang bagong booking
+    pollInterval = setInterval(async () => {
+      if (!riderAvail) return;
+      const { count } = await db.from('bookings')
+        .select('id', { count: 'exact' })
+        .eq('status', 'pending');
+      if (count > lastBookingCount && lastBookingCount > 0) {
+        showToast('🛵 Bagong booking!', 'success');
+        playAlertSound();
+        loadBookings();
+      }
+      lastBookingCount = count || 0;
+    }, 10000);
   }
 
   function showToast(msg, type) {
@@ -501,6 +534,7 @@
   }
 
   async function logout() {
+    if (pollInterval) clearInterval(pollInterval);
     stopLocationTracking();
     // Clear location on logout
     if (riderId) {
