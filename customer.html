@@ -321,52 +321,67 @@ let selectedDropoff = null;
 // BARANGAY DATA
 // =====================
 const BARANGAYS = [
-  // BAGUA
-  { name:'Bagua Mother', area:'Bagua', zone:'bagua' },
-  { name:'Bagua I', area:'Bagua', zone:'bagua' },
-  { name:'Bagua II', area:'Bagua', zone:'bagua' },
-  { name:'Bagua III', area:'Bagua', zone:'bagua' },
+  // BAGUA — center coords
+  { name:'Bagua Mother', area:'Bagua', zone:'bagua', lat:7.2180, lng:124.2450 },
+  { name:'Bagua I', area:'Bagua', zone:'bagua', lat:7.2175, lng:124.2440 },
+  { name:'Bagua II', area:'Bagua', zone:'bagua', lat:7.2185, lng:124.2460 },
+  { name:'Bagua III', area:'Bagua', zone:'bagua', lat:7.2190, lng:124.2470 },
   // KALANGANAN
-  { name:'Kalanganan Mother', area:'Kalanganan', zone:'kalanganan' },
-  { name:'Kalanganan I', area:'Kalanganan', zone:'kalanganan' },
-  { name:'Kalanganan II', area:'Kalanganan', zone:'kalanganan' },
+  { name:'Kalanganan Mother', area:'Kalanganan', zone:'kalanganan', lat:7.1950, lng:124.2150 },
+  { name:'Kalanganan I', area:'Kalanganan', zone:'kalanganan', lat:7.1940, lng:124.2140 },
+  { name:'Kalanganan II', area:'Kalanganan', zone:'kalanganan', lat:7.1960, lng:124.2160 },
   // POBLACION
-  { name:'Poblacion Mother', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion I', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion II', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion III', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion IV', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion V', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion VI', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion VII', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion VIII', area:'Poblacion', zone:'poblacion' },
-  { name:'Poblacion IX', area:'Poblacion', zone:'poblacion' },
+  { name:'Poblacion Mother', area:'Poblacion', zone:'poblacion', lat:7.2233, lng:124.2472 },
+  { name:'Poblacion I', area:'Poblacion', zone:'poblacion', lat:7.2220, lng:124.2460 },
+  { name:'Poblacion II', area:'Poblacion', zone:'poblacion', lat:7.2225, lng:124.2465 },
+  { name:'Poblacion III', area:'Poblacion', zone:'poblacion', lat:7.2230, lng:124.2470 },
+  { name:'Poblacion IV', area:'Poblacion', zone:'poblacion', lat:7.2235, lng:124.2475 },
+  { name:'Poblacion V', area:'Poblacion', zone:'poblacion', lat:7.2240, lng:124.2480 },
+  { name:'Poblacion VI', area:'Poblacion', zone:'poblacion', lat:7.2245, lng:124.2485 },
+  { name:'Poblacion VII', area:'Poblacion', zone:'poblacion', lat:7.2250, lng:124.2490 },
+  { name:'Poblacion VIII', area:'Poblacion', zone:'poblacion', lat:7.2255, lng:124.2495 },
+  { name:'Poblacion IX', area:'Poblacion', zone:'poblacion', lat:7.2260, lng:124.2500 },
   // ROSARY HEIGHTS
-  { name:'Rosary Heights Mother', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights I', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights II', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights III', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights IV', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights V', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights VI', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights VII', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights VIII', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights IX', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights X', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights XI', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights XII', area:'Rosary Heights', zone:'rosary' },
-  { name:'Rosary Heights XIII', area:'Rosary Heights', zone:'rosary' },
+  { name:'Rosary Heights Mother', area:'Rosary Heights', zone:'rosary', lat:7.2100, lng:124.2380 },
+  { name:'Rosary Heights I', area:'Rosary Heights', zone:'rosary', lat:7.2090, lng:124.2370 },
+  { name:'Rosary Heights II', area:'Rosary Heights', zone:'rosary', lat:7.2095, lng:124.2375 },
+  { name:'Rosary Heights III', area:'Rosary Heights', zone:'rosary', lat:7.2100, lng:124.2380 },
+  { name:'Rosary Heights IV', area:'Rosary Heights', zone:'rosary', lat:7.2105, lng:124.2385 },
+  { name:'Rosary Heights V', area:'Rosary Heights', zone:'rosary', lat:7.2110, lng:124.2390 },
+  { name:'Rosary Heights VI', area:'Rosary Heights', zone:'rosary', lat:7.2115, lng:124.2395 },
+  { name:'Rosary Heights VII', area:'Rosary Heights', zone:'rosary', lat:7.2120, lng:124.2400 },
+  { name:'Rosary Heights VIII', area:'Rosary Heights', zone:'rosary', lat:7.2125, lng:124.2405 },
+  { name:'Rosary Heights IX', area:'Rosary Heights', zone:'rosary', lat:7.2130, lng:124.2410 },
+  { name:'Rosary Heights X', area:'Rosary Heights', zone:'rosary', lat:7.2135, lng:124.2415 },
+  { name:'Rosary Heights XI', area:'Rosary Heights', zone:'rosary', lat:7.2140, lng:124.2420 },
+  { name:'Rosary Heights XII', area:'Rosary Heights', zone:'rosary', lat:7.2145, lng:124.2425 },
+  { name:'Rosary Heights XIII', area:'Rosary Heights', zone:'rosary', lat:7.2150, lng:124.2430 },
   // TAMONTAKA
-  { name:'Tamontaka Mother', area:'Tamontaka', zone:'tamontaka' },
-  { name:'Tamontaka I', area:'Tamontaka', zone:'tamontaka' },
-  { name:'Tamontaka II', area:'Tamontaka', zone:'tamontaka' },
-  { name:'Tamontaka III', area:'Tamontaka', zone:'tamontaka' },
-  { name:'Tamontaka IV', area:'Tamontaka', zone:'tamontaka' },
-  { name:'Tamontaka V', area:'Tamontaka', zone:'tamontaka' },
+  { name:'Tamontaka Mother', area:'Tamontaka', zone:'tamontaka', lat:7.2050, lng:124.2200 },
+  { name:'Tamontaka I', area:'Tamontaka', zone:'tamontaka', lat:7.2040, lng:124.2190 },
+  { name:'Tamontaka II', area:'Tamontaka', zone:'tamontaka', lat:7.2045, lng:124.2195 },
+  { name:'Tamontaka III', area:'Tamontaka', zone:'tamontaka', lat:7.2055, lng:124.2205 },
+  { name:'Tamontaka IV', area:'Tamontaka', zone:'tamontaka', lat:7.2060, lng:124.2210 },
+  { name:'Tamontaka V', area:'Tamontaka', zone:'tamontaka', lat:7.2065, lng:124.2215 },
   // AWANG
-  { name:'Awang', area:'Awang, Datu Odin Sinsuat', zone:'awang' },
-  { name:'Awang Dos', area:'Maguindanao', zone:'awang' },
+  { name:'Awang', area:'Awang, Datu Odin Sinsuat', zone:'awang', lat:7.1800, lng:124.2100 },
+  { name:'Awang Dos', area:'Maguindanao', zone:'awang', lat:7.1780, lng:124.2080 },
 ];
+
+// Find nearest barangay using Haversine
+function findNearestBarangay(lat, lng) {
+  let nearest = null;
+  let minDist = Infinity;
+  BARANGAYS.forEach(b => {
+    if (!b.lat) return;
+    const dLat = (b.lat - lat) * Math.PI / 180;
+    const dLng = (b.lng - lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    if (dist < minDist) { minDist = dist; nearest = b; }
+  });
+  return { barangay: nearest, distanceKm: minDist };
+}
 
 // =====================
 // FARE MATRIX (zone to zone)
