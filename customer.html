@@ -208,17 +208,31 @@
     <!-- PICKUP -->
     <div class="form-card">
       <div class="form-label">🟢 Pickup Location</div>
-      <div style="display:flex;gap:8px;margin-bottom:8px">
-        <div class="brgy-wrap" style="flex:1;margin-bottom:0">
-          <input class="brgy-input" id="pickupInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('pickup')" onclick="showDropdown('pickup')" autocomplete="off" readonly/>
-          <div class="brgy-dropdown" id="pickupDropdown"></div>
-        </div>
-        <button type="button" id="gpsBtn" style="background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.4);border-radius:12px;padding:12px 16px;color:var(--green);font-size:20px;cursor:pointer;flex-shrink:0;min-width:52px;min-height:48px;-webkit-tap-highlight-color:rgba(34,197,94,0.3)" onclick="getPickupGPS()">📍</button>
+
+      <!-- GPS BUTTON - full width, above search -->
+      <div id="gpsBtnWrap" style="margin-bottom:10px">
+        <button type="button" id="gpsBtn"
+          style="width:100%;padding:13px;background:rgba(34,197,94,0.12);border:1.5px solid rgba(34,197,94,0.4);border-radius:12px;color:var(--green);font-family:DM Sans,sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:rgba(34,197,94,0.2);touch-action:manipulation"
+          onclick="getPickupGPS()">
+          <span style="font-size:18px">📍</span> Gamitin ang GPS para sa Pickup
+        </button>
+        <div id="gpsStatus" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center;display:none"></div>
       </div>
-      <div id="gpsStatus" style="font-size:11px;color:var(--muted);margin-bottom:6px;display:none"></div>
-      <div class="input-wrap" style="margin-top:4px">
+
+      <!-- OR DIVIDER -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+        <span style="font-size:11px;color:var(--muted)">o manual</span>
+        <div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+
+      <div class="brgy-wrap">
+        <input class="brgy-input" id="pickupInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('pickup')" onclick="showDropdown('pickup')" autocomplete="off" readonly/>
+        <div class="brgy-dropdown" id="pickupDropdown"></div>
+      </div>
+      <div class="input-wrap" style="margin-top:8px">
         <span>📌</span>
-        <input type="text" id="pickupLandmark" placeholder="Landmark / Purok / Kalsada (e.g. Tapat ng Mercury Drug)"/>
+        <input type="text" id="pickupLandmark" placeholder="Landmark / Purok / Kalsada"/>
       </div>
     </div>
 
