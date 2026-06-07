@@ -59,26 +59,31 @@
     /* FORM CARD */
     .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
     .form-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-    .input-wrap { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; position: relative; transition: border-color 0.15s; }
-    .input-wrap:focus-within { border-color: var(--accent); }
+    .input-wrap { display: flex; align-items: center; gap: 10px; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
     .input-wrap:last-child { margin-bottom: 0; }
     .input-wrap input, .input-wrap textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; }
     .input-wrap textarea { resize: none; height: 50px; }
     .input-wrap input::placeholder, .input-wrap textarea::placeholder { color: #444; }
 
-    /* BARANGAY SEARCH */
-    .brgy-wrap { position: relative; margin-bottom: 8px; }
-    .brgy-input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
-    .brgy-input:focus { border-color: var(--accent); }
-    .brgy-input::placeholder { color: #444; }
-    .brgy-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 99; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; margin-top: 4px; }
-    .brgy-dropdown.show { display: block; }
-    .brgy-item { padding: 11px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; }
-    .brgy-item:last-child { border-bottom: none; }
-    .brgy-item:active, .brgy-item:hover { background: #2a2a2a; }
-    .brgy-item-name { font-weight: 600; }
-    .brgy-item-area { font-size: 11px; color: var(--muted); }
-    .brgy-selected { background: rgba(249,115,22,0.08); border-color: var(--accent); }
+    /* PLACE SEARCH */
+    .place-wrap { position: relative; margin-bottom: 8px; }
+    .place-input { width: 100%; background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px; padding: 13px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
+    .place-input:focus { border-color: var(--accent); }
+    .place-input::placeholder { color: #444; }
+    .place-input.selected { border-color: var(--green); background: rgba(34,197,94,0.05); }
+    .place-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: #1c1c1c; border: 1px solid var(--border); border-radius: 12px; z-index: 99; max-height: 220px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; margin-top: 4px; }
+    .place-dropdown.show { display: block; }
+    .place-item { padding: 12px 14px; cursor: pointer; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; gap: 10px; transition: background 0.1s; }
+    .place-item:last-child { border-bottom: none; }
+    .place-item:active { background: #2a2a2a; }
+    .place-icon { font-size: 18px; flex-shrink: 0; }
+    .place-name { font-weight: 600; font-size: 13px; }
+    .place-brgy { font-size: 11px; color: var(--accent); margin-top: 2px; font-weight: 600; }
+    .place-loading { padding: 12px 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
+    /* SELECTED BADGE */
+    .selected-badge { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 10px; padding: 8px 12px; margin-top: 6px; display: none; font-size: 12px; color: var(--green); font-weight: 600; }
+    .selected-badge.show { display: flex; align-items: center; gap: 6px; }
 
     /* FARE BOX */
     .fare-box { background: var(--card); border: 1.5px solid rgba(249,115,22,0.3); border-radius: 14px; padding: 16px; margin-bottom: 14px; display: none; }
@@ -89,7 +94,7 @@
     .fare-amount { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; color: var(--accent); }
 
     /* BOOK BTN */
-    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 20px; transition: transform 0.12s; }
+    .book-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 14px; color: #fff; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 20px; transition: transform 0.12s; touch-action: manipulation; }
     .book-btn:active { transform: scale(0.97); }
     .book-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -189,7 +194,7 @@
   <div class="bk-content">
     <div class="bk-greeting">
       <h2 id="greetingName">Saan ka pupunta? 🛵</h2>
-      <p>📍 Cotabato City &nbsp;<span id="gpsIndicator" style="font-size:11px;color:var(--muted)">📍 Kukuha ng GPS…</span></p>
+      <p>📍 Cotabato City</p>
     </div>
 
     <!-- TYPE -->
@@ -207,57 +212,41 @@
 
     <!-- PICKUP -->
     <div class="form-card">
-      <div class="form-label">🟢 Pickup Location</div>
-
-      <!-- GPS BUTTON - full width, above search -->
-      <div id="gpsBtnWrap" style="margin-bottom:10px">
-        <button type="button" id="gpsBtn"
-          style="width:100%;padding:13px;background:rgba(34,197,94,0.12);border:1.5px solid rgba(34,197,94,0.4);border-radius:12px;color:var(--green);font-family:DM Sans,sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:rgba(34,197,94,0.2);touch-action:manipulation"
-          onclick="getPickupGPS()">
-          <span style="font-size:18px">📍</span> Gamitin ang GPS para sa Pickup
-        </button>
-        <div id="gpsStatus" style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center;display:none"></div>
+      <div class="form-label">🟢 Pickup — Landmark o Kalsada</div>
+      <div class="place-wrap">
+        <input class="place-input" id="pickupSearch" type="text"
+          placeholder="I-type ang landmark, kalsada, o lugar…"
+          oninput="searchPlaces('pickup')" autocomplete="off"/>
+        <div class="place-dropdown" id="pickupDropdown"></div>
       </div>
-
-      <!-- OR DIVIDER -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <div style="flex:1;height:1px;background:var(--border)"></div>
-        <span style="font-size:11px;color:var(--muted)">o manual</span>
-        <div style="flex:1;height:1px;background:var(--border)"></div>
-      </div>
-
-      <div class="brgy-wrap">
-        <input class="brgy-input" id="pickupInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('pickup')" onclick="showDropdown('pickup')" autocomplete="off" readonly/>
-        <div class="brgy-dropdown" id="pickupDropdown"></div>
-      </div>
-      <div class="input-wrap" style="margin-top:8px">
-        <span>📌</span>
-        <input type="text" id="pickupLandmark" placeholder="Landmark / Purok / Kalsada"/>
+      <div class="selected-badge" id="pickupBadge">
+        <span>📍</span><span id="pickupBadgeText"></span>
       </div>
     </div>
 
     <!-- DESTINATION -->
     <div class="form-card">
-      <div class="form-label">🔴 Destination</div>
-      <div class="brgy-wrap">
-        <input class="brgy-input" id="dropoffInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('dropoff')" onclick="showDropdown('dropoff')" autocomplete="off" readonly/>
-        <div class="brgy-dropdown" id="dropoffDropdown"></div>
+      <div class="form-label">🔴 Destination — Landmark o Kalsada</div>
+      <div class="place-wrap">
+        <input class="place-input" id="dropoffSearch" type="text"
+          placeholder="I-type ang landmark, kalsada, o lugar…"
+          oninput="searchPlaces('dropoff')" autocomplete="off"/>
+        <div class="place-dropdown" id="dropoffDropdown"></div>
       </div>
-      <div class="input-wrap" style="margin-top:4px">
-        <span>📌</span>
-        <input type="text" id="dropoffLandmark" placeholder="Landmark / Purok / Kalsada (e.g. Harap ng SM)"/>
+      <div class="selected-badge" id="dropoffBadge">
+        <span>📍</span><span id="dropoffBadgeText"></span>
       </div>
     </div>
 
-    <!-- NOTE TO RIDER -->
+    <!-- NOTES -->
     <div class="form-card">
-      <div class="form-label">📝 Note sa Rider</div>
+      <div class="form-label">📝 Note sa Rider (optional)</div>
       <div class="input-wrap">
-        <textarea id="notes" placeholder="Halimbawa: Blue gate, katabi ng bakery. O kung delivery, ano ang ipadala."></textarea>
+        <textarea id="notes" placeholder="Halimbawa: Blue gate, katabi ng bakery…"></textarea>
       </div>
     </div>
 
-    <div class="note-tip">ℹ️ Pakilagay ang pinakamalapit na landmark, purok, o kalsada para madaling mahanap ng rider.</div>
+    <div class="note-tip">ℹ️ I-type ang kilalang landmark, kalsada, o lugar. Automatic malalaman ang barangay at fare.</div>
 
     <!-- FARE -->
     <div class="fare-box" id="fareBox">
@@ -314,182 +303,108 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let bookingType = 'ride';
-let selectedPickup = null;  // { name, area, zone }
+let selectedPickup = null;  // { name, barangay, zone }
 let selectedDropoff = null;
 
 // =====================
-// BARANGAY DATA
-// =====================
-const BARANGAYS = [
-  // BAGUA — center coords
-  { name:'Bagua Mother', area:'Bagua', zone:'bagua', lat:7.2180, lng:124.2450 },
-  { name:'Bagua I', area:'Bagua', zone:'bagua', lat:7.2175, lng:124.2440 },
-  { name:'Bagua II', area:'Bagua', zone:'bagua', lat:7.2185, lng:124.2460 },
-  { name:'Bagua III', area:'Bagua', zone:'bagua', lat:7.2190, lng:124.2470 },
-  // KALANGANAN
-  { name:'Kalanganan Mother', area:'Kalanganan', zone:'kalanganan', lat:7.1950, lng:124.2150 },
-  { name:'Kalanganan I', area:'Kalanganan', zone:'kalanganan', lat:7.1940, lng:124.2140 },
-  { name:'Kalanganan II', area:'Kalanganan', zone:'kalanganan', lat:7.1960, lng:124.2160 },
-  // POBLACION
-  { name:'Poblacion Mother', area:'Poblacion', zone:'poblacion', lat:7.2233, lng:124.2472 },
-  { name:'Poblacion I', area:'Poblacion', zone:'poblacion', lat:7.2220, lng:124.2460 },
-  { name:'Poblacion II', area:'Poblacion', zone:'poblacion', lat:7.2225, lng:124.2465 },
-  { name:'Poblacion III', area:'Poblacion', zone:'poblacion', lat:7.2230, lng:124.2470 },
-  { name:'Poblacion IV', area:'Poblacion', zone:'poblacion', lat:7.2235, lng:124.2475 },
-  { name:'Poblacion V', area:'Poblacion', zone:'poblacion', lat:7.2240, lng:124.2480 },
-  { name:'Poblacion VI', area:'Poblacion', zone:'poblacion', lat:7.2245, lng:124.2485 },
-  { name:'Poblacion VII', area:'Poblacion', zone:'poblacion', lat:7.2250, lng:124.2490 },
-  { name:'Poblacion VIII', area:'Poblacion', zone:'poblacion', lat:7.2255, lng:124.2495 },
-  { name:'Poblacion IX', area:'Poblacion', zone:'poblacion', lat:7.2260, lng:124.2500 },
-  // ROSARY HEIGHTS
-  { name:'Rosary Heights Mother', area:'Rosary Heights', zone:'rosary', lat:7.2100, lng:124.2380 },
-  { name:'Rosary Heights I', area:'Rosary Heights', zone:'rosary', lat:7.2090, lng:124.2370 },
-  { name:'Rosary Heights II', area:'Rosary Heights', zone:'rosary', lat:7.2095, lng:124.2375 },
-  { name:'Rosary Heights III', area:'Rosary Heights', zone:'rosary', lat:7.2100, lng:124.2380 },
-  { name:'Rosary Heights IV', area:'Rosary Heights', zone:'rosary', lat:7.2105, lng:124.2385 },
-  { name:'Rosary Heights V', area:'Rosary Heights', zone:'rosary', lat:7.2110, lng:124.2390 },
-  { name:'Rosary Heights VI', area:'Rosary Heights', zone:'rosary', lat:7.2115, lng:124.2395 },
-  { name:'Rosary Heights VII', area:'Rosary Heights', zone:'rosary', lat:7.2120, lng:124.2400 },
-  { name:'Rosary Heights VIII', area:'Rosary Heights', zone:'rosary', lat:7.2125, lng:124.2405 },
-  { name:'Rosary Heights IX', area:'Rosary Heights', zone:'rosary', lat:7.2130, lng:124.2410 },
-  { name:'Rosary Heights X', area:'Rosary Heights', zone:'rosary', lat:7.2135, lng:124.2415 },
-  { name:'Rosary Heights XI', area:'Rosary Heights', zone:'rosary', lat:7.2140, lng:124.2420 },
-  { name:'Rosary Heights XII', area:'Rosary Heights', zone:'rosary', lat:7.2145, lng:124.2425 },
-  { name:'Rosary Heights XIII', area:'Rosary Heights', zone:'rosary', lat:7.2150, lng:124.2430 },
-  // TAMONTAKA
-  { name:'Tamontaka Mother', area:'Tamontaka', zone:'tamontaka', lat:7.2050, lng:124.2200 },
-  { name:'Tamontaka I', area:'Tamontaka', zone:'tamontaka', lat:7.2040, lng:124.2190 },
-  { name:'Tamontaka II', area:'Tamontaka', zone:'tamontaka', lat:7.2045, lng:124.2195 },
-  { name:'Tamontaka III', area:'Tamontaka', zone:'tamontaka', lat:7.2055, lng:124.2205 },
-  { name:'Tamontaka IV', area:'Tamontaka', zone:'tamontaka', lat:7.2060, lng:124.2210 },
-  { name:'Tamontaka V', area:'Tamontaka', zone:'tamontaka', lat:7.2065, lng:124.2215 },
-  // AWANG
-  { name:'Awang', area:'Awang, Datu Odin Sinsuat', zone:'awang', lat:7.1800, lng:124.2100 },
-  { name:'Awang Dos', area:'Maguindanao', zone:'awang', lat:7.1780, lng:124.2080 },
-];
-
-// Find nearest barangay using Haversine
-function findNearestBarangay(lat, lng) {
-  let nearest = null;
-  let minDist = Infinity;
-  BARANGAYS.forEach(b => {
-    if (!b.lat) return;
-    const dLat = (b.lat - lat) * Math.PI / 180;
-    const dLng = (b.lng - lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-    const dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    if (dist < minDist) { minDist = dist; nearest = b; }
-  });
-  return { barangay: nearest, distanceKm: minDist };
-}
-
-// =====================
-// FARE MATRIX (zone to zone)
+// FARE MATRIX
 // =====================
 function computeZoneFare(fromZone, toZone) {
-  if (fromZone === toZone) return 70; // Same area
+  if (fromZone === toZone) return 70;
   const routes = {
-    'poblacion-rosary': 120,
-    'rosary-poblacion': 120,
-    'poblacion-tamontaka': 140,
-    'tamontaka-poblacion': 140,
-    'poblacion-bagua': 100,
-    'bagua-poblacion': 100,
-    'poblacion-kalanganan': 140,
-    'kalanganan-poblacion': 140,
-    'rosary-tamontaka': 130,
-    'tamontaka-rosary': 130,
-    'rosary-bagua': 120,
-    'bagua-rosary': 120,
-    'rosary-kalanganan': 160,
-    'kalanganan-rosary': 160,
-    'tamontaka-bagua': 120,
-    'bagua-tamontaka': 120,
-    'tamontaka-kalanganan': 140,
-    'kalanganan-tamontaka': 140,
-    'bagua-kalanganan': 140,
-    'kalanganan-bagua': 140,
-    // Awang routes
-    'awang-poblacion': 160,
-    'poblacion-awang': 160,
-    'awang-rosary': 160,
-    'rosary-awang': 160,
-    'awang-tamontaka': 140,
-    'tamontaka-awang': 140,
-    'awang-bagua': 150,
-    'bagua-awang': 150,
-    'awang-kalanganan': 170,
-    'kalanganan-awang': 170,
+    'poblacion-rosary': 120, 'rosary-poblacion': 120,
+    'poblacion-tamontaka': 140, 'tamontaka-poblacion': 140,
+    'poblacion-bagua': 100, 'bagua-poblacion': 100,
+    'poblacion-kalanganan': 140, 'kalanganan-poblacion': 140,
+    'rosary-tamontaka': 130, 'tamontaka-rosary': 130,
+    'rosary-bagua': 120, 'bagua-rosary': 120,
+    'rosary-kalanganan': 160, 'kalanganan-rosary': 160,
+    'tamontaka-bagua': 120, 'bagua-tamontaka': 120,
+    'tamontaka-kalanganan': 140, 'kalanganan-tamontaka': 140,
+    'bagua-kalanganan': 140, 'kalanganan-bagua': 140,
+    'awang-poblacion': 160, 'poblacion-awang': 160,
+    'awang-rosary': 160, 'rosary-awang': 160,
+    'awang-tamontaka': 140, 'tamontaka-awang': 140,
+    'awang-bagua': 150, 'bagua-awang': 150,
+    'awang-kalanganan': 170, 'kalanganan-awang': 170,
   };
   return routes[fromZone + '-' + toZone] || 100;
 }
 
 // =====================
-// BARANGAY SEARCH
+// PLACE SEARCH
 // =====================
-let filterText = { pickup: '', dropoff: '' };
+let searchTimers = {};
 
-function showDropdown(type) {
-  renderDropdown(type, BARANGAYS);
-}
-
-function filterBrgy(type) {
-  // handled by readonly input — use separate search
-}
-
-function renderDropdown(type, list) {
+async function searchPlaces(type) {
+  const val = document.getElementById(type + 'Search').value.trim();
   const dd = document.getElementById(type + 'Dropdown');
-  if (list.length === 0) {
-    dd.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--muted)">Walang nahanap.</div>';
-  } else {
-    dd.innerHTML = list.map(b => `
-      <div class="brgy-item" onclick="selectBrgy('${type}', '${b.name}', '${b.area}', '${b.zone}')">
-        <div>
-          <div class="brgy-item-name">${b.name}</div>
-          <div class="brgy-item-area">${b.area}</div>
-        </div>
-        <span style="font-size:11px;color:var(--accent)">₱${computeZoneFare(b.zone, b.zone)}+</span>
-      </div>
-    `).join('');
-  }
+
+  // Reset selection
+  if (type === 'pickup') selectedPickup = null;
+  else selectedDropoff = null;
+  document.getElementById(type + 'Badge').classList.remove('show');
+  document.getElementById('fareBox').classList.remove('show');
+
+  if (val.length < 2) { dd.classList.remove('show'); return; }
+
+  dd.innerHTML = '<div class="place-loading">🔍 Naghahanap…</div>';
   dd.classList.add('show');
+
+  clearTimeout(searchTimers[type]);
+  searchTimers[type] = setTimeout(async () => {
+    try {
+      const { data, error } = await db.from('places')
+        .select('name, barangay, zone')
+        .or(`name.ilike.%${val}%,keywords.ilike.%${val}%,barangay.ilike.%${val}%`)
+        .limit(8);
+
+      if (error || !data || data.length === 0) {
+        dd.innerHTML = '<div class="place-loading">Walang nahanap. Subukan ng ibang keyword.</div>';
+        return;
+      }
+
+      dd.innerHTML = data.map(p => `
+        <div class="place-item" onclick="selectPlace('${type}', '${p.name.replace(/'/g,"\\'")}', '${p.barangay.replace(/'/g,"\\'")}', '${p.zone}')">
+          <span class="place-icon">📍</span>
+          <div>
+            <div class="place-name">${p.name}</div>
+            <div class="place-brgy">Barangay ${p.barangay}</div>
+          </div>
+        </div>
+      `).join('');
+      dd.classList.add('show');
+    } catch(e) {
+      dd.innerHTML = '<div class="place-loading">Error. Subukan ulit.</div>';
+    }
+  }, 400);
 }
 
-// Make input writable for search
-document.addEventListener('DOMContentLoaded', () => {
-  ['pickup','dropoff'].forEach(type => {
-    const input = document.getElementById(type + 'Input');
-    input.removeAttribute('readonly');
-    input.addEventListener('input', () => {
-      const val = input.value.toLowerCase();
-      const filtered = val.length === 0 ? BARANGAYS : BARANGAYS.filter(b =>
-        b.name.toLowerCase().includes(val) || b.area.toLowerCase().includes(val)
-      );
-      renderDropdown(type, filtered);
-    });
-  });
-});
-
-function selectBrgy(type, name, area, zone) {
-  document.getElementById(type + 'Input').value = name;
+function selectPlace(type, name, barangay, zone) {
+  document.getElementById(type + 'Search').value = name;
   document.getElementById(type + 'Dropdown').classList.remove('show');
-  if (type === 'pickup') selectedPickup = { name, area, zone };
-  else selectedDropoff = { name, area, zone };
-  updateFare();
-}
 
-function updateFare() {
-  if (!selectedPickup || !selectedDropoff) return;
-  const fare = computeZoneFare(selectedPickup.zone, selectedDropoff.zone);
-  document.getElementById('fareBox').classList.add('show');
-  document.getElementById('fareRoute').textContent = selectedPickup.name + ' → ' + selectedDropoff.name;
-  document.getElementById('fareAmount').textContent = '₱' + fare;
+  const selected = { name, barangay, zone };
+  if (type === 'pickup') selectedPickup = selected;
+  else selectedDropoff = selected;
+
+  // Show badge
+  document.getElementById(type + 'BadgeText').textContent = 'Barangay ' + barangay;
+  document.getElementById(type + 'Badge').classList.add('show');
+
+  // Compute fare if both selected
+  if (selectedPickup && selectedDropoff) {
+    const fare = computeZoneFare(selectedPickup.zone, selectedDropoff.zone);
+    document.getElementById('fareBox').classList.add('show');
+    document.getElementById('fareRoute').textContent = selectedPickup.barangay + ' → ' + selectedDropoff.barangay;
+    document.getElementById('fareAmount').textContent = '₱' + fare;
+  }
 }
 
 // Close dropdowns on outside click
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.brgy-wrap') && !e.target.closest('.brgy-input')) {
-    document.querySelectorAll('.brgy-dropdown').forEach(d => d.classList.remove('show'));
+  if (!e.target.closest('.place-wrap') && !e.target.closest('.place-input')) {
+    document.querySelectorAll('.place-dropdown').forEach(d => d.classList.remove('show'));
   }
 });
 
@@ -571,22 +486,22 @@ function setType(type, el) {
 async function bookRide() {
   const cName = document.getElementById('cName').value.trim();
   const cPhone = document.getElementById('cPhone').value.trim();
-  const pickupLandmark = document.getElementById('pickupLandmark').value.trim();
-  const dropoffLandmark = document.getElementById('dropoffLandmark').value.trim();
+  const pickupText = document.getElementById('pickupSearch').value.trim();
+  const dropoffText = document.getElementById('dropoffSearch').value.trim();
   const notes = document.getElementById('notes').value;
   const btn = document.getElementById('bookBtn');
 
   if (!cName || !cPhone) { alert('Ilagay ang iyong pangalan at cellphone number!'); return; }
-  if (!selectedPickup) { alert('Piliin ang pickup barangay!'); return; }
-  if (!selectedDropoff) { alert('Piliin ang destination barangay!'); return; }
-  if (!pickupLandmark) { alert('Ilagay ang landmark sa pickup!'); return; }
-  if (!dropoffLandmark) { alert('Ilagay ang landmark sa destination!'); return; }
+  if (!pickupText) { alert('Ilagay ang pickup location!'); return; }
+  if (!dropoffText) { alert('Ilagay ang destinasyon!'); return; }
+  if (!selectedPickup) { alert('Piliin ang pickup mula sa suggestions!'); return; }
+  if (!selectedDropoff) { alert('Piliin ang destination mula sa suggestions!'); return; }
 
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Nagbo-book…';
 
   const fare = computeZoneFare(selectedPickup.zone, selectedDropoff.zone);
-  const pickupFull = selectedPickup.name + ' - ' + pickupLandmark;
-  const dropoffFull = selectedDropoff.name + ' - ' + dropoffLandmark;
+  const pickupFull = selectedPickup.name + ' — Brgy. ' + selectedPickup.barangay;
+  const dropoffFull = selectedDropoff.name + ' — Brgy. ' + selectedDropoff.barangay;
 
   const { data, error } = await db.from('bookings').insert({
     passenger_id: currentUser.id,
@@ -606,12 +521,12 @@ async function bookRide() {
   if (error) { alert('Error: ' + error.message); return; }
 
   // Reset
-  document.getElementById('pickupInput').value = '';
-  document.getElementById('dropoffInput').value = '';
-  document.getElementById('pickupLandmark').value = '';
-  document.getElementById('dropoffLandmark').value = '';
+  document.getElementById('pickupSearch').value = '';
+  document.getElementById('dropoffSearch').value = '';
   document.getElementById('notes').value = '';
   document.getElementById('fareBox').classList.remove('show');
+  document.getElementById('pickupBadge').classList.remove('show');
+  document.getElementById('dropoffBadge').classList.remove('show');
   selectedPickup = null; selectedDropoff = null;
 
   document.getElementById('bookingIdLabel').textContent = 'Booking ID: ' + data.id.slice(0,8).toUpperCase();
