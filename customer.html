@@ -213,7 +213,7 @@
           <input class="brgy-input" id="pickupInput" type="text" placeholder="🔍 Maghanap ng barangay…" oninput="filterBrgy('pickup')" onclick="showDropdown('pickup')" autocomplete="off" readonly/>
           <div class="brgy-dropdown" id="pickupDropdown"></div>
         </div>
-        <button onclick="getPickupGPS()" id="gpsBtn" style="background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.4);border-radius:12px;padding:0 14px;color:var(--green);font-size:18px;cursor:pointer;flex-shrink:0;transition:all 0.15s" title="Gamitin ang GPS para sa pickup">📍</button>
+        <button type="button" id="gpsBtn" style="background:rgba(34,197,94,0.15);border:1.5px solid rgba(34,197,94,0.4);border-radius:12px;padding:12px 16px;color:var(--green);font-size:20px;cursor:pointer;flex-shrink:0;min-width:52px;min-height:48px;-webkit-tap-highlight-color:rgba(34,197,94,0.3)" onclick="getPickupGPS()">📍</button>
       </div>
       <div id="gpsStatus" style="font-size:11px;color:var(--muted);margin-bottom:6px;display:none"></div>
       <div class="input-wrap" style="margin-top:4px">
