@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>DG Inventory</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f1f5f9;color:#0f172a;font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:72px}
+input{font-family:inherit}
+input::placeholder{color:#94a3b8}
+
+/* header */
+.header{background:#fff;padding:16px 16px 12px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px}
+.header-title{font-size:18px;font-weight:800;color:#0f172a;flex:1}
+.btn-add{background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-add:active{opacity:.8}
+
+/* search */
+.search-wrap{padding:12px 14px;background:#f1f5f9}
+.search{width:100%;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:15px;outline:none;color:#0f172a}
+.search:focus{border-color:#0ea5e9}
+
+/* item list */
+.list{padding:0 14px}
+.item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1.5px solid #e2e8f0;transition:border-color .1s}
+.item:active{background:#f8fafc}
+.item.low{border-color:#fbbf24}
+.item.out{border-color:#f87171}
+.item-icon{font-size:26px;width:44px;text-align:center;flex-shrink:0}
+.item-name{font-weight:700;font-size:15px;color:#0f172a}
+.item-sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.item-qty{font-size:22px;font-weight:800;color:#0f172a;text-align:right;flex-shrink:0}
+.item-qty.low{color:#f59e0b}
+.item-qty.out{color:#ef4444}
+.item-unit{font-size:11px;font-weight:400;color:#94a3b8}
+
+/* empty */
+.empty{text-align:center;padding:48px 20px;color:#94a3b8;font-size:14px;line-height:2}
+
+/* bottom nav */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e2e8f0;display:flex}
+.nav-btn{flex:1;background:none;border:none;padding:10px 8px 14px;cursor:pointer;font-size:10px;font-weight:700;color:#94a3b8;border-top:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav-btn .ni{font-size:20px}
+.nav-btn.active{color:#0ea5e9;border-top-color:#0ea5e9}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 20px 40px;animation:up .2s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet-handle{width:40px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 18px}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.sheet-sub{font-size:13px;color:#94a3b8;margin-bottom:20px}
+
+/* qty input */
+.qty-row{display:flex;align-items:center;gap:0;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:18px}
+.qty-row button{background:none;border:none;font-size:24px;padding:10px 18px;cursor:pointer;color:#0f172a;font-weight:700}
+.qty-row button:active{background:#f1f5f9}
+.qty-row input{flex:1;border:none;font-size:22px;font-weight:800;text-align:center;outline:none;color:#0f172a;padding:10px 0}
+
+/* action btns */
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.btn-sell{background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.btn-sell:active{opacity:.8}
+.btn-stock{background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
+.btn-stock:active{background:#e2e8f0}
+.btn-edit{background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;width:100%}
+
+/* add item form */
+.field-lbl{font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px;display:block}
+.field{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;color:#0f172a;margin-bottom:12px;background:#fff}
+.field:focus{border-color:#0ea5e9}
+.btn-save{background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* history */
+.log-item{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1.5px solid #e2e8f0}
+.log-icon{font-size:22px;width:36px;text-align:center;flex-shrink:0}
+.log-name{font-weight:700;font-size:14px}
+.log-meta{font-size:11px;color:#94a3b8;margin-top:2px}
+
+/* low stock banner */
+.banner{background:#fef9c3;border:1.5px solid #fde047;border-radius:12px;padding:10px 14px;margin:0 14px 10px;font-size:13px;color:#713f12;font-weight:600}
+
+/* success flash */
+.flash{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:700;z-index:200;white-space:nowrap;animation:flash .2s ease}
+@keyframes flash{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title" id="page-title">📦 Stock</div>
+  <button class="btn-add" id="btn-add" onclick="openAdd()">+ Item</button>
+</div>
+
+<div id="view-stock" style="display:block">
+  <div class="search-wrap">
+    <input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)" id="search-input"/>
+  </div>
+  <div id="low-banner" style="display:none"></div>
+  <div class="list" id="item-list"></div>
+</div>
+
+<div id="view-history" style="display:none">
+  <div style="padding:12px 14px 0">
+    <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px">SOLD ITEMS — PARA SA SUPPLIER</div>
+    <div id="supplier-list" style="background:#fff;border-radius:12px;border:1.5px solid #e2e8f0;margin-bottom:14px"></div>
+    <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px">LAHAT NG TRANSACTIONS</div>
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" id="nav-stock"   onclick="switchView('stock')"><span class="ni">📦</span>Stock</button>
+  <button class="nav-btn"        id="nav-history" onclick="switchView('history')"><span class="ni">📋</span>History</button>
+</nav>
+
+<div class="overlay" id="overlay" style="display:none" onclick="overlayClick(event)">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+// ── Storage ──────────────────────────────────────────
+let items = JSON.parse(localStorage.getItem('dg_items')||'[]');
+let logs  = JSON.parse(localStorage.getItem('dg_logs') ||'[]');
+let searchVal = '';
+let currentView = 'stock';
+
+const save = () => {
+  localStorage.setItem('dg_items', JSON.stringify(items));
+  localStorage.setItem('dg_logs',  JSON.stringify(logs));
+};
+const uid  = () => Math.random().toString(36).slice(2,8);
+const now  = () => { const d=new Date(); return { date:d.toISOString().slice(0,10), time:d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}) }; };
+const esc  = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const ICONS = {'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
+const icon  = cat => ICONS[cat]||'📦';
+
+// ── Views ─────────────────────────────────────────────
+function switchView(v){
+  currentView = v;
+  document.getElementById('view-stock').style.display   = v==='stock'?'':'none';
+  document.getElementById('view-history').style.display = v==='history'?'':'none';
+  document.getElementById('nav-stock').className   = 'nav-btn'+(v==='stock'?' active':'');
+  document.getElementById('nav-history').className = 'nav-btn'+(v==='history'?' active':'');
+  document.getElementById('btn-add').style.display = v==='stock'?'':'none';
+  document.getElementById('page-title').textContent = v==='stock'?'📦 Stock':'📋 History';
+  if(v==='stock') renderList();
+  if(v==='history') renderHistory();
+}
+
+// ── Item List ─────────────────────────────────────────
+function renderList(){
+  const filtered = items.filter(i=>i.name.toLowerCase().includes(searchVal.toLowerCase()));
+  const low = items.filter(i=>i.qty>0&&i.qty<=i.lowAt);
+  const out = items.filter(i=>i.qty===0);
+
+  // Low stock banner
+  const banner = document.getElementById('low-banner');
+  if(out.length||low.length){
+    banner.style.display='block';
+    let msg='';
+    if(out.length) msg+=`❌ ${out.length} item${out.length>1?'s':''} wala nang stock. `;
+    if(low.length) msg+=`⚠️ ${low.length} item${low.length>1?'s':''} mababa na.`;
+    banner.innerHTML=msg;
+  } else { banner.style.display='none'; }
+
+  if(filtered.length===0){
+    document.getElementById('item-list').innerHTML=`<div class="empty">Wala pang items.<br>I-tap ang <strong>+ Item</strong> para magdagdag.</div>`;
+    return;
+  }
+
+  document.getElementById('item-list').innerHTML = filtered
+    .sort((a,b)=>a.name.localeCompare(b.name))
+    .map(i=>{
+      const isOut=i.qty===0, isLow=i.qty>0&&i.qty<=i.lowAt;
+      return `<div class="item${isLow?' low':''}${isOut?' out':''}" onclick="openItem('${i.id}')">
+        <div class="item-icon">${icon(i.category)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="item-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.name)}</div>
+          <div class="item-sub">${esc(i.category)} · ₱${Number(i.price||0).toLocaleString()}</div>
+        </div>
+        <div>
+          <div class="item-qty${isOut?' out':isLow?' low':''}">${i.qty}<span class="item-unit"> ${esc(i.unit)}</span></div>
+          ${isOut?'<div style="font-size:10px;color:#ef4444;text-align:right;font-weight:700">WALA NA</div>':isLow?'<div style="font-size:10px;color:#f59e0b;text-align:right;font-weight:700">MABABA</div>':''}
+        </div>
+      </div>`;
+    }).join('');
+}
+
+// ── History ───────────────────────────────────────────
+function renderHistory(){
+  // Supplier reorder: aggregate sold items
+  const sold = {};
+  logs.filter(l=>l.type==='sell').forEach(l=>{
+    sold[l.itemId] = sold[l.itemId]||{name:l.itemName,qty:0};
+    sold[l.itemId].qty += l.qty;
+  });
+  const topSold = Object.entries(sold).sort((a,b)=>b[1].qty-a[1].qty);
+
+  const supplierEl = document.getElementById('supplier-list');
+  if(topSold.length===0){
+    supplierEl.innerHTML=`<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px">Wala pang sold items</div>`;
+  } else {
+    supplierEl.innerHTML = topSold.map(([id,info],idx)=>{
+      const item = items.find(i=>i.id===id);
+      const stock = item?item.qty:0;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:${idx<topSold.length-1?'1.5px solid #f1f5f9':'none'}">
+        <div>
+          <div style="font-weight:700;font-size:14px">${esc(info.name)}</div>
+          <div style="font-size:11px;color:#94a3b8">Stock ngayon: ${stock} ${item?esc(item.unit):''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;color:#0ea5e9">${info.qty} sold</div>
+          ${stock===0?'<div style="font-size:10px;color:#ef4444;font-weight:700">ORDER NA</div>':stock<=(item?item.lowAt:2)?'<div style="font-size:10px;color:#f59e0b;font-weight:700">MABABA</div>':''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Full log
+  const logEl = document.getElementById('log-list');
+  if(logs.length===0){
+    logEl.innerHTML=`<div class="empty">Wala pang transactions.</div>`;
+    return;
+  }
+  logEl.innerHTML = logs.slice(0,80).map(l=>{
+    const isSell = l.type==='sell';
+    return `<div class="log-item">
+      <div class="log-icon">${isSell?'📤':'📥'}</div>
+      <div style="flex:1">
+        <div class="log-name">${esc(l.itemName)}</div>
+        <div class="log-meta">${l.date} ${l.time||''} ${l.note?'· '+esc(l.note):''}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:800;font-size:16px;color:${isSell?'#0ea5e9':'#10b981'}">${isSell?'-':'+'}${l.qty}</div>
+        <div style="font-size:10px;color:#94a3b8;font-weight:700">${isSell?'SOLD':'STOCK IN'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Modals ────────────────────────────────────────────
+function overlayClick(e){ if(e.target===document.getElementById('overlay')) closeSheet(); }
+function closeSheet(){
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('sheet').innerHTML='';
+}
+function showSheet(html){
+  document.getElementById('sheet').innerHTML=html;
+  document.getElementById('overlay').style.display='flex';
+}
+
+// ── Item Action Sheet ─────────────────────────────────
+let activeItemId = null;
+function openItem(id){
+  activeItemId = id;
+  const item = items.find(i=>i.id===id);
+  if(!item) return;
+  showSheet(`
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">${esc(item.name)}</div>
+    <div class="sheet-sub">${icon(item.category)} ${esc(item.category)} · Stock: <strong style="color:${item.qty===0?'#ef4444':item.qty<=item.lowAt?'#f59e0b':'#0f172a'}">${item.qty} ${esc(item.unit)}</strong> · ₱${Number(item.price||0).toLocaleString()}</div>
+
+    <label class="field-lbl">Quantity</label>
+    <div class="qty-row">
+      <button onclick="stepQ(-1)">−</button>
+      <input type="number" id="q-val" value="1" min="1"/>
+      <button onclick="stepQ(1)">＋</button>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-sell" onclick="doSell()">📤 Ibenta</button>
+      <button class="btn-stock" onclick="doAddStock()">📥 Dagdag Stock</button>
+    </div>
+    <button class="btn-edit" onclick="openEdit('${id}')">✏️ Edit item</button>
+  `);
+}
+
+function stepQ(d){
+  const el=document.getElementById('q-val');
+  el.value=Math.max(1,parseInt(el.value||1)+d);
+}
+
+function getQ(){ return Math.max(1,parseInt(document.getElementById('q-val').value)||1); }
+
+function doSell(){
+  const item=items.find(i=>i.id===activeItemId);
+  const q=getQ();
+  if(q>item.qty){ alert('Hindi sapat ang stock!'); return; }
+  items=items.map(i=>i.id===activeItemId?{...i,qty:i.qty-q}:i);
+  const {date,time}=now();
+  logs.unshift({id:uid(),itemId:activeItemId,itemName:item.name,type:'sell',qty:q,date,time});
+  save();
+  closeSheet();
+  flash(`✅ Nabenta: ${item.name} x${q}`);
+  renderList();
+}
+
+function doAddStock(){
+  const item=items.find(i=>i.id===activeItemId);
+  const q=getQ();
+  items=items.map(i=>i.id===activeItemId?{...i,qty:i.qty+q}:i);
+  const {date,time}=now();
+  logs.unshift({id:uid(),itemId:activeItemId,itemName:item.name,type:'add',qty:q,date,time});
+  save();
+  closeSheet();
+  flash(`📥 Nadagdag: ${item.name} x${q}`);
+  renderList();
+}
+
+// ── Add / Edit Item ───────────────────────────────────
+const CATS = ['LCD / Display','Flex Cable','Battery','Charger','Casing / Cover','Tools / Parts','Accessories','Others'];
+
+function openAdd(){
+  showSheet(`
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="margin-bottom:16px">Bagong Item</div>
+    <label class="field-lbl">Pangalan</label>
+    <input class="field" id="f-name" placeholder="e.g. iPhone 13 LCD"/>
+    <label class="field-lbl">Category</label>
+    <select class="field" id="f-cat" style="background:#fff">
+      ${CATS.map(c=>`<option value="${c}">${icon(c)} ${c}</option>`).join('')}
+    </select>
+    <div class="grid2">
+      <div><label class="field-lbl">Stock ngayon</label><input class="field" id="f-qty" type="number" placeholder="0" min="0"/></div>
+      <div><label class="field-lbl">Selling Price (₱)</label><input class="field" id="f-price" type="number" placeholder="0" min="0"/></div>
+    </div>
+    <div class="grid2">
+      <div><label class="field-lbl">Low stock alert</label><input class="field" id="f-low" type="number" placeholder="2" value="2" min="0"/></div>
+      <div><label class="field-lbl">Unit</label><input class="field" id="f-unit" placeholder="pcs" value="pcs"/></div>
+    </div>
+    <button class="btn-save" onclick="saveAdd()">✅ I-Save</button>
+  `);
+}
+
+function saveAdd(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){ alert('Lagyan ng pangalan!'); return; }
+  items.push({
+    id:uid(), name,
+    category:document.getElementById('f-cat').value,
+    qty:parseInt(document.getElementById('f-qty').value)||0,
+    price:parseFloat(document.getElementById('f-price').value)||0,
+    lowAt:parseInt(document.getElementById('f-low').value)||2,
+    unit:document.getElementById('f-unit').value.trim()||'pcs'
+  });
+  save(); closeSheet(); renderList();
+  flash('✅ Item added!');
+}
+
+function openEdit(id){
+  const i=items.find(x=>x.id===id);
+  if(!i) return;
+  showSheet(`
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="margin-bottom:16px">I-Edit ang Item</div>
+    <label class="field-lbl">Pangalan</label>
+    <input class="field" id="e-name" value="${esc(i.name)}"/>
+    <label class="field-lbl">Category</label>
+    <select class="field" id="e-cat" style="background:#fff">
+      ${CATS.map(c=>`<option value="${c}"${i.category===c?' selected':''}>${icon(c)} ${c}</option>`).join('')}
+    </select>
+    <div class="grid2">
+      <div><label class="field-lbl">Stock</label><input class="field" id="e-qty" type="number" value="${i.qty}" min="0"/></div>
+      <div><label class="field-lbl">Selling Price (₱)</label><input class="field" id="e-price" type="number" value="${i.price||0}" min="0"/></div>
+    </div>
+    <div class="grid2">
+      <div><label class="field-lbl">Low stock alert</label><input class="field" id="e-low" type="number" value="${i.lowAt||2}" min="0"/></div>
+      <div><label class="field-lbl">Unit</label><input class="field" id="e-unit" value="${esc(i.unit)}"/></div>
+    </div>
+    <button class="btn-save" onclick="saveEdit('${id}')">✅ I-Update</button>
+    <button class="btn-edit" style="color:#ef4444;margin-top:8px" onclick="deleteItem('${id}')">🗑️ I-Delete ang item</button>
+  `);
+}
+
+function saveEdit(id){
+  items=items.map(i=>i.id===id?{...i,
+    name:document.getElementById('e-name').value.trim()||i.name,
+    category:document.getElementById('e-cat').value,
+    qty:parseInt(document.getElementById('e-qty').value)||0,
+    price:parseFloat(document.getElementById('e-price').value)||0,
+    lowAt:parseInt(document.getElementById('e-low').value)||2,
+    unit:document.getElementById('e-unit').value.trim()||i.unit
+  }:i);
+  save(); closeSheet(); renderList();
+  flash('✅ Updated!');
+}
+
+function deleteItem(id){
+  if(!confirm('I-delete ba?')) return;
+  items=items.filter(i=>i.id!==id);
+  logs=logs.filter(l=>l.itemId!==id);
+  save(); closeSheet(); renderList();
+}
+
+// ── Search ────────────────────────────────────────────
+function doSearch(v){ searchVal=v; renderList(); }
+
+// ── Flash toast ───────────────────────────────────────
+function flash(msg){
+  const el=document.createElement('div');
+  el.className='flash'; el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
+}
+
+// ── Init ──────────────────────────────────────────────
+renderList();
+</script>
+</body>
+</html>
