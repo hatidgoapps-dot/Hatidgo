@@ -8,560 +8,565 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:#f1f5f9;color:#0f172a;font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:72px}
-input,select,textarea{font-family:inherit}
-input::placeholder,textarea::placeholder{color:#94a3b8}
+input,select{font-family:inherit}
+input::placeholder{color:#94a3b8}
 select option{background:#fff}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
 
-.header{background:#fff;padding:14px 16px 12px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px}
-.header-title{font-size:18px;font-weight:800;flex:1}
-.btn-add{background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer}
-.btn-add:active{opacity:.8}
+.login-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;background:#0f172a}
+.login-logo{font-size:52px;margin-bottom:14px}
+.login-title{font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:4px}
+.login-sub{font-size:13px;color:#64748b;margin-bottom:28px}
+.lf{width:100%;background:#1e293b;border:1.5px solid #334155;border-radius:12px;color:#f1f5f9;padding:13px 16px;font-size:15px;outline:none;margin-bottom:11px}
+.lf:focus{border-color:#0ea5e9}
+.lf::placeholder{color:#475569}
+.btn-login{width:100%;background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer}
+.btn-login:active{opacity:.8}
+.login-err{color:#f87171;font-size:13px;margin-top:10px;text-align:center;min-height:18px}
 
-.search-wrap{padding:12px 14px}
-.search{width:100%;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:15px;outline:none;color:#0f172a}
-.search:focus{border-color:#0ea5e9}
-
-.list{padding:0 14px}
-.item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1.5px solid #e2e8f0}
-.item:active{background:#f8fafc}
-.item.low{border-color:#fbbf24}
-.item.out{border-color:#f87171}
-.item-icon{font-size:26px;width:40px;text-align:center;flex-shrink:0}
-.item-name{font-weight:700;font-size:15px}
-.item-sub{font-size:12px;color:#94a3b8;margin-top:2px}
-.item-qty{font-size:22px;font-weight:800}
-.item-qty.low{color:#f59e0b}
-.item-qty.out{color:#ef4444}
-.item-unit{font-size:11px;font-weight:400;color:#94a3b8}
-.status-tag{font-size:10px;font-weight:700;text-align:right}
-
-.banner{background:#fef9c3;border:1.5px solid #fde047;border-radius:12px;padding:10px 14px;margin:0 14px 10px;font-size:13px;color:#713f12;font-weight:600}
+.header{background:#fff;padding:13px 16px 11px;border-bottom:1px solid #e2e8f0;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px}
+.header-title{font-size:17px;font-weight:800;flex:1}
+.role-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.admin-b{background:#fef9c3;color:#92400e}
+.staff-b{background:#e0f2fe;color:#0369a1}
+.btn-sm{background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-sm:active{opacity:.8}
+.logout-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:2px 4px}
 
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:50}
 .nav-btn{flex:1;background:none;border:none;padding:10px 4px 14px;cursor:pointer;font-size:10px;font-weight:700;color:#94a3b8;border-top:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px}
 .nav-btn .ni{font-size:20px}
 .nav-btn.active{color:#0ea5e9;border-top-color:#0ea5e9}
 
+.search-wrap{padding:12px 14px}
+.search{width:100%;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:15px;outline:none;color:#0f172a}
+.search:focus{border-color:#0ea5e9}
+.list{padding:0 14px}
+.item{background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:9px;display:flex;align-items:center;gap:11px;cursor:pointer;border:1.5px solid #e2e8f0}
+.item:active{background:#f8fafc}
+.item.low{border-color:#fbbf24}
+.item.out{border-color:#f87171}
+.i-icon{font-size:24px;width:38px;text-align:center;flex-shrink:0}
+.i-name{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.i-sub{font-size:12px;color:#94a3b8;margin-top:2px}
+.i-qty{font-size:22px;font-weight:800;text-align:right;flex-shrink:0}
+.i-qty.low{color:#f59e0b}
+.i-qty.out{color:#ef4444}
+.i-unit{font-size:11px;font-weight:400;color:#94a3b8}
+.stag{font-size:9px;font-weight:700;text-align:right;margin-top:2px}
+.banner{background:#fef9c3;border:1.5px solid #fde047;border-radius:12px;padding:9px 14px;margin:0 14px 9px;font-size:13px;color:#713f12;font-weight:600}
+
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 20px 40px;max-height:92vh;overflow-y:auto}
-@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
-.sheet{animation:up .2s ease}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:14px 20px 40px;max-height:92vh;overflow-y:auto;animation:sUp .2s ease}
+@keyframes sUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 .handle{width:40px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 16px}
-.sheet-title{font-size:18px;font-weight:800;margin-bottom:4px}
-.sheet-sub{font-size:13px;color:#94a3b8;margin-bottom:18px}
-
-.qty-row{display:flex;align-items:center;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px}
-.qty-row button{background:none;border:none;font-size:24px;padding:10px 16px;cursor:pointer;color:#0f172a;font-weight:700}
+.s-title{font-size:18px;font-weight:800;margin-bottom:3px}
+.s-sub{font-size:13px;color:#94a3b8;margin-bottom:16px}
+.qty-row{display:flex;align-items:center;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px}
+.qty-row button{background:none;border:none;font-size:24px;padding:9px 16px;cursor:pointer;color:#0f172a;font-weight:700}
 .qty-row button:active{background:#f1f5f9}
-.qty-row input{flex:1;border:none;font-size:22px;font-weight:800;text-align:center;outline:none;color:#0f172a;padding:10px 0}
-
-.action-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.btn-sell{background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
-.btn-sell:active{opacity:.8}
-.btn-stock{background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer}
-.btn-stock:active{background:#e2e8f0}
-.btn-edit-link{background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:8px;width:100%}
-
-.lbl{font-size:12px;font-weight:700;color:#64748b;margin-bottom:5px;display:block}
-.field{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;color:#0f172a;margin-bottom:12px;background:#fff}
-.field:focus{border-color:#0ea5e9}
-.btn-save{background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
-.btn-save:active{opacity:.8}
-.btn-del{background:none;border:none;color:#ef4444;font-size:13px;cursor:pointer;padding:10px;width:100%;margin-top:4px}
+.qty-row input{flex:1;border:none;font-size:22px;font-weight:800;text-align:center;outline:none;color:#0f172a;padding:9px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.lbl{font-size:12px;font-weight:700;color:#64748b;margin-bottom:4px;display:block}
+.field{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:15px;outline:none;color:#0f172a;margin-bottom:11px;background:#fff}
+.field:focus{border-color:#0ea5e9}
+.btn-blue{background:#0ea5e9;color:#fff;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
+.btn-blue:active{opacity:.8}
+.btn-gray{background:#f1f5f9;color:#0f172a;border:1.5px solid #e2e8f0;border-radius:12px;padding:13px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
+.btn-gray:active{background:#e2e8f0}
+.btn-ghost{background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;padding:9px;width:100%}
+.btn-del{background:none;border:none;color:#ef4444;font-size:13px;cursor:pointer;padding:9px;width:100%;margin-top:2px}
+.price-box{background:#f8fafc;border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.price-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+.price-lbl{color:#64748b}
+.price-val{font-weight:700}
 
-/* History */
-.day-block{margin-bottom:16px}
-.day-header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;margin-bottom:6px}
-.day-label{font-size:13px;font-weight:800;color:#0f172a}
-.day-total{font-size:12px;color:#0ea5e9;font-weight:700}
-.log-card{background:#fff;border-radius:12px;padding:11px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border:1.5px solid #e2e8f0}
-.log-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0}
-.log-name{font-weight:700;font-size:14px}
+.day-block{margin-bottom:14px}
+.day-hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;margin-bottom:5px}
+.day-lbl{font-size:13px;font-weight:800}
+.day-rev{font-size:13px;font-weight:800;color:#10b981}
+.log-card{background:#fff;border-radius:11px;padding:10px 13px;margin-bottom:6px;display:flex;align-items:center;gap:9px;border:1.5px solid #e2e8f0}
+.log-icon{font-size:19px;width:30px;text-align:center;flex-shrink:0}
+.log-name{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .log-meta{font-size:11px;color:#94a3b8;margin-top:1px}
+.sup-card{background:#fff;border-radius:14px;border:1.5px solid #fde04788;margin:0 14px 6px}
+.sup-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f1f5f9}
+.sup-row:last-child{border-bottom:none}
+.user-card{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:8px;border:1.5px solid #e2e8f0;display:flex;align-items:center;gap:10px}
 
-/* Supplier card */
-.supplier-card{background:#fff;border-radius:14px;border:1.5px solid #fbbf2488;margin:0 14px 6px}
-.supplier-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f1f5f9}
-.supplier-row:last-child{border-bottom:none}
-.order-tag{font-size:10px;font-weight:700;color:#ef4444}
-.low-tag{font-size:10px;font-weight:700;color:#f59e0b}
-
-/* Setup screen */
-.setup{padding:32px 20px;display:flex;flex-direction:column;align-items:center;min-height:100vh;justify-content:center}
-.setup-logo{font-size:48px;margin-bottom:12px}
-.setup h2{font-size:20px;font-weight:800;margin-bottom:6px;text-align:center}
-.setup p{font-size:13px;color:#64748b;text-align:center;margin-bottom:24px}
-.setup .field{border:1.5px solid #e2e8f0;border-radius:12px;padding:12px 14px;font-size:14px;width:100%;outline:none;margin-bottom:12px;background:#fff}
-.setup .field:focus{border-color:#0ea5e9}
-
-/* Loading */
-.loading{display:flex;align-items:center;justify-content:center;padding:48px;color:#94a3b8;font-size:14px;gap:10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner{width:20px;height:20px;border:2.5px solid #e2e8f0;border-top-color:#0ea5e9;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
-
-/* Flash toast */
-.flash{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:12px;padding:11px 20px;font-size:14px;font-weight:700;z-index:200;white-space:nowrap}
-@keyframes flashIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%)}}
-.flash{animation:flashIn .2s ease}
-
-.empty{text-align:center;padding:40px 20px;color:#94a3b8;font-size:14px;line-height:2}
+.empty{text-align:center;padding:36px 20px;color:#94a3b8;font-size:14px;line-height:2}
+.sec-title{font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:8px}
+.flash{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:700;z-index:200;white-space:nowrap;animation:fIn .2s ease}
+@keyframes fIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%)}}
 </style>
 </head>
 <body>
 
-<!-- ── SETUP SCREEN ────────────────────────────────── -->
-<div id="setup-screen" style="display:none">
-  <div class="setup">
-    <div class="setup-logo">🔧</div>
-    <h2>Doctor Gadget Inventory</h2>
-    <p>I-lagay ang iyong Supabase credentials.<br>Makukuha sa Supabase → Project Settings → API</p>
-    <input class="field" id="sb-url"  placeholder="Project URL  (https://xxxx.supabase.co)" style="width:100%"/>
-    <input class="field" id="sb-key"  placeholder="Anon Key  (eyJh...)" style="width:100%"/>
-    <button class="btn-save" onclick="saveConfig()">✅ I-Connect</button>
-    <div id="setup-err" style="color:#ef4444;font-size:13px;margin-top:10px;text-align:center"></div>
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">🔧</div>
+    <div class="login-title">Doctor Gadget</div>
+    <div class="login-sub">Inventory System</div>
+    <input class="lf" id="l-email" type="email" placeholder="Email"/>
+    <input class="lf" id="l-pass" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-login" onclick="doLogin()">Login</button>
+    <div class="login-err" id="login-err"></div>
   </div>
 </div>
 
-<!-- ── MAIN APP ────────────────────────────────────── -->
-<div id="app" style="display:none">
+<!-- ADMIN -->
+<div id="screen-admin" class="screen">
   <div class="header">
-    <div class="header-title" id="page-title">📦 Stock</div>
-    <button class="btn-add" id="btn-add" onclick="openAdd()">+ Item</button>
+    <div class="header-title">Doctor Gadget</div>
+    <span class="role-badge admin-b" id="admin-name">Admin</span>
+    <button class="btn-sm" id="btn-add-item" onclick="openAdd()" style="display:none">+ Item</button>
+    <button class="logout-btn" onclick="doLogout()">👋</button>
   </div>
-
-  <!-- Stock Tab -->
-  <div id="view-stock">
-    <div class="search-wrap">
-      <input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)"/>
-    </div>
-    <div id="low-banner" style="display:none"></div>
-    <div class="list" id="item-list"></div>
+  <div id="av-stock" style="display:none">
+    <div class="search-wrap"><input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)"/></div>
+    <div id="a-banner" style="display:none"></div>
+    <div class="list" id="a-list"></div>
   </div>
-
-  <!-- History Tab -->
-  <div id="view-history" style="display:none;padding-top:12px">
+  <div id="av-history" style="display:none;padding-top:12px">
     <div style="padding:0 14px;margin-bottom:6px">
-      <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px">📦 PARA SA SUPPLIER — TOP SOLD</div>
-      <div class="supplier-card" id="supplier-list"></div>
+      <div class="sec-title">📦 PARA SA SUPPLIER — TOP SOLD</div>
+      <div class="sup-card" id="a-supplier"></div>
     </div>
-    <div style="padding:0 14px;margin-top:14px">
-      <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:8px">📅 BENTA PER ARAW</div>
-      <div id="log-list"></div>
+    <div style="padding:0 14px;margin-top:12px">
+      <div class="sec-title">📅 BENTA PER ARAW</div>
+      <div id="a-logs"></div>
     </div>
   </div>
-
+  <div id="av-users" style="display:none;padding:12px 14px">
+    <div class="sec-title">👥 MGA STAFF ACCOUNTS</div>
+    <div id="a-users"></div>
+    <div style="margin-top:4px">
+      <button class="btn-blue" onclick="openCreateStaff()">➕ Gawa ng Staff Account</button>
+    </div>
+  </div>
   <nav class="nav">
-    <button class="nav-btn active" id="nav-stock"   onclick="switchView('stock')"><span class="ni">📦</span>Stock</button>
-    <button class="nav-btn"        id="nav-history" onclick="switchView('history')"><span class="ni">📅</span>History</button>
+    <button class="nav-btn active" id="na-stock"   onclick="adminTab('stock')"><span class="ni">📦</span>Stock</button>
+    <button class="nav-btn"        id="na-history" onclick="adminTab('history')"><span class="ni">📅</span>History</button>
+    <button class="nav-btn"        id="na-users"   onclick="adminTab('users')"><span class="ni">👥</span>Users</button>
   </nav>
 </div>
 
-<!-- Modal -->
-<div class="overlay" id="overlay" style="display:none" onclick="overlayClick(event)">
+<!-- STAFF -->
+<div id="screen-staff" class="screen">
+  <div class="header">
+    <div class="header-title">Doctor Gadget</div>
+    <span class="role-badge staff-b" id="staff-name">Staff</span>
+    <button class="logout-btn" onclick="doLogout()">👋</button>
+  </div>
+  <div id="sv-stock" style="display:none">
+    <div class="search-wrap"><input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)"/></div>
+    <div class="list" id="s-list"></div>
+  </div>
+  <div id="sv-history" style="display:none;padding-top:12px">
+    <div style="padding:0 14px">
+      <div class="sec-title">📅 AKING MGA BENTA NGAYON</div>
+      <div id="s-logs"></div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" id="ns-stock"   onclick="staffTab('stock')"><span class="ni">📦</span>Stock</button>
+    <button class="nav-btn"        id="ns-history" onclick="staffTab('history')"><span class="ni">📅</span>History</button>
+  </nav>
+</div>
+
+<div class="overlay" id="overlay" style="display:none" onclick="bgClick(event)">
   <div class="sheet" id="sheet"></div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
-let sb = null;
-let items = [];
-let logs  = [];
-let searchVal = '';
-let currentView = 'stock';
-let activeId = null;
+// ═══════════════════════════════════════════════════
+//  ⚠️  PALITAN MO LANG ITONG DALAWA BAGO I-UPLOAD
+// ═══════════════════════════════════════════════════
+const SB_URL = 'https://sivnejgshvmlpribuydl.supabase.co';
+const SB_KEY = 'ILAGAY_MO_DITO_ANG_ANON_KEY';
+// ═══════════════════════════════════════════════════
 
-const ICONS = {'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
-const CATS  = Object.keys(ICONS);
-const icon  = c => ICONS[c]||'📦';
-const uid   = () => Math.random().toString(36).slice(2,9);
-const esc   = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const now   = () => { const d=new Date(); return { date:d.toISOString().slice(0,10), time:d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}) }; };
-const today = () => new Date().toISOString().slice(0,10);
+const sb = supabase.createClient(SB_URL, SB_KEY);
+let profile, items=[], logs=[];
+let searchVal='', activeId=null;
 
-// Config from localStorage
-let SB_URL = localStorage.getItem('dg_url')||'';
-let SB_KEY = localStorage.getItem('dg_key')||'';
+const ICONS={'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
+const CATS=Object.keys(ICONS);
+const icon=c=>ICONS[c]||'📦';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const now=()=>{const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})};};
+const today=()=>new Date().toISOString().slice(0,10);
+const peso=n=>'₱'+Number(n||0).toLocaleString('en-PH');
+const showScreen=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');};
 
 async function init(){
-  if(!SB_URL||!SB_KEY){ show('setup-screen'); return; }
-  try{
-    const {createClient} = supabase;
-    sb = createClient(SB_URL, SB_KEY);
-    show('app');
-    setLoading(true);
-    await loadAll();
-    renderList();
-    setLoading(false);
-  } catch(e){
-    localStorage.removeItem('dg_url'); localStorage.removeItem('dg_key');
-    show('setup-screen');
-    document.getElementById('setup-err').textContent='Hindi makaconnect. Subukan ulit.';
+  const {data:{session}}=await sb.auth.getSession();
+  if(session) await afterLogin(session.user);
+}
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const pass=document.getElementById('l-pass').value;
+  document.getElementById('login-err').textContent='';
+  if(!email||!pass){document.getElementById('login-err').textContent='Kumpleto ang email at password.';return;}
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){document.getElementById('login-err').textContent='Mali ang email o password.';return;}
+  await afterLogin(data.user);
+}
+
+async function afterLogin(user){
+  const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  profile=data||{id:user.id,name:user.email,role:'staff'};
+  await loadData();
+  if(profile.role==='admin'){
+    document.getElementById('admin-name').textContent='👑 '+profile.name;
+    showScreen('admin');adminTab('stock');
+  } else {
+    document.getElementById('staff-name').textContent='👤 '+profile.name;
+    showScreen('staff');staffTab('stock');
   }
 }
 
-async function saveConfig(){
-  SB_URL = document.getElementById('sb-url').value.trim();
-  SB_KEY = document.getElementById('sb-key').value.trim();
-  if(!SB_URL||!SB_KEY){ document.getElementById('setup-err').textContent='Kumpleto ang dalawang fields!'; return; }
-  localStorage.setItem('dg_url', SB_URL);
-  localStorage.setItem('dg_key', SB_KEY);
-  await init();
-}
+async function doLogout(){await sb.auth.signOut();profile=null;items=[];logs=[];showScreen('login');}
 
-function show(id){
-  document.getElementById('setup-screen').style.display = id==='setup-screen'?'':'none';
-  if(document.getElementById('app')) document.getElementById('app').style.display = id==='app'?'':'none';
-}
-
-// ══════════════════════════════════════════════════════
-//  DATA
-// ══════════════════════════════════════════════════════
-async function loadAll(){
-  const [ir, lr] = await Promise.all([
+async function loadData(){
+  const [ir,lr]=await Promise.all([
     sb.from('items').select('*').order('name'),
     sb.from('logs').select('*').order('created_at',{ascending:false}).limit(300)
   ]);
-  if(ir.data) items = ir.data;
-  if(lr.data) logs  = lr.data;
+  if(ir.data)items=ir.data;
+  if(lr.data)logs=lr.data;
 }
 
-function setLoading(on){
-  const el = document.getElementById('item-list');
-  if(!el) return;
-  if(on) el.innerHTML = `<div class="loading"><div class="spinner"></div>Loading...</div>`;
+function adminTab(tab){
+  ['stock','history','users'].forEach(t=>{
+    document.getElementById('av-'+t).style.display=t===tab?'':'none';
+    document.getElementById('na-'+t).className='nav-btn'+(t===tab?' active':'');
+  });
+  document.getElementById('btn-add-item').style.display=tab==='stock'?'':'none';
+  if(tab==='stock')renderAdminStock();
+  if(tab==='history')renderHistory('admin');
+  if(tab==='users')renderUsers();
 }
 
-// ══════════════════════════════════════════════════════
-//  STOCK VIEW
-// ══════════════════════════════════════════════════════
-function renderList(){
-  const fil = items.filter(i=>i.name.toLowerCase().includes(searchVal.toLowerCase()));
-  const low = items.filter(i=>i.qty>0&&i.qty<=i.low_at);
-  const out = items.filter(i=>i.qty===0);
+function staffTab(tab){
+  ['stock','history'].forEach(t=>{
+    document.getElementById('sv-'+t).style.display=t===tab?'':'none';
+    document.getElementById('ns-'+t).className='nav-btn'+(t===tab?' active':'');
+  });
+  if(tab==='stock')renderStaffStock();
+  if(tab==='history')renderHistory('staff');
+}
 
-  const banner = document.getElementById('low-banner');
+function renderAdminStock(){
+  const fil=items.filter(i=>i.name.toLowerCase().includes(searchVal.toLowerCase()));
+  const low=items.filter(i=>i.qty>0&&i.qty<=i.low_at);
+  const out=items.filter(i=>i.qty===0);
+  const banner=document.getElementById('a-banner');
   if(out.length||low.length){
-    let msg='';
-    if(out.length) msg+=`❌ ${out.length} item${out.length>1?'s':''} wala nang stock.  `;
-    if(low.length) msg+=`⚠️ ${low.length} item${low.length>1?'s':''} mababa na.`;
-    banner.innerHTML=msg; banner.style.display='block';
-  } else { banner.style.display='none'; }
-
-  if(fil.length===0){
-    document.getElementById('item-list').innerHTML=`<div class="empty">Wala pang items.<br>I-tap ang <strong>+ Item</strong> para magdagdag.</div>`;
-    return;
-  }
-
-  document.getElementById('item-list').innerHTML = fil
-    .sort((a,b)=>a.name.localeCompare(b.name))
-    .map(i=>{
-      const isOut=i.qty===0, isLow=i.qty>0&&i.qty<=i.low_at;
-      return `<div class="item${isLow?' low':''}${isOut?' out':''}" onclick="openItem('${i.id}')">
-        <div class="item-icon">${icon(i.category)}</div>
+    banner.innerHTML=(out.length?`❌ ${out.length} wala nang stock.  `:'')+(low.length?`⚠️ ${low.length} mababa na.`:'');
+    banner.style.display='block';
+  } else banner.style.display='none';
+  document.getElementById('a-list').innerHTML=fil.length===0
+    ?`<div class="empty">Wala pang items.<br>I-tap ang <strong>+ Item</strong></div>`
+    :fil.map(i=>{
+      const isOut=i.qty===0,isLow=i.qty>0&&i.qty<=i.low_at;
+      return `<div class="item${isLow?' low':''}${isOut?' out':''}" onclick="openAdminItem('${i.id}')">
+        <div class="i-icon">${icon(i.category)}</div>
         <div style="flex:1;min-width:0">
-          <div class="item-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.name)}</div>
-          <div class="item-sub">₱${Number(i.price||0).toLocaleString()}</div>
+          <div class="i-name">${esc(i.name)}</div>
+          <div class="i-sub">Cost: ${peso(i.cost)} · Admin: ${peso(i.admin_price)} · Staff: ${peso(i.staff_price)}</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <div class="item-qty${isOut?' out':isLow?' low':''}">${i.qty}<span class="item-unit"> ${esc(i.unit)}</span></div>
-          ${isOut?'<div class="status-tag" style="color:#ef4444">WALA NA</div>':isLow?'<div class="status-tag" style="color:#f59e0b">MABABA</div>':''}
+          <div class="i-qty${isOut?' out':isLow?' low':''}">${i.qty}<span class="i-unit"> ${esc(i.unit)}</span></div>
+          ${isOut?'<div class="stag" style="color:#ef4444">WALA NA</div>':isLow?'<div class="stag" style="color:#f59e0b">MABABA</div>':''}
         </div>
       </div>`;
     }).join('');
 }
 
-function switchView(v){
-  currentView=v;
-  document.getElementById('view-stock').style.display   = v==='stock'?'':'none';
-  document.getElementById('view-history').style.display = v==='history'?'':'none';
-  document.getElementById('nav-stock').className   = 'nav-btn'+(v==='stock'?' active':'');
-  document.getElementById('nav-history').className = 'nav-btn'+(v==='history'?' active':'');
-  document.getElementById('btn-add').style.display = v==='stock'?'':'none';
-  document.getElementById('page-title').textContent = v==='stock'?'📦 Stock':'📅 History';
-  if(v==='history') renderHistory();
-}
-
-function doSearch(v){ searchVal=v; renderList(); }
-
-// ══════════════════════════════════════════════════════
-//  HISTORY VIEW
-// ══════════════════════════════════════════════════════
-function renderHistory(){
-  // Supplier: aggregate sold items
-  const soldMap = {};
-  logs.filter(l=>l.type==='sell').forEach(l=>{
-    soldMap[l.item_id]=soldMap[l.item_id]||{name:l.item_name,qty:0};
-    soldMap[l.item_id].qty+=l.qty;
-  });
-  const topSold = Object.entries(soldMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8);
-  const supEl = document.getElementById('supplier-list');
-  if(topSold.length===0){
-    supEl.innerHTML=`<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px">Wala pang sold items</div>`;
-  } else {
-    supEl.innerHTML = topSold.map(([id,info],idx)=>{
-      const item=items.find(i=>i.id===id);
-      const stock=item?item.qty:0;
-      return `<div class="supplier-row">
-        <div>
-          <div style="font-weight:700;font-size:14px">${esc(info.name)}</div>
-          <div style="font-size:11px;color:#94a3b8">Stock ngayon: ${stock} ${item?esc(item.unit):''}</div>
+function renderStaffStock(){
+  const fil=items.filter(i=>i.qty>0&&i.name.toLowerCase().includes(searchVal.toLowerCase()));
+  document.getElementById('s-list').innerHTML=fil.length===0
+    ?`<div class="empty">Walang available na items ngayon.</div>`
+    :fil.map(i=>`
+      <div class="item" onclick="openStaffItem('${i.id}')">
+        <div class="i-icon">${icon(i.category)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="i-name">${esc(i.name)}</div>
+          <div class="i-sub">${esc(i.category)}</div>
         </div>
-        <div style="text-align:right">
-          <div style="font-weight:800;color:#0ea5e9;font-size:14px">${info.qty} sold</div>
-          ${stock===0?`<div class="order-tag">ORDER NA</div>`:stock<=(item?item.low_at:2)?`<div class="low-tag">MABABA</div>`:''}
+        <div style="text-align:right;flex-shrink:0">
+          <div class="i-qty">${i.qty}<span class="i-unit"> ${esc(i.unit)}</span></div>
         </div>
-      </div>`;
-    }).join('');
-  }
-
-  // Group logs by date
-  const byDate = {};
-  logs.forEach(l=>{
-    if(!byDate[l.date]) byDate[l.date]=[];
-    byDate[l.date].push(l);
-  });
-
-  const t = today();
-  const dateLabel = d => d===t ? '🟢 Ngayon' : formatDate(d);
-
-  let html = '';
-  if(Object.keys(byDate).length===0){
-    html=`<div class="empty">Wala pang transactions.</div>`;
-  } else {
-    Object.entries(byDate).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([date,entries])=>{
-      const sells = entries.filter(e=>e.type==='sell');
-      const totalSold = sells.reduce((s,e)=>s+e.qty,0);
-      const totalAmt  = sells.reduce((s,e)=>{
-        const item=items.find(i=>i.id===e.item_id);
-        return s+(item?item.price*e.qty:0);
-      },0);
-
-      html+=`<div class="day-block">
-        <div class="day-header">
-          <div>
-            <div class="day-label">${dateLabel(date)}</div>
-            <div style="font-size:11px;color:#94a3b8">${sells.length} transaction${sells.length!==1?'s':''} · ${totalSold} items sold</div>
-          </div>
-          ${totalAmt>0?`<div style="font-weight:800;color:#10b981;font-size:15px">₱${Number(totalAmt).toLocaleString()}</div>`:''}
-        </div>`;
-
-      entries.sort((a,b)=>(b.time||'').localeCompare(a.time||'')).forEach(l=>{
-        const isSell=l.type==='sell';
-        const item=items.find(i=>i.id===l.item_id);
-        const amt = isSell&&item ? item.price*l.qty : null;
-        html+=`<div class="log-card">
-          <div class="log-icon">${isSell?'📤':'📥'}</div>
-          <div style="flex:1;min-width:0">
-            <div class="log-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.item_name)}</div>
-            <div class="log-meta">${l.time||''} ${l.note?'· '+esc(l.note):''}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-weight:800;font-size:16px;color:${isSell?'#0ea5e9':'#10b981'}">${isSell?'-':'+'}${l.qty}</div>
-            ${amt?`<div style="font-size:11px;color:#94a3b8">₱${Number(amt).toLocaleString()}</div>`:''}
-          </div>
-        </div>`;
-      });
-      html+=`</div>`;
-    });
-  }
-  document.getElementById('log-list').innerHTML = html;
+      </div>`).join('');
 }
 
-function formatDate(d){
-  const dt=new Date(d+'T00:00:00');
-  return dt.toLocaleDateString('en-PH',{month:'short',day:'numeric',weekday:'short'});
-}
+function doSearch(v){searchVal=v;if(profile.role==='admin')renderAdminStock();else renderStaffStock();}
 
-// ══════════════════════════════════════════════════════
-//  ITEM ACTION SHEET
-// ══════════════════════════════════════════════════════
-function openItem(id){
-  activeId=id;
-  const item=items.find(i=>i.id===id);
-  if(!item) return;
+function openAdminItem(id){
+  activeId=id;const i=items.find(x=>x.id===id);
   showSheet(`
     <div class="handle"></div>
-    <div class="sheet-title">${esc(item.name)}</div>
-    <div class="sheet-sub">${icon(item.category)} ${esc(item.category)} &nbsp;·&nbsp; Stock: <strong style="color:${item.qty===0?'#ef4444':item.qty<=item.low_at?'#f59e0b':'#0f172a'}">${item.qty} ${esc(item.unit)}</strong> &nbsp;·&nbsp; ₱${Number(item.price||0).toLocaleString()}</div>
+    <div class="s-title">${esc(i.name)}</div>
+    <div class="s-sub">${icon(i.category)} ${esc(i.category)} · ${i.qty} ${esc(i.unit)} natitira</div>
+    <div class="price-box">
+      <div class="price-row"><span class="price-lbl">Supplier Cost</span><span class="price-val">${peso(i.cost)}</span></div>
+      <div class="price-row"><span class="price-lbl">Admin Price</span><span class="price-val" style="color:#0ea5e9">${peso(i.admin_price)}</span></div>
+      <div class="price-row"><span class="price-lbl">Staff Price</span><span class="price-val" style="color:#64748b">${peso(i.staff_price)}</span></div>
+    </div>
     <label class="lbl">Quantity</label>
     <div class="qty-row">
       <button onclick="stepQ(-1)">−</button>
       <input type="number" id="q-val" value="1" min="1"/>
       <button onclick="stepQ(1)">＋</button>
     </div>
-    <div class="action-row">
-      <button class="btn-sell" onclick="doSell()">📤 Ibenta</button>
-      <button class="btn-stock" onclick="doAdd()">📥 Dagdag Stock</button>
+    <div class="grid2" style="margin-bottom:10px">
+      <button class="btn-blue" onclick="doSell()">📤 Ibenta</button>
+      <button class="btn-gray" onclick="doAddStock()">📥 Dagdag</button>
     </div>
-    <button class="btn-edit-link" onclick="openEdit('${id}')">✏️ I-edit ang item</button>
-  `);
+    <button class="btn-ghost" onclick="openEdit('${id}')">✏️ I-edit ang item</button>`);
 }
 
-function stepQ(d){
-  const el=document.getElementById('q-val');
-  el.value=Math.max(1,parseInt(el.value||1)+d);
+function openStaffItem(id){
+  activeId=id;const i=items.find(x=>x.id===id);
+  showSheet(`
+    <div class="handle"></div>
+    <div class="s-title">${esc(i.name)}</div>
+    <div class="s-sub">${icon(i.category)} · Natitira: <strong>${i.qty} ${esc(i.unit)}</strong></div>
+    <label class="lbl">Quantity na ibebenta</label>
+    <div class="qty-row">
+      <button onclick="stepQ(-1)">−</button>
+      <input type="number" id="q-val" value="1" min="1"/>
+      <button onclick="stepQ(1)">＋</button>
+    </div>
+    <button class="btn-blue" onclick="doSell()">📤 Ibenta</button>`);
 }
-function getQ(){ return Math.max(1,parseInt(document.getElementById('q-val').value)||1); }
+
+function stepQ(d){const el=document.getElementById('q-val');el.value=Math.max(1,parseInt(el.value||1)+d);}
+function getQ(){return Math.max(1,parseInt(document.getElementById('q-val').value)||1);}
 
 async function doSell(){
-  const item=items.find(i=>i.id===activeId);
-  const q=getQ();
-  if(q>item.qty){ flash('❌ Hindi sapat ang stock!'); return; }
+  const item=items.find(i=>i.id===activeId);const q=getQ();
+  if(q>item.qty){flash('❌ Hindi sapat ang stock!');return;}
   closeSheet();
-  const {date,time}=now();
+  const isAdmin=profile.role==='admin';
+  const priceUsed=isAdmin?item.admin_price:item.staff_price;
   const newQty=item.qty-q;
-  const log={id:uid(),item_id:activeId,item_name:item.name,type:'sell',qty:q,note:null,date,time};
-  // Optimistic update
-  items=items.map(i=>i.id===activeId?{...i,qty:newQty}:i);
-  logs.unshift(log);
-  renderList();
-  flash(`✅ Nabenta: ${item.name} x${q}`);
-  // Sync Supabase
-  await Promise.all([
-    sb.from('items').update({qty:newQty}).eq('id',activeId),
-    sb.from('logs').insert(log)
-  ]);
-}
-
-async function doAdd(){
-  const item=items.find(i=>i.id===activeId);
-  const q=getQ();
-  closeSheet();
   const {date,time}=now();
-  const newQty=item.qty+q;
-  const log={id:uid(),item_id:activeId,item_name:item.name,type:'add',qty:q,note:null,date,time};
+  const log={id:uid(),item_id:activeId,item_name:item.name,type:'sell',qty:q,price_used:priceUsed,seller_name:profile.name,seller_role:profile.role,date,time};
   items=items.map(i=>i.id===activeId?{...i,qty:newQty}:i);
   logs.unshift(log);
-  renderList();
-  flash(`📥 Nadagdag: ${item.name} x${q}`);
-  await Promise.all([
-    sb.from('items').update({qty:newQty}).eq('id',activeId),
-    sb.from('logs').insert(log)
-  ]);
+  if(isAdmin)renderAdminStock();else renderStaffStock();
+  flash(`✅ Nabenta: ${item.name} x${q}`);
+  await Promise.all([sb.from('items').update({qty:newQty}).eq('id',activeId),sb.from('logs').insert(log)]);
 }
 
-// ══════════════════════════════════════════════════════
-//  ADD / EDIT ITEM
-// ══════════════════════════════════════════════════════
+async function doAddStock(){
+  const item=items.find(i=>i.id===activeId);const q=getQ();
+  closeSheet();
+  const newQty=item.qty+q;
+  const {date,time}=now();
+  const log={id:uid(),item_id:activeId,item_name:item.name,type:'add',qty:q,price_used:0,seller_name:profile.name,seller_role:'admin',date,time};
+  items=items.map(i=>i.id===activeId?{...i,qty:newQty}:i);logs.unshift(log);
+  renderAdminStock();flash(`📥 Nadagdag: ${item.name} x${q}`);
+  await Promise.all([sb.from('items').update({qty:newQty}).eq('id',activeId),sb.from('logs').insert(log)]);
+}
+
 function openAdd(){
   showSheet(`
     <div class="handle"></div>
-    <div class="sheet-title" style="margin-bottom:16px">Bagong Item</div>
+    <div class="s-title" style="margin-bottom:14px">Bagong Item</div>
     <label class="lbl">Pangalan</label>
     <input class="field" id="f-name" placeholder="e.g. iPhone 13 LCD"/>
     <label class="lbl">Category</label>
-    <select class="field" id="f-cat" style="background:#fff">
-      ${CATS.map(c=>`<option value="${c}">${icon(c)} ${c}</option>`).join('')}
-    </select>
+    <select class="field" id="f-cat">${CATS.map(c=>`<option value="${c}">${icon(c)} ${c}</option>`).join('')}</select>
     <div class="grid2">
       <div><label class="lbl">Stock ngayon</label><input class="field" id="f-qty" type="number" placeholder="0" min="0"/></div>
-      <div><label class="lbl">Selling Price (₱)</label><input class="field" id="f-price" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Low stock alert</label><input class="field" id="f-low" type="number" value="2" min="0"/></div>
     </div>
-    <div class="grid2">
-      <div><label class="lbl">Low stock alert</label><input class="field" id="f-low" type="number" placeholder="2" value="2" min="0"/></div>
-      <div><label class="lbl">Unit</label><input class="field" id="f-unit" placeholder="pcs" value="pcs"/></div>
+    <div class="grid3">
+      <div><label class="lbl">Cost (₱)</label><input class="field" id="f-cost" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Admin Price</label><input class="field" id="f-ap" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Staff Price</label><input class="field" id="f-sp" type="number" placeholder="0" min="0"/></div>
     </div>
-    <button class="btn-save" onclick="saveAdd()">✅ I-Save</button>
-  `);
+    <label class="lbl">Unit</label>
+    <input class="field" id="f-unit" value="pcs"/>
+    <button class="btn-blue" onclick="saveAdd()">✅ I-Save</button>`);
 }
 
 async function saveAdd(){
   const name=document.getElementById('f-name').value.trim();
-  if(!name){ flash('❌ Lagyan ng pangalan!'); return; }
-  const item={
-    id:uid(), name,
-    category:document.getElementById('f-cat').value,
+  if(!name){flash('❌ Lagyan ng pangalan!');return;}
+  const item={id:uid(),name,category:document.getElementById('f-cat').value,
     qty:parseInt(document.getElementById('f-qty').value)||0,
-    price:parseFloat(document.getElementById('f-price').value)||0,
     low_at:parseInt(document.getElementById('f-low').value)||2,
-    unit:document.getElementById('f-unit').value.trim()||'pcs'
-  };
-  closeSheet();
-  items.push(item);
-  items.sort((a,b)=>a.name.localeCompare(b.name));
-  renderList();
-  flash('✅ Item added!');
+    cost:parseFloat(document.getElementById('f-cost').value)||0,
+    admin_price:parseFloat(document.getElementById('f-ap').value)||0,
+    staff_price:parseFloat(document.getElementById('f-sp').value)||0,
+    unit:document.getElementById('f-unit').value.trim()||'pcs'};
+  closeSheet();items.push(item);items.sort((a,b)=>a.name.localeCompare(b.name));
+  renderAdminStock();flash('✅ Item added!');
   await sb.from('items').insert(item);
 }
 
 function openEdit(id){
   const i=items.find(x=>x.id===id);
-  if(!i) return;
   showSheet(`
     <div class="handle"></div>
-    <div class="sheet-title" style="margin-bottom:16px">I-Edit</div>
+    <div class="s-title" style="margin-bottom:14px">I-Edit</div>
     <label class="lbl">Pangalan</label>
     <input class="field" id="e-name" value="${esc(i.name)}"/>
     <label class="lbl">Category</label>
-    <select class="field" id="e-cat" style="background:#fff">
-      ${CATS.map(c=>`<option value="${c}"${i.category===c?' selected':''}>${icon(c)} ${c}</option>`).join('')}
-    </select>
+    <select class="field" id="e-cat">${CATS.map(c=>`<option value="${c}"${i.category===c?' selected':''}>${icon(c)} ${c}</option>`).join('')}</select>
     <div class="grid2">
       <div><label class="lbl">Stock</label><input class="field" id="e-qty" type="number" value="${i.qty}" min="0"/></div>
-      <div><label class="lbl">Selling Price (₱)</label><input class="field" id="e-price" type="number" value="${i.price||0}" min="0"/></div>
-    </div>
-    <div class="grid2">
       <div><label class="lbl">Low stock alert</label><input class="field" id="e-low" type="number" value="${i.low_at||2}" min="0"/></div>
-      <div><label class="lbl">Unit</label><input class="field" id="e-unit" value="${esc(i.unit)}"/></div>
     </div>
-    <button class="btn-save" onclick="saveEdit('${id}')">✅ I-Update</button>
-    <button class="btn-del" onclick="deleteItem('${id}')">🗑️ I-Delete</button>
-  `);
+    <div class="grid3">
+      <div><label class="lbl">Cost (₱)</label><input class="field" id="e-cost" type="number" value="${i.cost||0}" min="0"/></div>
+      <div><label class="lbl">Admin Price</label><input class="field" id="e-ap" type="number" value="${i.admin_price||0}" min="0"/></div>
+      <div><label class="lbl">Staff Price</label><input class="field" id="e-sp" type="number" value="${i.staff_price||0}" min="0"/></div>
+    </div>
+    <label class="lbl">Unit</label>
+    <input class="field" id="e-unit" value="${esc(i.unit)}"/>
+    <button class="btn-blue" onclick="saveEdit('${id}')">✅ I-Update</button>
+    <button class="btn-del" onclick="deleteItem('${id}')">🗑️ I-Delete</button>`);
 }
 
 async function saveEdit(id){
-  const upd={
-    name:document.getElementById('e-name').value.trim(),
-    category:document.getElementById('e-cat').value,
-    qty:parseInt(document.getElementById('e-qty').value)||0,
-    price:parseFloat(document.getElementById('e-price').value)||0,
-    low_at:parseInt(document.getElementById('e-low').value)||2,
-    unit:document.getElementById('e-unit').value.trim()||'pcs'
-  };
-  if(!upd.name){ flash('❌ Lagyan ng pangalan!'); return; }
-  closeSheet();
-  items=items.map(i=>i.id===id?{...i,...upd}:i);
-  renderList();
-  flash('✅ Updated!');
+  const upd={name:document.getElementById('e-name').value.trim(),category:document.getElementById('e-cat').value,
+    qty:parseInt(document.getElementById('e-qty').value)||0,low_at:parseInt(document.getElementById('e-low').value)||2,
+    cost:parseFloat(document.getElementById('e-cost').value)||0,
+    admin_price:parseFloat(document.getElementById('e-ap').value)||0,
+    staff_price:parseFloat(document.getElementById('e-sp').value)||0,
+    unit:document.getElementById('e-unit').value.trim()||'pcs'};
+  if(!upd.name){flash('❌ Lagyan ng pangalan!');return;}
+  closeSheet();items=items.map(i=>i.id===id?{...i,...upd}:i);
+  renderAdminStock();flash('✅ Updated!');
   await sb.from('items').update(upd).eq('id',id);
 }
 
 async function deleteItem(id){
-  if(!confirm('I-delete ba?')) return;
-  closeSheet();
-  items=items.filter(i=>i.id!==id);
-  logs=logs.filter(l=>l.item_id!==id);
-  renderList();
-  flash('🗑️ Deleted.');
+  if(!confirm('I-delete ba?'))return;
+  closeSheet();items=items.filter(i=>i.id!==id);
+  renderAdminStock();flash('🗑️ Deleted.');
   await sb.from('items').delete().eq('id',id);
 }
 
-// ══════════════════════════════════════════════════════
-//  MODAL
-// ══════════════════════════════════════════════════════
-function overlayClick(e){ if(e.target===document.getElementById('overlay')) closeSheet(); }
-function closeSheet(){
-  document.getElementById('overlay').style.display='none';
-  document.getElementById('sheet').innerHTML='';
-}
-function showSheet(html){
-  document.getElementById('sheet').innerHTML=html;
-  document.getElementById('overlay').style.display='flex';
-}
-
-function flash(msg){
-  const el=document.createElement('div');
-  el.className='flash'; el.textContent=msg;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(),2200);
+async function renderUsers(){
+  const {data}=await sb.from('profiles').select('*').order('created_at');
+  document.getElementById('a-users').innerHTML=(data||[]).map(p=>`
+    <div class="user-card">
+      <div style="font-size:24px">${p.role==='admin'?'👑':'👤'}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px">${esc(p.name)}</div>
+        <div style="font-size:11px;color:#94a3b8">${p.role==='admin'?'Admin':'Staff'}</div>
+      </div>
+      ${p.id!==profile.id?`<button onclick="toggleRole('${p.id}','${p.role==='staff'?'admin':'staff'}')"
+        style="font-size:11px;border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:700;${p.role==='staff'?'background:#fef9c3;color:#92400e':'background:#e0f2fe;color:#0369a1'}">
+        ${p.role==='staff'?'→ Admin':'→ Staff'}</button>`
+      :'<span style="font-size:11px;color:#94a3b8">Ikaw</span>'}
+    </div>`).join('');
 }
 
-// ══════════════════════════════════════════════════════
-//  START
-// ══════════════════════════════════════════════════════
+async function toggleRole(id,role){
+  await sb.from('profiles').update({role}).eq('id',id);
+  flash('✅ Role updated!');renderUsers();
+}
+
+function openCreateStaff(){
+  showSheet(`
+    <div class="handle"></div>
+    <div class="s-title" style="margin-bottom:4px">Gawa ng Staff Account</div>
+    <div class="s-sub">Ikaw mismo ang mag-assign ng login</div>
+    <label class="lbl">Pangalan</label>
+    <input class="field" id="ns-name" placeholder="e.g. Maria"/>
+    <label class="lbl">Email</label>
+    <input class="field" id="ns-email" type="email" placeholder="e.g. maria@gmail.com"/>
+    <label class="lbl">Password</label>
+    <input class="field" id="ns-pass" type="password" placeholder="Min. 6 characters"/>
+    <button class="btn-blue" id="cs-btn" onclick="createStaff()">✅ Gawa ng Account</button>
+    <div id="cs-err" style="color:#ef4444;font-size:13px;margin-top:8px;text-align:center"></div>`);
+}
+
+async function createStaff(){
+  const name=document.getElementById('ns-name').value.trim();
+  const email=document.getElementById('ns-email').value.trim();
+  const pass=document.getElementById('ns-pass').value;
+  const err=document.getElementById('cs-err');
+  err.textContent='';
+  if(!name||!email||!pass){err.textContent='Kumpleto ang lahat ng fields.';return;}
+  if(pass.length<6){err.textContent='Password — minimum 6 characters.';return;}
+  document.getElementById('cs-btn').textContent='⏳ Ginagawa...';
+  const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+  if(error){err.textContent=error.message;document.getElementById('cs-btn').textContent='✅ Gawa ng Account';return;}
+  if(data.user){
+    await new Promise(r=>setTimeout(r,800));
+    await sb.from('profiles').update({name,role:'staff'}).eq('id',data.user.id);
+  }
+  closeSheet();flash(`✅ Account ni ${name} nagawa na!`);renderUsers();
+}
+
+function renderHistory(role){
+  const myLogs=role==='staff'?logs.filter(l=>l.seller_name===profile.name&&l.date===today()):logs;
+  if(role==='admin'){
+    const soldMap={};
+    myLogs.filter(l=>l.type==='sell').forEach(l=>{soldMap[l.item_id]=soldMap[l.item_id]||{name:l.item_name,qty:0};soldMap[l.item_id].qty+=l.qty;});
+    const top=Object.entries(soldMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8);
+    document.getElementById('a-supplier').innerHTML=top.length===0
+      ?`<div style="padding:14px;text-align:center;color:#94a3b8;font-size:13px">Wala pang sold items</div>`
+      :top.map(([id,info])=>{
+        const item=items.find(i=>i.id===id);const stk=item?item.qty:0;
+        return `<div class="sup-row">
+          <div><div style="font-weight:700;font-size:13px">${esc(info.name)}</div>
+          <div style="font-size:11px;color:#94a3b8">Stock: ${stk} ${item?esc(item.unit):''}</div></div>
+          <div style="text-align:right">
+            <div style="font-weight:800;color:#0ea5e9;font-size:13px">${info.qty} sold</div>
+            ${stk===0?'<div style="font-size:9px;color:#ef4444;font-weight:700">ORDER NA</div>':stk<=(item?item.low_at:2)?'<div style="font-size:9px;color:#f59e0b;font-weight:700">MABABA</div>':''}
+          </div></div>`;
+      }).join('');
+  }
+  const byDate={};
+  myLogs.forEach(l=>{if(!byDate[l.date])byDate[l.date]=[];byDate[l.date].push(l);});
+  const t=today();
+  const dlabel=d=>d===t?'🟢 Ngayon':new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',weekday:'short'});
+  let html='';
+  if(!Object.keys(byDate).length)html=`<div class="empty">Wala pang transactions.</div>`;
+  else Object.entries(byDate).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([date,entries])=>{
+    const sells=entries.filter(e=>e.type==='sell');
+    const rev=sells.reduce((s,e)=>s+(e.price_used||0)*e.qty,0);
+    html+=`<div class="day-block"><div class="day-hdr">
+      <div><div class="day-lbl">${dlabel(date)}</div>
+      <div style="font-size:11px;color:#94a3b8">${sells.length} benta · ${sells.reduce((s,e)=>s+e.qty,0)} items</div></div>
+      ${role==='admin'&&rev>0?`<div class="day-rev">${peso(rev)}</div>`:''}
+    </div>`;
+    entries.sort((a,b)=>(b.time||'').localeCompare(a.time||'')).forEach(l=>{
+      const isSell=l.type==='sell';
+      html+=`<div class="log-card">
+        <div class="log-icon">${isSell?'📤':'📥'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="log-name">${esc(l.item_name)}</div>
+          <div class="log-meta">${l.time||''} · ${esc(l.seller_name||'')}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-weight:800;font-size:15px;color:${isSell?'#0ea5e9':'#10b981'}">${isSell?'-':'+'}${l.qty}</div>
+          ${role==='admin'&&isSell&&l.price_used?`<div style="font-size:11px;color:#94a3b8">${peso(l.price_used*l.qty)}</div>`:''}
+        </div></div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById(role==='admin'?'a-logs':'s-logs').innerHTML=html;
+}
+
+function bgClick(e){if(e.target===document.getElementById('overlay'))closeSheet();}
+function closeSheet(){document.getElementById('overlay').style.display='none';document.getElementById('sheet').innerHTML='';}
+function showSheet(html){document.getElementById('sheet').innerHTML=html;document.getElementById('overlay').style.display='flex';}
+function flash(msg){const el=document.createElement('div');el.className='flash';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2200);}
+
 init();
 </script>
 </body>
