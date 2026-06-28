@@ -204,9 +204,11 @@ select.f option{background:#fff}
 // ─── CREDENTIALS ─────────────────────────────────────
 const SB_URL='https://sivnejgshvmlpribuydl.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzE1MzUsImV4cCI6MjA5ODA0NzUzNX0.rHYKO45RkpmUs61dQ1h46c_go7QA2Ps1C8Bc-rg0-rU';
+const SB_SVC='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjQ3MTUzNSwiZXhwIjoyMDk4MDQ3NTM1fQ.9ezpZMZGZP7XQbSW4h57CklJmhoYl4E6jmYaRicJp1E';
 // ─────────────────────────────────────────────────────
 
 const sb=supabase.createClient(SB_URL,SB_KEY);
+const sbAdmin=supabase.createClient(SB_URL,SB_SVC,{auth:{autoRefreshToken:false,persistSession:false}});
 let me,items=[],logs=[],q='',cat='All',aid=null;
 
 const CATS={'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
@@ -468,7 +470,7 @@ async function newStaff(){
   if(!n||!e||!p){err.textContent='Kumpleto ang lahat.';return;}
   if(p.length<6){err.textContent='Password — min. 6 characters.';return;}
   document.getElementById('nsb').textContent='⏳ Ginagawa...';
-  const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{name:n}}});
+  const {data,error}=await sbAdmin.auth.admin.createUser({email:e,password:p,email_confirm:true,user_metadata:{name:n}});
   if(error){err.textContent=error.message;document.getElementById('nsb').textContent='✅ Gawa ng Account';return;}
   if(data.user){await new Promise(r=>setTimeout(r,800));await sb.from('profiles').update({name:n,role:'staff'}).eq('id',data.user.id);}
   cls();toast(`✅ Account ni ${n} nagawa na!`);rUsers();
