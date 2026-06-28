@@ -444,30 +444,37 @@ function rHist(role){
 async function rUsers(){
   const {data}=await sb.from('profiles').select('*').order('created_at');
   document.getElementById('a-ulist').innerHTML=(data||[]).map(p=>`
-    <div class="ucard">
+    <div class="ucard" style="flex-wrap:wrap;gap:8px">
       <div style="font-size:22px">${p.role==='admin'?'👑':'👤'}</div>
       <div style="flex:1"><div style="font-weight:700;font-size:14px">${esc(p.name)}</div><div style="font-size:11px;color:#aaa">${p.role==='admin'?'Admin':'Staff'}</div></div>
-      ${p.id!==me.id?`<button onclick="toggleR('${p.id}','${p.role==='staff'?'admin':'staff'}')"
-        style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;${p.role==='staff'?'background:#fffbdc;color:#8a6000':'background:#e8f4ff;color:#0069b0'}">
-        ${p.role==='staff'?'→ Admin':'→ Staff'}</button>`:'<span style="font-size:11px;color:#bbb">Ikaw</span>'}
+      ${p.id!==me.id?`
+        <button onclick="toggleR('${p.id}','${p.role==='staff'?'admin':'staff'}')"
+          style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;${p.role==='staff'?'background:#fffbdc;color:#8a6000':'background:#e8f4ff;color:#0069b0'}">
+          ${p.role==='staff'?'→ Admin':'→ Staff'}</button>
+        <button onclick="openChangePass('${p.id}','${esc(p.name)}')"
+          style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;background:#f0f0f0;color:#333">
+          🔑 Pass</button>`
+      :'<span style="font-size:11px;color:#bbb">Ikaw</span>'}
     </div>`).join('');
 }
 async function toggleR(id,role){await sb.from('profiles').update({role}).eq('id',id);toast('✅ Role updated!');rUsers();}
 function openNewStaff(){
   modal(`<div class="sh"></div>
     <div class="s-name" style="margin-bottom:4px">Gawa ng Staff Account</div>
-    <div class="s-meta">Ikaw ang mag-assign ng login</div>
-    <label class="lbl" style="margin-top:0">Pangalan</label><input class="f" id="nn" placeholder="e.g. Maria"/>
-    <label class="lbl">Email</label><input class="f" id="ne" type="email" placeholder="e.g. maria@gmail.com"/>
-    <label class="lbl">Password</label><input class="f" id="np" type="password" placeholder="Min. 6 characters"/>
+    <div class="s-meta">Username at password lang ang kailangan</div>
+    <label class="lbl" style="margin-top:0">Username</label>
+    <input class="f" id="nn" placeholder="e.g. maria" style="text-transform:lowercase"/>
+    <label class="lbl">Password</label>
+    <input class="f" id="np" placeholder="e.g. 123456"/>
     <button class="btn btn-blue" id="nsb" onclick="newStaff()" style="margin-top:12px">✅ Gawa ng Account</button>
     <div id="nse" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>`);
 }
 async function newStaff(){
-  const n=document.getElementById('nn').value.trim(),e=document.getElementById('ne').value.trim(),p=document.getElementById('np').value;
+  const n=document.getElementById('nn').value.trim().toLowerCase(),p=document.getElementById('np').value.trim();
+  const e=n+'@doctorgadget.staff';
   const err=document.getElementById('nse');err.textContent='';
-  if(!n||!e||!p){err.textContent='Kumpleto ang lahat.';return;}
-  if(p.length<6){err.textContent='Password — min. 6 characters.';return;}
+  if(!n||!p){err.textContent='Kumpleto ang username at password.';return;}
+  if(p.length<4){err.textContent='Password — minimum 4 characters.';return;}
   document.getElementById('nsb').textContent='⏳ Ginagawa...';
   const res=await fetch(SB_URL+'/auth/v1/admin/users',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
@@ -479,6 +486,30 @@ async function newStaff(){
 }
 
 // ── MODAL ─────────────────────────────────────────────
+function openChangePass(uid, uname){
+  modal(`<div class="sh"></div>
+    <div class="s-name" style="margin-bottom:4px">Palitan ang Password</div>
+    <div class="s-meta">User: <strong>${uname}</strong></div>
+    <label class="lbl" style="margin-top:0">Bagong Password</label>
+    <input class="f" id="cp" placeholder="e.g. 123456"/>
+    <button class="btn btn-blue" id="cpb" onclick="changePass('${uid}')" style="margin-top:12px">✅ I-Update</button>
+    <div id="cpe" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>`);
+}
+
+async function changePass(uid){
+  const p=document.getElementById('cp').value.trim();
+  const err=document.getElementById('cpe');err.textContent='';
+  if(!p){err.textContent='Lagyan ng password.';return;}
+  if(p.length<4){err.textContent='Minimum 4 characters.';return;}
+  document.getElementById('cpb').textContent='⏳ Ginagawa...';
+  const res=await fetch(SB_URL+'/auth/v1/admin/users/'+uid,{method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({password:p})});
+  const json=await res.json();
+  if(!res.ok){err.textContent=json.message||'Error';document.getElementById('cpb').textContent='✅ I-Update';return;}
+  cls();toast('✅ Password updated!');
+}
+
 function bgc(e){if(e.target===document.getElementById('ov'))cls();}
 function cls(){document.getElementById('ov').style.display='none';document.getElementById('sh').innerHTML='';}
 function modal(h){document.getElementById('sh').innerHTML=h;document.getElementById('ov').style.display='flex';}
