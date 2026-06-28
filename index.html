@@ -134,7 +134,7 @@ select.f option{background:#fff}
     <div style="font-size:44px;margin-bottom:12px">🔧</div>
     <h1>Doctor Gadget</h1>
     <p>Inventory System</p>
-    <input id="em" type="email" placeholder="Email"/>
+    <input id="em" placeholder="Email o Username"/>
     <input id="pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')login()"/>
     <button onclick="login()">Login</button>
     <div class="err" id="lerr"></div>
@@ -226,11 +226,13 @@ async function init(){
   if(session)await go(session.user); else pg('login');
 }
 async function login(){
-  const e=document.getElementById('em').value.trim(),p=document.getElementById('pw').value;
+  let e=document.getElementById('em').value.trim(),p=document.getElementById('pw').value;
   document.getElementById('lerr').textContent='';
-  if(!e||!p){document.getElementById('lerr').textContent='Kumpleto ang email at password.';return;}
+  if(!e||!p){document.getElementById('lerr').textContent='Kumpleto ang username/email at password.';return;}
+  // If no @ sign, treat as username and append staff domain
+  if(!e.includes('@')) e=e.toLowerCase()+'@doctorgadget.staff';
   const {data,error}=await sb.auth.signInWithPassword({email:e,password:p});
-  if(error){document.getElementById('lerr').textContent='Mali ang email o password.';return;}
+  if(error){document.getElementById('lerr').textContent='Mali ang username/email o password.';return;}
   await go(data.user);
 }
 async function go(user){
