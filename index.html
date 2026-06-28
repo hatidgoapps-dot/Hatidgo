@@ -95,6 +95,11 @@ select option{background:#fff}
 .sup-row:last-child{border-bottom:none}
 .user-card{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:8px;border:1.5px solid #e2e8f0;display:flex;align-items:center;gap:10px}
 
+
+.cat-tabs{display:flex;gap:8px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{flex-shrink:0;border:1.5px solid #e2e8f0;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#64748b;white-space:nowrap}
+.cat-tab.active{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
 .empty{text-align:center;padding:36px 20px;color:#94a3b8;font-size:14px;line-height:2}
 .sec-title{font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:8px}
 .flash{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:700;z-index:200;white-space:nowrap;animation:fIn .2s ease}
@@ -126,6 +131,7 @@ select option{background:#fff}
   </div>
   <div id="av-stock" style="display:none">
     <div class="search-wrap"><input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)"/></div>
+    <div class="cat-tabs" id="a-cat-tabs"></div>
     <div id="a-banner" style="display:none"></div>
     <div class="list" id="a-list"></div>
   </div>
@@ -162,6 +168,7 @@ select option{background:#fff}
   </div>
   <div id="sv-stock" style="display:none">
     <div class="search-wrap"><input class="search" placeholder="🔍  Hanapin ang item..." oninput="doSearch(this.value)"/></div>
+    <div class="cat-tabs" id="s-cat-tabs"></div>
     <div class="list" id="s-list"></div>
   </div>
   <div id="sv-history" style="display:none;padding-top:12px">
@@ -190,7 +197,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 const sb = supabase.createClient(SB_URL, SB_KEY);
 let profile, items=[], logs=[];
-let searchVal='', activeId=null;
+let searchVal='', activeId=null, catFilter='All';
 
 const ICONS={'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
 const CATS=Object.keys(ICONS);
@@ -247,7 +254,7 @@ function adminTab(tab){
     document.getElementById('na-'+t).className='nav-btn'+(t===tab?' active':'');
   });
   document.getElementById('btn-add-item').style.display=tab==='stock'?'':'none';
-  if(tab==='stock')renderAdminStock();
+  if(tab==='stock'){catFilter='All';renderAdminStock();}
   if(tab==='history')renderHistory('admin');
   if(tab==='users')renderUsers();
 }
@@ -257,12 +264,29 @@ function staffTab(tab){
     document.getElementById('sv-'+t).style.display=t===tab?'':'none';
     document.getElementById('ns-'+t).className='nav-btn'+(t===tab?' active':'');
   });
-  if(tab==='stock')renderStaffStock();
+  if(tab==='stock'){catFilter='All';renderStaffStock();}
   if(tab==='history')renderHistory('staff');
 }
 
+function renderCatTabs(tabsId, role){
+  const cats=['All',...CATS];
+  document.getElementById(tabsId).innerHTML=cats.map(c=>`
+    <button class="cat-tab${catFilter===c?' active':''}" onclick="setCat('${c.replace(/'/g,"\'")}','${role}')">
+      ${c==='All'?'🔠 Lahat':(ICONS[c]||'📦')+' '+c.split(' /')[0].trim()}
+    </button>`).join('');
+}
+
+function setCat(c, role){
+  catFilter=c;
+  if(role==='admin'){renderCatTabs('a-cat-tabs','admin');renderAdminStock();}
+  else{renderCatTabs('s-cat-tabs','staff');renderStaffStock();}
+}
+
 function renderAdminStock(){
-  const fil=items.filter(i=>i.name.toLowerCase().includes(searchVal.toLowerCase()));
+  renderCatTabs('a-cat-tabs','admin');
+  const fil=items.filter(i=>
+    (catFilter==='All'||i.category===catFilter)&&
+    i.name.toLowerCase().includes(searchVal.toLowerCase()));
   const low=items.filter(i=>i.qty>0&&i.qty<=i.low_at);
   const out=items.filter(i=>i.qty===0);
   const banner=document.getElementById('a-banner');
@@ -289,7 +313,11 @@ function renderAdminStock(){
 }
 
 function renderStaffStock(){
-  const fil=items.filter(i=>i.qty>0&&i.name.toLowerCase().includes(searchVal.toLowerCase()));
+  renderCatTabs('s-cat-tabs','staff');
+  const fil=items.filter(i=>
+    i.qty>0&&
+    (catFilter==='All'||i.category===catFilter)&&
+    i.name.toLowerCase().includes(searchVal.toLowerCase()));
   document.getElementById('s-list').innerHTML=fil.length===0
     ?`<div class="empty">Walang available na items ngayon.</div>`
     :fil.map(i=>`
