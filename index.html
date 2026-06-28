@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>DG Inventory</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,sans-serif;background:#fff;color:#111;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:68px}
+input,select,button{font-family:inherit}
+input::placeholder{color:#aaa}
+
+/* LOGIN */
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 28px;background:#f8f8f8}
+.login h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.login p{font-size:13px;color:#888;margin-bottom:32px}
+.login input{width:100%;border:1.5px solid #ddd;border-radius:10px;padding:13px 14px;font-size:15px;outline:none;margin-bottom:10px}
+.login input:focus{border-color:#0ea5e9}
+.login button{width:100%;background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px}
+.login button:active{opacity:.85}
+.login .err{color:#e33;font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+
+/* HEADER */
+.hdr{background:#fff;border-bottom:1px solid #eee;padding:14px 16px;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px}
+.hdr-title{font-size:17px;font-weight:800;flex:1}
+.hdr-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#fff8dc;color:#8a6000}
+.hdr-badge.staff{background:#e8f4ff;color:#0069b0}
+.hdr-add{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.hdr-logout{background:none;border:none;font-size:19px;cursor:pointer;padding:2px}
+
+/* TABS (category) */
+.cat-scroll{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 8px;border-bottom:1px solid #f0f0f0}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-btn{flex-shrink:0;border:1.5px solid #e0e0e0;border-radius:20px;padding:5px 13px;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#555;white-space:nowrap}
+.cat-btn.on{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+
+/* SEARCH */
+.search-wrap{padding:10px 14px 4px}
+.search{width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:9px 13px;font-size:14px;outline:none;color:#111;background:#fafafa}
+.search:focus{border-color:#0ea5e9;background:#fff}
+
+/* ITEM LIST */
+.list{padding:8px 14px 0}
+.item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;margin-bottom:7px;background:#f9f9f9;cursor:pointer;border:1.5px solid #f0f0f0}
+.item:active{background:#f0f0f0}
+.item.low{border-color:#fbbf24;background:#fffdf0}
+.item.out{border-color:#f87171;background:#fff8f8}
+.i-em{font-size:22px;width:34px;text-align:center;flex-shrink:0}
+.i-name{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.i-sub{font-size:11px;color:#888;margin-top:1px}
+.i-right{text-align:right;flex-shrink:0}
+.i-qty{font-size:20px;font-weight:800;line-height:1}
+.i-qty.low{color:#d97706}
+.i-qty.out{color:#dc2626}
+.i-unit{font-size:10px;color:#aaa}
+.i-tag{font-size:9px;font-weight:700;margin-top:2px}
+
+.banner{background:#fffbeb;border:1.5px solid #fde047;border-radius:10px;padding:8px 13px;margin:6px 14px;font-size:12px;color:#7a5a00;font-weight:600}
+
+/* BOTTOM NAV */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #eee;display:flex}
+.nav-btn{flex:1;background:none;border:none;padding:9px 4px 13px;cursor:pointer;font-size:10px;font-weight:700;color:#bbb;border-top:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav-btn span{font-size:19px}
+.nav-btn.on{color:#0ea5e9;border-top-color:#0ea5e9}
+
+/* SHEET */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;padding:12px 18px 38px;max-height:90vh;overflow-y:auto}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.sheet{animation:up .18s ease}
+.sh{width:36px;height:3px;background:#ddd;border-radius:2px;margin:0 auto 14px}
+.s-name{font-size:17px;font-weight:800;margin-bottom:2px}
+.s-meta{font-size:13px;color:#888;margin-bottom:14px}
+
+/* QTY STEPPER */
+.stepper{display:flex;align-items:center;border:1.5px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.stepper button{background:none;border:none;font-size:22px;padding:8px 16px;cursor:pointer;color:#111;font-weight:700}
+.stepper button:active{background:#f5f5f5}
+.stepper input{flex:1;border:none;font-size:21px;font-weight:800;text-align:center;outline:none;color:#111;padding:8px 0}
+
+/* BUTTONS */
+.btn{border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%}
+.btn:active{opacity:.85}
+.btn-blue{background:#0ea5e9;color:#fff}
+.btn-light{background:#f0f0f0;color:#111;border:1.5px solid #e0e0e0}
+.btn-red{background:none;border:none;color:#e33;font-size:13px;cursor:pointer;padding:9px;width:100%;margin-top:4px}
+.btn-gray{background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;padding:9px;width:100%}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+
+/* FORM */
+.lbl{font-size:11px;font-weight:700;color:#888;margin-bottom:3px;display:block;margin-top:10px}
+.f{width:100%;border:1.5px solid #e0e0e0;border-radius:9px;padding:10px 12px;font-size:14px;outline:none;color:#111;background:#fff}
+.f:focus{border-color:#0ea5e9}
+select.f option{background:#fff}
+
+/* PRICE BOX */
+.pbox{background:#f8f8f8;border-radius:10px;padding:10px 13px;margin-bottom:12px}
+.prow{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.plbl{color:#888}
+.pval{font-weight:700}
+
+/* HISTORY */
+.day-wrap{margin-bottom:12px}
+.day-top{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;margin-bottom:4px}
+.day-name{font-size:12px;font-weight:800;color:#555}
+.day-rev{font-size:12px;font-weight:800;color:#16a34a}
+.log{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f9f9f9;border-radius:10px;margin:0 14px 5px;border:1px solid #f0f0f0}
+.log-ico{font-size:17px;width:26px;text-align:center;flex-shrink:0}
+.log-name{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log-meta{font-size:10px;color:#aaa;margin-top:1px}
+
+/* SUPPLIER */
+.sup{background:#fffdf0;border:1.5px solid #fde04788;border-radius:12px;margin:0 14px 10px}
+.sup-row{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;border-bottom:1px solid #f5f5f5}
+.sup-row:last-child{border-bottom:none}
+
+/* USERS */
+.ucard{display:flex;align-items:center;gap:10px;padding:11px 13px;background:#f9f9f9;border-radius:11px;margin-bottom:7px;border:1px solid #eee}
+
+.sec{font-size:10px;font-weight:700;color:#aaa;padding:10px 14px 4px;letter-spacing:.5px}
+.empty{text-align:center;padding:40px 20px;color:#bbb;font-size:14px;line-height:2}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#111;color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;z-index:200;white-space:nowrap}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%)}}
+.toast{animation:tin .18s ease}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="pg-login">
+  <div class="login">
+    <div style="font-size:44px;margin-bottom:12px">🔧</div>
+    <h1>Doctor Gadget</h1>
+    <p>Inventory System</p>
+    <input id="em" placeholder="Email o Username"/>
+    <input id="pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')login()"/>
+    <button onclick="login()">Login</button>
+    <div class="err" id="lerr"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="pg-admin" style="display:none">
+  <div class="hdr">
+    <div class="hdr-title">Doctor Gadget</div>
+    <span class="hdr-badge" id="aname">Admin</span>
+    <button class="hdr-add" id="btn-add" onclick="openAdd()" style="display:none">+ Item</button>
+    <button class="hdr-logout" onclick="logout()">👋</button>
+  </div>
+  <div id="a-stock" style="display:none">
+    <div class="cat-scroll" id="a-cats"></div>
+    <div class="search-wrap"><input class="search" placeholder="🔍 Hanapin..." oninput="srch(this.value)"/></div>
+    <div id="a-banner" style="display:none" class="banner"></div>
+    <div class="list" id="a-list"></div>
+  </div>
+  <div id="a-history" style="display:none;padding-top:8px">
+    <div class="sec">📦 PARA SA SUPPLIER</div>
+    <div class="sup" id="a-sup"></div>
+    <div class="sec">📅 BENTA PER ARAW</div>
+    <div id="a-logs"></div>
+  </div>
+  <div id="a-users" style="display:none;padding:8px 14px 0">
+    <div class="sec" style="padding:0 0 8px">👥 MGA STAFF</div>
+    <div id="a-ulist"></div>
+    <button class="btn btn-blue" onclick="openNewStaff()" style="margin-top:6px">➕ Gawa ng Staff Account</button>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn on" id="na-s" onclick="atab('stock')"><span>📦</span>Stock</button>
+    <button class="nav-btn"    id="na-h" onclick="atab('history')"><span>📅</span>History</button>
+    <button class="nav-btn"    id="na-u" onclick="atab('users')"><span>👥</span>Users</button>
+  </nav>
+</div>
+
+<!-- STAFF -->
+<div id="pg-staff" style="display:none">
+  <div class="hdr">
+    <div class="hdr-title">Doctor Gadget</div>
+    <span class="hdr-badge staff" id="sname">Staff</span>
+    <button class="hdr-logout" onclick="logout()">👋</button>
+  </div>
+  <div id="s-stock" style="display:none">
+    <div class="cat-scroll" id="s-cats"></div>
+    <div class="search-wrap"><input class="search" placeholder="🔍 Hanapin..." oninput="srch(this.value)"/></div>
+    <div class="list" id="s-list"></div>
+  </div>
+  <div id="s-history" style="display:none;padding-top:8px">
+    <div class="sec">📅 AKING BENTA NGAYON</div>
+    <div id="s-logs"></div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn on" id="ns-s" onclick="stab('stock')"><span>📦</span>Stock</button>
+    <button class="nav-btn"    id="ns-h" onclick="stab('history')"><span>📅</span>History</button>
+  </nav>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="ov" style="display:none" onclick="bgc(event)">
+  <div class="sheet" id="sh"></div>
+</div>
+
+<script>
+// ─── CREDENTIALS ─────────────────────────────────────
+const SB_URL='https://sivnejgshvmlpribuydl.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzE1MzUsImV4cCI6MjA5ODA0NzUzNX0.rHYKO45RkpmUs61dQ1h46c_go7QA2Ps1C8Bc-rg0-rU';
+const SB_SVC='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjQ3MTUzNSwiZXhwIjoyMDk4MDQ3NTM1fQ.9ezpZMZGZP7XQbSW4h57CklJmhoYl4E6jmYaRicJp1E';
+// ─────────────────────────────────────────────────────
+
+const sb=supabase.createClient(SB_URL,SB_KEY);
+let me,items=[],logs=[],q='',cat='All',aid=null;
+
+const CATS={'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
+const CK=Object.keys(CATS);
+const ic=c=>CATS[c]||'📦';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ts=()=>{const d=new Date();return{date:d.toISOString().slice(0,10),time:d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})};};
+const td=()=>new Date().toISOString().slice(0,10);
+const P=n=>'₱'+Number(n||0).toLocaleString('en-PH');
+const pg=id=>{['login','admin','staff'].forEach(x=>document.getElementById('pg-'+x).style.display=x===id?'':'none');};
+
+// ── AUTH ──────────────────────────────────────────────
+async function init(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session)await go(session.user); else pg('login');
+}
+async function login(){
+  let e=document.getElementById('em').value.trim(),p=document.getElementById('pw').value;
+  document.getElementById('lerr').textContent='';
+  if(!e||!p){document.getElementById('lerr').textContent='Kumpleto ang username/email at password.';return;}
+  // If no @ sign, treat as username and append staff domain
+  if(!e.includes('@')) e=e.toLowerCase()+'@doctorgadget.staff';
+  const {data,error}=await sb.auth.signInWithPassword({email:e,password:p});
+  if(error){document.getElementById('lerr').textContent='Mali ang username/email o password.';return;}
+  await go(data.user);
+}
+async function go(user){
+  const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  me=data||{id:user.id,name:user.email,role:'staff'};
+  await load();
+  if(me.role==='admin'){document.getElementById('aname').textContent='👑 '+me.name;pg('admin');atab('stock');}
+  else{document.getElementById('sname').textContent='👤 '+me.name;pg('staff');stab('stock');}
+}
+async function logout(){await sb.auth.signOut();me=null;items=[];logs=[];pg('login');}
+async function load(){
+  const[ir,lr]=await Promise.all([sb.from('items').select('*').order('name'),sb.from('logs').select('*').order('created_at',{ascending:false}).limit(300)]);
+  if(ir.data)items=ir.data;if(lr.data)logs=lr.data;
+}
+
+// ── TABS ──────────────────────────────────────────────
+function atab(t){
+  ['stock','history','users'].forEach(x=>{document.getElementById('a-'+x).style.display=x===t?'':'none';document.getElementById('na-'+x[0]).className='nav-btn'+(x===t?' on':'');});
+  document.getElementById('btn-add').style.display=t==='stock'?'':'none';
+  cat='All';q='';
+  if(t==='stock')rAdmin();if(t==='history')rHist('admin');if(t==='users')rUsers();
+}
+function stab(t){
+  ['stock','history'].forEach(x=>{document.getElementById('s-'+x).style.display=x===t?'':'none';document.getElementById('ns-'+x[0]).className='nav-btn'+(x===t?' on':'');});
+  cat='All';q='';
+  if(t==='stock')rStaff();if(t==='history')rHist('staff');
+}
+
+// ── CATEGORY TABS ─────────────────────────────────────
+function rCats(elId,role){
+  const el=document.getElementById(elId);
+  el.innerHTML=['All',...CK].map(c=>`<button class="cat-btn${cat===c?' on':''}" onclick="setC('${c.replace(/'/g,"\\'")}','${role}')">${c==='All'?'🔠 Lahat':ic(c)+' '+c.split(' /')[0].trim()}</button>`).join('');
+}
+function setC(c,role){cat=c;role==='admin'?rAdmin():rStaff();}
+function srch(v){q=v;me.role==='admin'?rAdmin():rStaff();}
+
+// ── ADMIN STOCK ───────────────────────────────────────
+function rAdmin(){
+  rCats('a-cats','admin');
+  const fil=items.filter(i=>(cat==='All'||i.category===cat)&&i.name.toLowerCase().includes(q.toLowerCase()));
+  const low=items.filter(i=>i.qty>0&&i.qty<=i.low_at),out=items.filter(i=>i.qty===0);
+  const bn=document.getElementById('a-banner');
+  if(out.length||low.length){bn.innerHTML=(out.length?`❌ ${out.length} wala na.  `:'')+(low.length?`⚠️ ${low.length} mababa na.`:'');bn.style.display='';}
+  else bn.style.display='none';
+  document.getElementById('a-list').innerHTML=fil.length===0?`<div class="empty">Walang items.<br>I-tap ang <b>+ Item</b></div>`:
+    fil.map(i=>{const o=i.qty===0,l=i.qty>0&&i.qty<=i.low_at;return`<div class="item${l?' low':''}${o?' out':''}" onclick="openA('${i.id}')">
+      <div class="i-em">${ic(i.category)}</div>
+      <div style="flex:1;min-width:0"><div class="i-name">${esc(i.name)}</div><div class="i-sub">Cost: ${P(i.cost)} · Admin: ${P(i.admin_price)} · Staff: ${P(i.staff_price)}</div></div>
+      <div class="i-right"><div class="i-qty${o?' out':l?' low':''}">${i.qty}<span class="i-unit"> ${esc(i.unit)}</span></div>${o?'<div class="i-tag" style="color:#dc2626">WALA NA</div>':l?'<div class="i-tag" style="color:#d97706">MABABA</div>':''}</div>
+    </div>`;}).join('');
+}
+
+// ── STAFF STOCK ───────────────────────────────────────
+function rStaff(){
+  rCats('s-cats','staff');
+  const fil=items.filter(i=>i.qty>0&&(cat==='All'||i.category===cat)&&i.name.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('s-list').innerHTML=fil.length===0?`<div class="empty">Walang items ngayon.</div>`:
+    fil.map(i=>`<div class="item" onclick="openS('${i.id}')">
+      <div class="i-em">${ic(i.category)}</div>
+      <div style="flex:1;min-width:0"><div class="i-name">${esc(i.name)}</div><div class="i-sub">${esc(i.category)}</div></div>
+      <div class="i-right"><div class="i-qty">${i.qty}<span class="i-unit"> ${esc(i.unit)}</span></div></div>
+    </div>`).join('');
+}
+
+// ── ITEM SHEETS ───────────────────────────────────────
+function openA(id){
+  aid=id;const i=items.find(x=>x.id===id);
+  modal(`<div class="sh"></div>
+    <div class="s-name">${esc(i.name)}</div>
+    <div class="s-meta">${ic(i.category)} ${esc(i.category)} · ${i.qty} ${esc(i.unit)} natitira</div>
+    <div class="pbox">
+      <div class="prow"><span class="plbl">Supplier Cost</span><span class="pval">${P(i.cost)}</span></div>
+      <div class="prow"><span class="plbl">Admin Price</span><span class="pval" style="color:#0ea5e9">${P(i.admin_price)}</span></div>
+      <div class="prow"><span class="plbl">Staff Price</span><span class="pval" style="color:#666">${P(i.staff_price)}</span></div>
+    </div>
+    <label class="lbl" style="margin-top:0">Quantity</label>
+    <div class="stepper"><button onclick="sq(-1)">−</button><input type="number" id="qv" value="1" min="1"/><button onclick="sq(1)">＋</button></div>
+    <div class="g2"><button class="btn btn-blue" onclick="sell()">📤 Ibenta</button><button class="btn btn-light" onclick="addstk()">📥 Dagdag</button></div>
+    <button class="btn-gray" onclick="openEdit('${id}')">✏️ I-edit</button>`);
+}
+function openS(id){
+  aid=id;const i=items.find(x=>x.id===id);
+  modal(`<div class="sh"></div>
+    <div class="s-name">${esc(i.name)}</div>
+    <div class="s-meta">${ic(i.category)} · Natitira: <b>${i.qty} ${esc(i.unit)}</b></div>
+    <label class="lbl" style="margin-top:0">Quantity na ibebenta</label>
+    <div class="stepper"><button onclick="sq(-1)">−</button><input type="number" id="qv" value="1" min="1"/><button onclick="sq(1)">＋</button></div>
+    <button class="btn btn-blue" onclick="sell()">📤 Ibenta</button>`);
+}
+function sq(d){const el=document.getElementById('qv');el.value=Math.max(1,parseInt(el.value||1)+d);}
+function gq(){return Math.max(1,parseInt(document.getElementById('qv').value)||1);}
+
+// ── SELL / ADD STOCK ──────────────────────────────────
+async function sell(){
+  const it=items.find(i=>i.id===aid),q=gq();
+  if(q>it.qty){toast('❌ Hindi sapat ang stock!');return;}
+  cls();
+  const isA=me.role==='admin',pr=isA?it.admin_price:it.staff_price,nq=it.qty-q,{date,time}=ts();
+  const lg={id:uid(),item_id:aid,item_name:it.name,type:'sell',qty:q,price_used:pr,seller_name:me.name,seller_role:me.role,date,time};
+  items=items.map(i=>i.id===aid?{...i,qty:nq}:i);logs.unshift(lg);
+  isA?rAdmin():rStaff();
+  toast(`✅ Nabenta: ${it.name} x${q}`);
+  await Promise.all([sb.from('items').update({qty:nq}).eq('id',aid),sb.from('logs').insert(lg)]);
+}
+async function addstk(){
+  const it=items.find(i=>i.id===aid),q=gq();cls();
+  const nq=it.qty+q,{date,time}=ts();
+  const lg={id:uid(),item_id:aid,item_name:it.name,type:'add',qty:q,price_used:0,seller_name:me.name,seller_role:'admin',date,time};
+  items=items.map(i=>i.id===aid?{...i,qty:nq}:i);logs.unshift(lg);
+  rAdmin();toast(`📥 Nadagdag: ${it.name} x${q}`);
+  await Promise.all([sb.from('items').update({qty:nq}).eq('id',aid),sb.from('logs').insert(lg)]);
+}
+
+// ── ADD / EDIT ITEM ───────────────────────────────────
+function openAdd(){
+  modal(`<div class="sh"></div>
+    <div class="s-name" style="margin-bottom:14px">Bagong Item</div>
+    <label class="lbl" style="margin-top:0">Pangalan</label><input class="f" id="fn" placeholder="e.g. iPhone 13 LCD"/>
+    <label class="lbl">Category</label>
+    <select class="f" id="fc">${CK.map(c=>`<option value="${c}">${ic(c)} ${c}</option>`).join('')}</select>
+    <div class="g2">
+      <div><label class="lbl">Stock ngayon</label><input class="f" id="fq" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Low stock alert</label><input class="f" id="fl" type="number" value="2" min="0"/></div>
+    </div>
+    <div class="g3">
+      <div><label class="lbl">Cost (₱)</label><input class="f" id="fco" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Admin Price</label><input class="f" id="fap" type="number" placeholder="0" min="0"/></div>
+      <div><label class="lbl">Staff Price</label><input class="f" id="fsp" type="number" placeholder="0" min="0"/></div>
+    </div>
+    <label class="lbl">Unit</label><input class="f" id="fu" value="pcs"/>
+    <button class="btn btn-blue" onclick="saveAdd()" style="margin-top:12px">✅ I-Save</button>`);
+}
+async function saveAdd(){
+  const name=document.getElementById('fn').value.trim();
+  if(!name){toast('❌ Lagyan ng pangalan!');return;}
+  const it={id:uid(),name,category:document.getElementById('fc').value,
+    qty:parseInt(document.getElementById('fq').value)||0,low_at:parseInt(document.getElementById('fl').value)||2,
+    cost:parseFloat(document.getElementById('fco').value)||0,admin_price:parseFloat(document.getElementById('fap').value)||0,
+    staff_price:parseFloat(document.getElementById('fsp').value)||0,unit:document.getElementById('fu').value.trim()||'pcs'};
+  cls();items.push(it);items.sort((a,b)=>a.name.localeCompare(b.name));rAdmin();toast('✅ Item added!');
+  await sb.from('items').insert(it);
+}
+function openEdit(id){
+  const i=items.find(x=>x.id===id);
+  modal(`<div class="sh"></div>
+    <div class="s-name" style="margin-bottom:14px">I-Edit</div>
+    <label class="lbl" style="margin-top:0">Pangalan</label><input class="f" id="en" value="${esc(i.name)}"/>
+    <label class="lbl">Category</label>
+    <select class="f" id="ec">${CK.map(c=>`<option value="${c}"${i.category===c?' selected':''}>${ic(c)} ${c}</option>`).join('')}</select>
+    <div class="g2">
+      <div><label class="lbl">Stock</label><input class="f" id="eq" type="number" value="${i.qty}" min="0"/></div>
+      <div><label class="lbl">Low stock alert</label><input class="f" id="el" type="number" value="${i.low_at||2}" min="0"/></div>
+    </div>
+    <div class="g3">
+      <div><label class="lbl">Cost (₱)</label><input class="f" id="eco" type="number" value="${i.cost||0}" min="0"/></div>
+      <div><label class="lbl">Admin Price</label><input class="f" id="eap" type="number" value="${i.admin_price||0}" min="0"/></div>
+      <div><label class="lbl">Staff Price</label><input class="f" id="esp" type="number" value="${i.staff_price||0}" min="0"/></div>
+    </div>
+    <label class="lbl">Unit</label><input class="f" id="eu" value="${esc(i.unit)}"/>
+    <button class="btn btn-blue" onclick="saveEdit('${id}')" style="margin-top:12px">✅ I-Update</button>
+    <button class="btn-red" onclick="delItem('${id}')">🗑️ I-Delete</button>`);
+}
+async function saveEdit(id){
+  const upd={name:document.getElementById('en').value.trim(),category:document.getElementById('ec').value,
+    qty:parseInt(document.getElementById('eq').value)||0,low_at:parseInt(document.getElementById('el').value)||2,
+    cost:parseFloat(document.getElementById('eco').value)||0,admin_price:parseFloat(document.getElementById('eap').value)||0,
+    staff_price:parseFloat(document.getElementById('esp').value)||0,unit:document.getElementById('eu').value.trim()||'pcs'};
+  if(!upd.name){toast('❌ Lagyan ng pangalan!');return;}
+  cls();items=items.map(i=>i.id===id?{...i,...upd}:i);rAdmin();toast('✅ Updated!');
+  await sb.from('items').update(upd).eq('id',id);
+}
+async function delItem(id){
+  if(!confirm('I-delete ba?'))return;cls();
+  items=items.filter(i=>i.id!==id);rAdmin();toast('🗑️ Deleted.');
+  await sb.from('items').delete().eq('id',id);
+}
+
+// ── HISTORY ───────────────────────────────────────────
+function rHist(role){
+  const ml=role==='staff'?logs.filter(l=>l.seller_name===me.name&&l.date===td()):logs;
+  if(role==='admin'){
+    const sm={};ml.filter(l=>l.type==='sell').forEach(l=>{sm[l.item_id]=sm[l.item_id]||{name:l.item_name,qty:0};sm[l.item_id].qty+=l.qty;});
+    const top=Object.entries(sm).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8);
+    document.getElementById('a-sup').innerHTML=top.length===0?`<div style="padding:12px;text-align:center;color:#bbb;font-size:13px">Wala pang sold items</div>`:
+      top.map(([id,inf])=>{const it=items.find(i=>i.id===id),s=it?it.qty:0;
+        return`<div class="sup-row"><div><div style="font-weight:700;font-size:13px">${esc(inf.name)}</div><div style="font-size:11px;color:#aaa">Stock: ${s} ${it?esc(it.unit):''}</div></div>
+          <div style="text-align:right"><div style="font-weight:800;color:#0ea5e9;font-size:13px">${inf.qty} sold</div>
+          ${s===0?'<div style="font-size:9px;color:#dc2626;font-weight:700">ORDER NA</div>':s<=(it?it.low_at:2)?'<div style="font-size:9px;color:#d97706;font-weight:700">MABABA</div>':''}</div></div>`;
+      }).join('');
+  }
+  const bd={};ml.forEach(l=>{if(!bd[l.date])bd[l.date]=[];bd[l.date].push(l);});
+  const t=td(),dl=d=>d===t?'🟢 Ngayon':new Date(d+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',weekday:'short'});
+  let h='';
+  if(!Object.keys(bd).length)h=`<div class="empty">Wala pang transactions.</div>`;
+  else Object.entries(bd).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([date,ents])=>{
+    const sv=ents.filter(e=>e.type==='sell'),rev=sv.reduce((s,e)=>s+(e.price_used||0)*e.qty,0);
+    h+=`<div class="day-wrap"><div class="day-top"><div class="day-name">${dl(date)} · ${sv.length} benta</div>${role==='admin'&&rev>0?`<div class="day-rev">${P(rev)}</div>`:''}</div>`;
+    ents.sort((a,b)=>(b.time||'').localeCompare(a.time||'')).forEach(l=>{
+      const is=l.type==='sell';
+      h+=`<div class="log"><div class="log-ico">${is?'📤':'📥'}</div>
+        <div style="flex:1;min-width:0"><div class="log-name">${esc(l.item_name)}</div><div class="log-meta">${l.time||''} · ${esc(l.seller_name||'')}</div></div>
+        <div style="text-align:right;flex-shrink:0"><div style="font-weight:800;font-size:14px;color:${is?'#0ea5e9':'#16a34a'}">${is?'-':'+'}${l.qty}</div>
+        ${role==='admin'&&is&&l.price_used?`<div style="font-size:10px;color:#aaa">${P(l.price_used*l.qty)}</div>`:''}</div></div>`;
+    });
+    h+=`</div>`;
+  });
+  document.getElementById(role==='admin'?'a-logs':'s-logs').innerHTML=h;
+}
+
+// ── USERS ─────────────────────────────────────────────
+async function rUsers(){
+  const {data}=await sb.from('profiles').select('*').order('created_at');
+  document.getElementById('a-ulist').innerHTML=(data||[]).map(p=>`
+    <div class="ucard" style="flex-wrap:wrap;gap:8px">
+      <div style="font-size:22px">${p.role==='admin'?'👑':'👤'}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:14px">${esc(p.name)}</div><div style="font-size:11px;color:#aaa">${p.role==='admin'?'Admin':'Staff'}</div></div>
+      ${p.id!==me.id?`
+        <button onclick="toggleR('${p.id}','${p.role==='staff'?'admin':'staff'}')"
+          style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;${p.role==='staff'?'background:#fffbdc;color:#8a6000':'background:#e8f4ff;color:#0069b0'}">
+          ${p.role==='staff'?'→ Admin':'→ Staff'}</button>
+        <button onclick="openChangePass('${p.id}','${esc(p.name)}')"
+          style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;background:#f0f0f0;color:#333">
+          🔑 Pass</button>
+        <button onclick="deleteStaff('${p.id}','${esc(p.name)}')"
+          style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;background:#ffe4e4;color:#cc0000">
+          🗑️</button>`
+      :'<span style="font-size:11px;color:#bbb">Ikaw</span>'}
+    </div>`).join('');
+}
+async function toggleR(id,role){await sb.from('profiles').update({role}).eq('id',id);toast('✅ Role updated!');rUsers();}
+function openNewStaff(){
+  modal(`<div class="sh"></div>
+    <div class="s-name" style="margin-bottom:4px">Gawa ng Staff Account</div>
+    <div class="s-meta">Username at password lang ang kailangan</div>
+    <label class="lbl" style="margin-top:0">Username</label>
+    <input class="f" id="nn" placeholder="e.g. maria" style="text-transform:lowercase"/>
+    <label class="lbl">Password</label>
+    <input class="f" id="np" placeholder="e.g. 123456"/>
+    <button class="btn btn-blue" id="nsb" onclick="newStaff()" style="margin-top:12px">✅ Gawa ng Account</button>
+    <div id="nse" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>`);
+}
+async function newStaff(){
+  const n=document.getElementById('nn').value.trim().toLowerCase(),p=document.getElementById('np').value.trim();
+  const e=n+'@doctorgadget.staff';
+  const err=document.getElementById('nse');err.textContent='';
+  if(!n||!p){err.textContent='Kumpleto ang username at password.';return;}
+  if(p.length<4){err.textContent='Password — minimum 4 characters.';return;}
+  document.getElementById('nsb').textContent='⏳ Ginagawa...';
+  const res=await fetch(SB_URL+'/auth/v1/admin/users',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({email:e,password:p,email_confirm:true,user_metadata:{name:n}})});
+  const json=await res.json();
+  if(!res.ok){err.textContent=json.message||json.msg||'Error';document.getElementById('nsb').textContent='✅ Gawa ng Account';return;}
+  if(json.id){await new Promise(r=>setTimeout(r,800));await sb.from('profiles').update({name:n,role:'staff'}).eq('id',json.id);}
+  cls();toast(`✅ Account ni ${n} nagawa na!`);rUsers();
+}
+
+// ── MODAL ─────────────────────────────────────────────
+async function deleteStaff(uid, uname){
+  if(!confirm('I-delete si '+uname+'?')) return;
+  const res=await fetch(SB_URL+'/auth/v1/admin/users/'+uid,{method:'DELETE',
+    headers:{'Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC}});
+  if(res.ok||res.status===200){toast('🗑️ '+uname+' deleted!');rUsers();}
+  else{toast('❌ Error sa pag-delete.');}
+}
+
+function openChangePass(uid, uname){
+  modal(`<div class="sh"></div>
+    <div class="s-name" style="margin-bottom:4px">Palitan ang Password</div>
+    <div class="s-meta">User: <strong>${uname}</strong></div>
+    <label class="lbl" style="margin-top:0">Bagong Password</label>
+    <input class="f" id="cp" placeholder="e.g. 123456"/>
+    <button class="btn btn-blue" id="cpb" onclick="changePass('${uid}')" style="margin-top:12px">✅ I-Update</button>
+    <div id="cpe" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>`);
+}
+
+async function changePass(uid){
+  const p=document.getElementById('cp').value.trim();
+  const err=document.getElementById('cpe');err.textContent='';
+  if(!p){err.textContent='Lagyan ng password.';return;}
+  if(p.length<4){err.textContent='Minimum 4 characters.';return;}
+  document.getElementById('cpb').textContent='⏳ Ginagawa...';
+  const res=await fetch(SB_URL+'/auth/v1/admin/users/'+uid,{method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({password:p})});
+  const json=await res.json();
+  if(!res.ok){err.textContent=json.message||'Error';document.getElementById('cpb').textContent='✅ I-Update';return;}
+  cls();toast('✅ Password updated!');
+}
+
+function bgc(e){if(e.target===document.getElementById('ov'))cls();}
+function cls(){document.getElementById('ov').style.display='none';document.getElementById('sh').innerHTML='';}
+function modal(h){document.getElementById('sh').innerHTML=h;document.getElementById('ov').style.display='flex';}
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2200);}
+
+init();
+</script>
+</body>
+</html>
