@@ -208,7 +208,6 @@ const SB_SVC='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 // ─────────────────────────────────────────────────────
 
 const sb=supabase.createClient(SB_URL,SB_KEY);
-const sbAdmin=supabase.createClient(SB_URL,SB_SVC,{auth:{autoRefreshToken:false,persistSession:false}});
 let me,items=[],logs=[],q='',cat='All',aid=null;
 
 const CATS={'LCD / Display':'📱','Flex Cable':'🔗','Battery':'🔋','Charger':'⚡','Casing / Cover':'📦','Tools / Parts':'🔧','Accessories':'🎧','Others':'🗂️'};
@@ -470,9 +469,12 @@ async function newStaff(){
   if(!n||!e||!p){err.textContent='Kumpleto ang lahat.';return;}
   if(p.length<6){err.textContent='Password — min. 6 characters.';return;}
   document.getElementById('nsb').textContent='⏳ Ginagawa...';
-  const {data,error}=await sbAdmin.auth.admin.createUser({email:e,password:p,email_confirm:true,user_metadata:{name:n}});
-  if(error){err.textContent=error.message;document.getElementById('nsb').textContent='✅ Gawa ng Account';return;}
-  if(data.user){await new Promise(r=>setTimeout(r,800));await sb.from('profiles').update({name:n,role:'staff'}).eq('id',data.user.id);}
+  const res=await fetch(SB_URL+'/auth/v1/admin/users',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({email:e,password:p,email_confirm:true,user_metadata:{name:n}})});
+  const json=await res.json();
+  if(!res.ok){err.textContent=json.message||json.msg||'Error';document.getElementById('nsb').textContent='✅ Gawa ng Account';return;}
+  if(json.id){await new Promise(r=>setTimeout(r,800));await sb.from('profiles').update({name:n,role:'staff'}).eq('id',json.id);}
   cls();toast(`✅ Account ni ${n} nagawa na!`);rUsers();
 }
 
