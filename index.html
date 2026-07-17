@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>DG Inventory</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,sans-serif;background:linear-gradient(#eef6ff,#f8fafc);color:#111;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:68px}
+input,select,button{font-family:inherit}
+input::placeholder{color:#aaa}
+.screen{display:none}.screen.active{display:block}
+.login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 28px;background:#f8f8f8}
+.login h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.login p{font-size:13px;color:#888;margin-bottom:28px}
+.login input{width:100%;border:1.5px solid #ddd;border-radius:10px;padding:13px 14px;font-size:15px;outline:none;margin-bottom:10px;background:#fff}
+.login input:focus{border-color:#0ea5e9}
+.login button{width:100%;background:#0ea5e9;color:#fff;border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;cursor:pointer}
+.lerr{color:#e33;font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+.hdr{background:#fff;border-bottom:1px solid #e2e8f0;padding:13px 16px;position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.htitle{font-size:17px;font-weight:800;flex:1}
+.abadge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#fff8dc;color:#8a6000}
+.sbadge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e8f4ff;color:#0069b0}
+.btn-add{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-logout{background:none;border:none;font-size:20px;cursor:pointer}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:50}
+.nb{flex:1;background:none;border:none;padding:10px 2px 14px;cursor:pointer;font-size:9px;font-weight:700;color:#bbb;border-top:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px}
+.nb .ni{font-size:18px}
+.nb.on{color:#0ea5e9;border-top-color:#0ea5e9}
+.ctabs{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 8px;border-bottom:1px solid #f0f0f0}
+.ctabs::-webkit-scrollbar{display:none}
+.ctab{flex-shrink:0;border:1.5px solid #e0e0e0;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#555;white-space:nowrap}
+.ctab.on{background:#0ea5e9;color:#fff;border-color:#0ea5e9}
+.sw{padding:10px 14px 4px}
+.si{width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:9px 13px;font-size:14px;outline:none;color:#111;background:#fafafa}
+.si:focus{border-color:#0ea5e9;background:#fff}
+.list{padding:8px 14px 0}
+.icard{display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:16px;margin-bottom:10px;background:#fff;cursor:pointer;border:1.5px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.icard:active{background:#f8fafc}
+.icard.out{border-color:#f87171;background:#fff8f8}
+.iem{font-size:22px;width:34px;text-align:center;flex-shrink:0}
+.iname{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.isub{font-size:11px;color:#888;margin-top:2px}
+.iqty{font-size:20px;font-weight:800;line-height:1;text-align:right}
+.iqty.out{color:#dc2626}
+.itag{font-size:9px;font-weight:700;text-align:right;margin-top:2px;color:#dc2626}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.sh{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:480px;padding:12px 18px 38px;max-height:90vh;overflow-y:auto;animation:up .18s ease}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.shdl{width:36px;height:3px;background:#ddd;border-radius:2px;margin:0 auto 14px}
+.shn{font-size:17px;font-weight:800;margin-bottom:2px}
+.shm{font-size:13px;color:#888;margin-bottom:14px}
+.stpr{display:flex;align-items:center;border:1.5px solid #e0e0e0;border-radius:10px;overflow:hidden;margin-bottom:12px}
+.stpr button{background:none;border:none;font-size:22px;padding:8px 16px;cursor:pointer;color:#111;font-weight:700}
+.stpr input{flex:1;border:none;font-size:21px;font-weight:800;text-align:center;outline:none;color:#111;padding:8px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.lbl{font-size:11px;font-weight:700;color:#888;margin-bottom:3px;display:block;margin-top:10px}
+.fi{width:100%;border:1.5px solid #e0e0e0;border-radius:9px;padding:10px 12px;font-size:14px;outline:none;color:#111;background:#fff}
+.fi:focus{border-color:#0ea5e9}
+select.fi option{background:#fff}
+.btn{border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;width:100%;margin-top:10px;display:block}
+.btn-blue{background:linear-gradient(135deg,#0ea5e9,#2563eb);color:#fff}
+.btn-gray{background:#f0f0f0;color:#111;border:1.5px solid #e0e0e0}
+.btn-del{background:none;border:none;color:#e33;font-size:13px;cursor:pointer;padding:9px;width:100%;margin-top:2px}
+.btn-ghost{background:none;border:none;color:#aaa;font-size:13px;cursor:pointer;padding:9px;width:100%}
+.pbox{background:#f8f8f8;border-radius:10px;padding:10px 13px;margin-bottom:12px}
+.pr{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.divider{border:none;border-top:1px solid #f0f0f0;margin:10px 0}
+.ord-item{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:13px;margin-bottom:8px;border:1.5px solid #e0e0e0}
+.dw{margin-bottom:12px}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:5px 14px;margin-bottom:4px}
+.dn{font-size:12px;font-weight:800;color:#555}
+.dr{font-size:12px;font-weight:800;color:#16a34a}
+.lc{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff;border-radius:10px;margin:0 14px 5px;border:1px solid #f0f0f0}
+.uc{display:flex;align-items:center;gap:10px;padding:11px 13px;background:#f9f9f9;border-radius:11px;margin-bottom:7px;border:1px solid #eee;flex-wrap:wrap}
+.ucard{background:#fff;border-radius:12px;padding:13px;margin-bottom:8px;border:1.5px solid #fca5a5;display:flex;align-items:center;gap:10px}
+.empty{text-align:center;padding:40px 20px;color:#bbb;font-size:14px;line-height:2}
+.sec{font-size:10px;font-weight:700;color:#aaa;margin-bottom:6px;margin-top:4px}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:#111;color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;z-index:200;white-space:nowrap;animation:tin .18s ease}
+@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(-6px)}to{opacity:1;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<div id="pg-login" class="screen active">
+  <div class="login">
+    <div style="font-size:44px;margin-bottom:12px">&#128295;</div>
+    <h1>Doctor Gadget</h1><p>Inventory System</p>
+    <input id="lem" placeholder="Email o Username"/>
+    <input id="lpw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Login</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<div id="pg-admin" class="screen">
+  <div class="hdr">
+    <div class="htitle">Doctor Gadget</div>
+    <span class="abadge" id="aname">Admin</span>
+    <button class="btn-add" id="btn-add" onclick="openAdd()" style="display:none">+ Item</button>
+    <button class="btn-logout" onclick="doLogout()">&#128075;</button>
+  </div>
+  <div id="av-stock" style="display:none">
+    <div class="ctabs" id="a-cats"></div>
+    <div class="sw"><input class="si" placeholder="&#128269; Hanapin..." oninput="doSearch(this.value)"/></div>
+    <div class="list" id="a-list"></div>
+  </div>
+  <div id="av-history" style="display:none;padding-top:8px">
+    <div style="padding:0 14px 10px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:6px">
+        <button id="hv-day" onclick="setHView('day')" style="flex:1;border:1.5px solid #0ea5e9;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;background:#0ea5e9;color:#fff">Per Day</button>
+        <button id="hv-mon" onclick="setHView('monthly')" style="flex:1;border:1.5px solid #e0e0e0;border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer;background:#fff;color:#555">Monthly</button>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="date" id="hfrom" onchange="rHist('admin')" style="flex:1;border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 8px;font-size:12px;outline:none;color:#111"/>
+        <span style="color:#aaa;font-size:12px">to</span>
+        <input type="date" id="hto" onchange="rHist('admin')" style="flex:1;border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 8px;font-size:12px;outline:none;color:#111"/>
+        <button onclick="clearDates()" style="border:none;background:#f0f0f0;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;color:#555;font-weight:700">Clear</button>
+      </div>
+    </div>
+    <div id="a-logs"></div>
+  </div>
+  <div id="av-order" style="display:none;padding:10px 14px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:#555">Para sa Supplier</div>
+      <div style="display:flex;gap:6px">
+        <button onclick="openAddOrder()" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
+        <button onclick="copyOrder()" style="background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">Copy</button>
+</div>
+    </div>
+    <div id="a-order-list"></div>
+  </div>
+  <div id="av-utang" style="display:none;padding:10px 14px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:#555">&#128176; Hindi Pa Nabayaran</div>
+      <button onclick="openAddUtang()" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Utang</button>
+    </div>
+    <div id="a-utang-list"></div>
+  </div>
+  <div id="av-users" style="display:none;padding:8px 14px 0">
+    <div style="font-size:10px;font-weight:700;color:#aaa;margin-bottom:8px">MGA STAFF</div>
+    <div id="a-ulist"></div>
+    <button class="btn btn-blue" onclick="openNewStaff()">+ Gawa ng Staff Account</button>
+  </div>
+  <nav class="nav">
+    <button class="nb on" id="na-s" onclick="atab('stock')"><span class="ni">&#128230;</span>Stock</button>
+    <button class="nb"    id="na-h" onclick="atab('history')"><span class="ni">&#128197;</span>History</button>
+    <button class="nb"    id="na-o" onclick="atab('order')"><span class="ni">&#128666;</span>Order</button>
+    <button class="nb"    id="na-t" onclick="atab('utang')"><span class="ni">&#128176;</span>Utang</button>
+    <button class="nb"    id="na-u" onclick="atab('users')"><span class="ni">&#128101;</span>Users</button>
+  </nav>
+</div>
+
+<div id="pg-staff" class="screen">
+  <div class="hdr">
+    <div class="htitle">Doctor Gadget</div>
+    <span class="sbadge" id="sname">Staff</span>
+    <button class="btn-logout" onclick="doLogout()">&#128075;</button>
+  </div>
+  <div id="sv-stock" style="display:none">
+    <div class="ctabs" id="s-cats"></div>
+    <div class="sw"><input class="si" placeholder="&#128269; Hanapin..." oninput="doSearch(this.value)"/></div>
+    <div class="list" id="s-list"></div>
+  </div>
+  <div id="sv-history" style="display:none;padding-top:8px">
+    <div style="font-size:10px;font-weight:700;color:#aaa;padding:0 14px 8px">BENTA NGAYON</div>
+    <div id="s-logs"></div>
+  </div>
+  <nav class="nav">
+    <button class="nb on" id="ns-s" onclick="stab('stock')"><span class="ni">&#128230;</span>Stock</button>
+    <button class="nb"    id="ns-h" onclick="stab('history')"><span class="ni">&#128197;</span>History</button>
+  </nav>
+</div>
+
+<div class="ov" id="ov" style="display:none" onclick="bgc(event)"><div class="sh" id="sh"></div></div>
+
+<script>
+var SB_URL='https://sivnejgshvmlpribuydl.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzE1MzUsImV4cCI6MjA5ODA0NzUzNX0.rHYKO45RkpmUs61dQ1h46c_go7QA2Ps1C8Bc-rg0-rU';
+var SB_SVC='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpdm5lamdzaHZtbHByaWJ1eWRsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjQ3MTUzNSwiZXhwIjoyMDk4MDQ3NTM1fQ.9ezpZMZGZP7XQbSW4h57CklJmhoYl4E6jmYaRicJp1E';
+var sb=supabase.createClient(SB_URL,SB_KEY);
+var me,items=[],logs=[],manualOrders={},hiddenSold=[];
+var q='',cat='All',aid=null,hView='day';
+var CATS={'LCD / Display':'&#128241;','Flex Cable':'&#128279;','Battery':'&#128267;','Charger':'&#9889;','Casing / Cover':'&#128230;','Tools / Parts':'&#128295;','Accessories':'&#127911;','Backglass':'&#129695;','Others':'&#128193;'};
+var CK=Object.keys(CATS);
+function ic(c){return CATS[c]||'&#128230;';}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function ts(){var d=new Date();return{date:d.toISOString().slice(0,10),time:d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})};}
+function td(){return new Date().toISOString().slice(0,10);}
+function P(n){return '&#8369;'+Number(n||0).toLocaleString('en-PH');}
+function pg(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById('pg-'+id).classList.add('active');}
+function toast(m){var e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(function(){e.remove();},2200);}
+function bgc(e){if(e.target===document.getElementById('ov'))closeSheet();}
+function closeSheet(){document.getElementById('ov').style.display='none';document.getElementById('sh').innerHTML='';}
+function modal(h){document.getElementById('sh').innerHTML=h;document.getElementById('ov').style.display='flex';}
+
+async function init(){
+  var s=await sb.auth.getSession();
+  if(s.data.session) await go(s.data.session.user);
+  else pg('login');
+}
+
+async function doLogin(){
+  var e=document.getElementById('lem').value.trim();
+  var p=document.getElementById('lpw').value;
+  document.getElementById('lerr').textContent='';
+  if(!e||!p){document.getElementById('lerr').textContent='Kumpleto ang email at password.';return;}
+  if(e.indexOf('@')<0) e=e.toLowerCase()+'@doctorgadget.staff';
+  var r=await sb.auth.signInWithPassword({email:e,password:p});
+  if(r.error){document.getElementById('lerr').textContent='Mali ang email o password.';return;}
+  await go(r.data.user);
+}
+
+async function go(user){
+  var r=await sb.from('profiles').select('*').eq('id',user.id).single();
+  me=r.data||{id:user.id,name:user.email,role:'staff'};
+  await load();
+  manualOrders=JSON.parse(localStorage.getItem('dg_orders')||'{}');
+  hiddenSold=JSON.parse(localStorage.getItem('dg_hidden_sold')||'[]');
+  if(me.role==='admin'){
+    document.getElementById('aname').textContent=me.name;
+    pg('admin');atab('stock');
+  } else {
+    document.getElementById('sname').textContent=me.name;
+    pg('staff');stab('stock');
+  }
+}
+
+async function doLogout(){await sb.auth.signOut();me=null;items=[];logs=[];pg('login');}
+
+async function load(){
+  var ir=await sb.from('items').select('*').order('name');
+  var lr=await sb.from('logs').select('*').order('created_at',{ascending:false}).limit(500);
+  if(ir.data)items=ir.data;
+  if(lr.data)logs=lr.data;
+}
+
+function atab(t){
+  ['stock','history','order','utang','users'].forEach(function(x){
+    document.getElementById('av-'+x).style.display=x===t?'':'none';
+    var nb=document.getElementById('na-'+x[0]);
+    if(nb)nb.className='nb'+(x===t?' on':'');
+  });
+  document.getElementById('btn-add').style.display=t==='stock'?'':'none';
+  cat='All';q='';
+  if(t==='stock'){rCats('a-cats','admin');rAdmin();}
+  if(t==='history'){document.getElementById('hfrom').value='';document.getElementById('hto').value='';rHist('admin');}
+  if(t==='order')rOrder();
+  if(t==='utang')rUtang();
+  if(t==='users')rUsers();
+}
+
+function stab(t){
+  ['stock','history'].forEach(function(x){
+    document.getElementById('sv-'+x).style.display=x===t?'':'none';
+    var nb=document.getElementById('ns-'+x[0]);
+    if(nb)nb.className='nb'+(x===t?' on':'');
+  });
+  cat='All';q='';
+  if(t==='stock'){rCats('s-cats','staff');rStaff();}
+  if(t==='history')rHist('staff');
+}
+
+function rCats(elId,role){
+  var el=document.getElementById(elId);
+  el.innerHTML=['All'].concat(CK).map(function(c){
+    var label=c==='All'?'Lahat':c.split('/')[0].trim();
+    return '<button class="ctab'+(cat===c?' on':'')+'" data-cat="'+c+'" data-role="'+role+'">'+label+'</button>';
+  }).join('');
+  el.querySelectorAll('.ctab').forEach(function(btn){
+    btn.addEventListener('click',function(){setC(btn.dataset.cat,btn.dataset.role);});
+  });
+}
+
+function setC(c,role){
+  cat=c;
+  if(role==='admin'){rCats('a-cats','admin');rAdmin();}
+  else{rCats('s-cats','staff');rStaff();}
+}
+
+function doSearch(v){q=v;if(me&&me.role==='admin')rAdmin();else rStaff();}
+
+function rAdmin(){
+  var fil=items.filter(function(i){return(cat==='All'||i.category===cat)&&i.name.toLowerCase().indexOf(q.toLowerCase())>=0;});
+  var el=document.getElementById('a-list');
+  if(!fil.length){el.innerHTML='<div class="empty">Wala pang items.<br>I-tap ang + Item</div>';return;}
+  el.innerHTML=fil.map(function(i){
+    var isOut=i.qty===0;
+    return '<div class="icard'+(isOut?' out':'')+'" onclick="openA(\''+i.id+'\')">'+
+      '<div class="iem">'+ic(i.category)+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="iname">'+esc(i.name)+'</div>'+
+      '<div class="isub">Cost: '+P(i.cost)+' &middot; Admin: '+P(i.admin_price)+' &middot; Staff: '+P(i.staff_price)+'</div></div>'+
+      '<div style="text-align:right"><div class="iqty'+(isOut?' out':'')+'">'+i.qty+'<span style="font-size:10px;font-weight:400;color:#aaa"> '+esc(i.unit)+'</span></div>'+
+      (isOut?'<div class="itag">WALA NA</div>':'')+
+      '</div></div>';
+  }).join('');
+}
+
+function rStaff(){
+  var fil=items.filter(function(i){return i.qty>0&&(cat==='All'||i.category===cat)&&i.name.toLowerCase().indexOf(q.toLowerCase())>=0;});
+  var el=document.getElementById('s-list');
+  if(!fil.length){el.innerHTML='<div class="empty">Walang available na items.</div>';return;}
+  el.innerHTML=fil.map(function(i){
+    return '<div class="icard" onclick="openS(\''+i.id+'\')">'+
+      '<div class="iem">'+ic(i.category)+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="iname">'+esc(i.name)+'</div>'+
+      '<div class="isub">'+esc(i.category)+'</div>'+
+      '<div style="font-size:12px;font-weight:700;color:#0ea5e9;margin-top:2px">'+P(i.staff_price)+'</div></div>'+
+      '<div style="text-align:right"><div class="iqty">'+i.qty+'<span style="font-size:10px;font-weight:400;color:#aaa"> '+esc(i.unit)+'</span></div></div>'+
+      '</div>';
+  }).join('');
+}
+
+function openA(id){
+  aid=id;
+  var i=items.find(function(x){return x.id===id;});
+  var iid=id,iname=i.name,iqty=i.qty,iunit=i.unit;
+  modal(
+    '<div class="shdl"></div>'+
+    '<div class="shn">'+esc(i.name)+'</div>'+
+    '<div class="shm">'+ic(i.category)+' '+esc(i.category)+' &middot; '+i.qty+' '+esc(i.unit)+' natitira</div>'+
+    '<div class="pbox">'+
+      '<div class="pr"><span style="color:#888">Supplier Cost</span><span style="font-weight:700">'+P(i.cost)+'</span></div>'+
+      '<div class="pr"><span style="color:#888">Admin Price</span><span style="font-weight:700;color:#0ea5e9">'+P(i.admin_price)+'</span></div>'+
+      '<div class="pr"><span style="color:#888">Staff Price</span><span style="font-weight:700">'+P(i.staff_price)+'</span></div>'+
+    '</div>'+
+    '<label class="lbl" style="margin-top:0">Quantity</label>'+
+    '<div class="stpr"><button onclick="sq(-1)">-</button><input type="number" id="qv" value="1" min="1"/><button onclick="sq(1)">+</button></div>'+
+    '<div class="g2" style="margin-bottom:8px">'+
+      '<button class="btn btn-blue" style="margin-top:0" onclick="doSell()">Ibenta</button>'+
+      '<button class="btn btn-gray" style="margin-top:0" onclick="doAdd()">Dagdag</button>'+
+    '</div>'+
+    '<button class="btn" style="background:#ef4444;color:#fff;margin-top:0" id="ubtn">Utang</button>'+
+    '<hr class="divider"/>'+
+    '<div class="sec">ORDER SA SUPPLIER</div>'+
+    '<div style="display:flex;gap:8px">'+
+      '<input type="number" id="oqty" placeholder="Ilang pcs?" min="1" style="flex:1;border:1.5px solid #e0e0e0;border-radius:9px;padding:9px 12px;font-size:14px;outline:none;color:#111"/>'+
+      '<button id="obtn" style="background:#f59e0b;color:#fff;border:none;border-radius:9px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer">+ Order</button>'+
+    '</div>'+
+    '<button class="btn-ghost" id="ebtn">I-edit ang item</button>'
+  );
+  setTimeout(function(){
+    var ubtn=document.getElementById('ubtn');
+    if(ubtn)ubtn.onclick=function(){openUtangForm(iid,iname,iqty,iunit);};
+    var obtn=document.getElementById('obtn');
+    if(obtn)obtn.onclick=function(){
+      var qv=parseInt(document.getElementById('oqty').value)||0;
+      if(qv<1){toast('Lagyan ng quantity!');return;}
+      if(!manualOrders[iid]) manualOrders[iid]={name:iname,qty:0};
+      manualOrders[iid].qty+=qv;
+      localStorage.setItem('dg_orders',JSON.stringify(manualOrders));
+      closeSheet();toast('Na-add sa Order: '+iname+' x'+qv);
+    };
+    var ebtn=document.getElementById('ebtn');
+    if(ebtn)ebtn.onclick=function(){openEdit(iid);};
+  },30);
+}
+
+function openUtangForm(id,name,qty,unit){
+  var iid=id,iname=name;
+  modal(
+    '<div class="shdl"></div>'+
+    '<div class="shn">Utang</div>'+
+    '<div class="shm">'+esc(name)+' &middot; Stock: '+qty+' '+esc(unit)+'</div>'+
+    '<label class="lbl" style="margin-top:0">Quantity</label>'+
+    '<div class="stpr"><button onclick="sq(-1)">-</button><input type="number" id="qv" value="1" min="1"/><button onclick="sq(1)">+</button></div>'+
+    '<label class="lbl">Pangalan ng customer</label>'+
+    '<input class="fi" id="utn" placeholder="e.g. Juan"/>'+
+    '<label class="lbl">Note (optional)</label>'+
+    '<input class="fi" id="uto" placeholder="e.g. bayad bukas"/>'+
+    '<button class="btn" style="background:#ef4444;color:#fff" id="svutang">Utang - Bawas sa Stock</button>'
+  );
+  setTimeout(function(){
+    var btn=document.getElementById('svutang');
+    if(btn)btn.onclick=function(){saveItemUtang(iid,iname);};
+  },30);
+}
+
+async function saveItemUtang(id,name){
+  var qv=gq(),cname=document.getElementById('utn').value.trim(),note=document.getElementById('uto').value.trim();
+  if(!cname){toast('Lagyan ng pangalan ng customer!');return;}
+  var it=items.find(function(i){return i.id===id;});
+  if(qv>it.qty){toast('Hindi sapat ang stock!');return;}
+  var nq=it.qty-qv,t=ts();
+  var lg={id:uid(),item_id:id,item_name:name,type:'sell',qty:qv,price_used:it.staff_price,seller_name:me.name,seller_role:me.role,date:t.date,time:t.time};
+  var r=await Promise.all([sb.from('items').update({qty:nq}).eq('id',id),sb.from('logs').insert(lg)]);
+  if(r[0].error||r[1].error){toast('Error!');return;}
+  var utangs=JSON.parse(localStorage.getItem('dg_utang')||'[]');
+  utangs.unshift({item:name+(qv>1?' x'+qv:''),name:cname,note:note,date:t.date});
+  localStorage.setItem('dg_utang',JSON.stringify(utangs));
+  closeSheet();items=items.map(function(i){return i.id===id?Object.assign({},i,{qty:nq}):i;});
+  logs.unshift(lg);rAdmin();toast('Utang ni '+cname+' na-save!');
+}
+
+function openS(id){
+  aid=id;
+  var i=items.find(function(x){return x.id===id;});
+  modal(
+    '<div class="shdl"></div>'+
+    '<div class="shn">'+esc(i.name)+'</div>'+
+    '<div class="shm">'+ic(i.category)+' &middot; Natitira: <strong>'+i.qty+' '+esc(i.unit)+'</strong> &middot; <strong style="color:#0ea5e9">'+P(i.staff_price)+'</strong></div>'+
+    '<label class="lbl" style="margin-top:0">Quantity na ibebenta</label>'+
+    '<div class="stpr"><button onclick="sq(-1)">-</button><input type="number" id="qv" value="1" min="1"/><button onclick="sq(1)">+</button></div>'+
+    '<button class="btn btn-blue" onclick="doSell()">Ibenta</button>'
+  );
+}
+
+function sq(d){var el=document.getElementById('qv');el.value=Math.max(1,parseInt(el.value||1)+d);}
+function gq(){return Math.max(1,parseInt(document.getElementById('qv').value)||1);}
+
+async function doSell(){
+  var it=items.find(function(i){return i.id===aid;}),qv=gq();
+  if(qv>it.qty){toast('Hindi sapat ang stock!');return;}
+  var isA=me.role==='admin',pr=isA?it.admin_price:it.staff_price,nq=it.qty-qv,t=ts();
+  var lg={id:uid(),item_id:aid,item_name:it.name,type:'sell',qty:qv,price_used:pr,seller_name:me.name,seller_role:me.role,date:t.date,time:t.time};
+  var r=await Promise.all([sb.from('items').update({qty:nq}).eq('id',aid),sb.from('logs').insert(lg)]);
+  if(r[0].error||r[1].error){toast('Error!');return;}
+  closeSheet();items=items.map(function(i){return i.id===aid?Object.assign({},i,{qty:nq}):i;});
+  logs.unshift(lg);isA?rAdmin():rStaff();toast('Nabenta: '+it.name+' x'+qv);
+}
+
+async function doAdd(){
+  var it=items.find(function(i){return i.id===aid;}),qv=gq(),nq=it.qty+qv,t=ts();
+  var lg={id:uid(),item_id:aid,item_name:it.name,type:'add',qty:qv,price_used:0,seller_name:me.name,seller_role:'admin',date:t.date,time:t.time};
+  var r=await Promise.all([sb.from('items').update({qty:nq}).eq('id',aid),sb.from('logs').insert(lg)]);
+  if(r[0].error||r[1].error){toast('Error!');return;}
+  closeSheet();items=items.map(function(i){return i.id===aid?Object.assign({},i,{qty:nq}):i;});
+  logs.unshift(lg);rAdmin();toast('Nadagdag: '+it.name+' x'+qv);
+}
+
+function openAdd(){
+  modal(
+    '<div class="shdl"></div><div class="shn" style="margin-bottom:12px">Bagong Item</div>'+
+    '<label class="lbl" style="margin-top:0">Pangalan</label><input class="fi" id="fn" placeholder="e.g. iPhone 13 LCD"/>'+
+    '<label class="lbl">Category</label>'+
+    '<select class="fi" id="fc">'+CK.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')+'</select>'+
+    '<div class="g2"><div><label class="lbl">Stock ngayon</label><input class="fi" id="fq" type="number" placeholder="0" min="0"/></div>'+
+    '<div><label class="lbl">Low stock alert</label><input class="fi" id="fl" type="number" value="2" min="0"/></div></div>'+
+    '<div class="g3">'+
+      '<div><label class="lbl">Cost</label><input class="fi" id="fco" type="number" placeholder="0" min="0"/></div>'+
+      '<div><label class="lbl">Admin Price</label><input class="fi" id="fap" type="number" placeholder="0" min="0"/></div>'+
+      '<div><label class="lbl">Staff Price</label><input class="fi" id="fsp" type="number" placeholder="0" min="0"/></div>'+
+    '</div>'+
+    '<label class="lbl">Unit</label><input class="fi" id="fu" value="pcs"/>'+
+    '<button class="btn btn-blue" onclick="saveAdd()">I-Save</button>'
+  );
+}
+
+async function saveAdd(){
+  var name=document.getElementById('fn').value.trim();
+  if(!name){toast('Lagyan ng pangalan!');return;}
+  var it={id:uid(),name:name,category:document.getElementById('fc').value,
+    qty:parseInt(document.getElementById('fq').value)||0,
+    low_at:parseInt(document.getElementById('fl').value)||2,
+    cost:parseFloat(document.getElementById('fco').value)||0,
+    admin_price:parseFloat(document.getElementById('fap').value)||0,
+    staff_price:parseFloat(document.getElementById('fsp').value)||0,
+    unit:document.getElementById('fu').value.trim()||'pcs'};
+  var r=await sb.from('items').insert(it);
+  if(r.error){toast('Error: '+r.error.message);return;}
+  closeSheet();items.push(it);items.sort(function(a,b){return a.name.localeCompare(b.name);});
+  rAdmin();toast('Item added!');
+}
+
+function openEdit(id){
+  var i=items.find(function(x){return x.id===id;});
+  modal(
+    '<div class="shdl"></div><div class="shn" style="margin-bottom:12px">I-Edit</div>'+
+    '<label class="lbl" style="margin-top:0">Pangalan</label><input class="fi" id="en" value="'+esc(i.name)+'"/>'+
+    '<label class="lbl">Category</label>'+
+    '<select class="fi" id="ec">'+CK.map(function(c){return '<option value="'+c+'"'+(i.category===c?' selected':'')+'>'+c+'</option>';}).join('')+'</select>'+
+    '<div class="g2"><div><label class="lbl">Stock</label><input class="fi" id="eq" type="number" value="'+(i.qty||0)+'" min="0"/></div>'+
+    '<div><label class="lbl">Low stock alert</label><input class="fi" id="el2" type="number" value="'+(i.low_at||2)+'" min="0"/></div></div>'+
+    '<div class="g3">'+
+      '<div><label class="lbl">Cost</label><input class="fi" id="eco" type="number" value="'+(i.cost||0)+'" min="0"/></div>'+
+      '<div><label class="lbl">Admin Price</label><input class="fi" id="eap" type="number" value="'+(i.admin_price||0)+'" min="0"/></div>'+
+      '<div><label class="lbl">Staff Price</label><input class="fi" id="esp" type="number" value="'+(i.staff_price||0)+'" min="0"/></div>'+
+    '</div>'+
+    '<label class="lbl">Unit</label><input class="fi" id="eu" value="'+esc(i.unit)+'"/>'+
+    '<button class="btn btn-blue" onclick="saveEdit(\''+id+'\')">I-Update</button>'+
+    '<button class="btn-del" onclick="delItem(\''+id+'\')">I-Delete</button>'
+  );
+}
+
+async function saveEdit(id){
+  var upd={name:document.getElementById('en').value.trim(),category:document.getElementById('ec').value,
+    qty:parseInt(document.getElementById('eq').value)||0,low_at:parseInt(document.getElementById('el2').value)||2,
+    cost:parseFloat(document.getElementById('eco').value)||0,admin_price:parseFloat(document.getElementById('eap').value)||0,
+    staff_price:parseFloat(document.getElementById('esp').value)||0,unit:document.getElementById('eu').value.trim()||'pcs'};
+  if(!upd.name){toast('Lagyan ng pangalan!');return;}
+  var r=await sb.from('items').update(upd).eq('id',id);
+  if(r.error){toast('Error: '+r.error.message);return;}
+  closeSheet();items=items.map(function(i){return i.id===id?Object.assign({},i,upd):i;});
+  rAdmin();toast('Updated!');
+}
+
+async function delItem(id){
+  if(!confirm('I-delete ba?'))return;
+  await sb.from('items').delete().eq('id',id);
+  closeSheet();items=items.filter(function(i){return i.id!==id;});
+  rAdmin();toast('Deleted.');
+}
+
+// ORDER TAB
+async function rOrder(){
+  manualOrders=JSON.parse(localStorage.getItem('dg_orders')||'{}');
+  hiddenSold=JSON.parse(localStorage.getItem('dg_hidden_sold')||'[]');
+  var el=document.getElementById('a-order-list');
+  el.innerHTML='<div style="text-align:center;padding:20px;color:#aaa">Loading...</div>';
+  var r=await sb.from('logs').select('item_id,item_name,qty').eq('type','sell');
+  var soldMap={};
+  if(r.data) r.data.forEach(function(l){
+    if(!soldMap[l.item_id])soldMap[l.item_id]={name:l.item_name,qty:0};
+    soldMap[l.item_id].qty+=l.qty;
+  });
+  var rows=[];
+  // SOLD ITEMS (filtered by hidden)
+  var soldEntries=Object.entries(soldMap).filter(function(e){return hiddenSold.indexOf(e[0])<0;}).sort(function(a,b){return b[1].qty-a[1].qty;});
+  if(soldEntries.length){
+    rows.push('<div class="sec">NABENTA</div>');
+    soldEntries.forEach(function(entry){
+      var sid=entry[0],info=entry[1];
+      var item=items.find(function(i){return i.id===sid;});
+      var stock=item?item.qty:0;
+      var cat=item?ic(item.category):'&#128230;';
+      rows.push(
+        '<div class="ord-item" style="border-color:#bfdbfe">'+
+          '<div style="font-size:22px">'+cat+'</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(info.name)+'</div>'+
+            '<div style="font-size:12px;color:#aaa;margin-top:2px">Nabenta: <strong style="color:#0ea5e9">'+info.qty+'</strong> &middot; Stock: '+stock+'</div>'+
+          '</div>'+
+          '<button data-sid="'+sid+'" class="del-sold-btn" style="flex-shrink:0;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer">Del</button>'+
+        '</div>'
+      );
+    });
+  }
+  // MANUAL ORDERS
+  var manualEntries=Object.entries(manualOrders);
+  if(manualEntries.length){
+    rows.push('<div class="sec" style="margin-top:12px">MANUAL ORDER</div>');
+    manualEntries.forEach(function(entry){
+      var mid=entry[0],info=entry[1];
+      rows.push(
+        '<div class="ord-item" style="border-color:#fde047">'+
+          '<div style="font-size:22px">&#128230;</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(info.name)+'</div>'+
+            '<div style="font-size:12px;color:#f59e0b;font-weight:600;margin-top:2px">Order: '+info.qty+' pcs</div>'+
+          '</div>'+
+          '<button data-mid="'+mid+'" class="done-manual-btn" style="flex-shrink:0;background:#10b981;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer">Done</button>'+
+        '</div>'
+      );
+    });
+  }
+  if(!rows.length){el.innerHTML='<div class="empty">Wala pang laman.<br>Mag-benta o mag-add ng manual order.</div>';return;}
+  el.innerHTML=rows.join('');
+  // Event listeners
+  el.querySelectorAll('.del-sold-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var sid=btn.dataset.sid;
+      if(hiddenSold.indexOf(sid)<0)hiddenSold.push(sid);
+      localStorage.setItem('dg_hidden_sold',JSON.stringify(hiddenSold));
+      rOrder();
+    });
+  });
+  el.querySelectorAll('.done-manual-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var mid=btn.dataset.mid;
+      delete manualOrders[mid];
+      localStorage.setItem('dg_orders',JSON.stringify(manualOrders));
+      toast('Done!');rOrder();
+    });
+  });
+}
+
+
+function openAddOrder(){
+  modal(
+    '<div class="shdl"></div><div class="shn" style="margin-bottom:14px">Dagdag sa Order List</div>'+
+    '<label class="lbl" style="margin-top:0">Pangalan ng item</label>'+
+    '<input class="fi" id="oan" placeholder="e.g. iPhone 13 LCD"/>'+
+    '<label class="lbl">Quantity</label>'+
+    '<div class="stpr"><button onclick="oqs(-1)">-</button><input type="number" id="oqn" value="1" min="1"/><button onclick="oqs(1)">+</button></div>'+
+    '<button class="btn" style="background:#f59e0b;color:#fff" onclick="saveAddOrder()">+ I-add</button>'
+  );
+}
+function oqs(d){var el=document.getElementById('oqn');el.value=Math.max(1,parseInt(el.value||1)+d);}
+function saveAddOrder(){
+  var name=document.getElementById('oan').value.trim();
+  var qty=parseInt(document.getElementById('oqn').value)||1;
+  if(!name){toast('Lagyan ng pangalan!');return;}
+  var id='manual_'+uid();
+  manualOrders[id]={name:name,qty:qty};
+  localStorage.setItem('dg_orders',JSON.stringify(manualOrders));
+  closeSheet();toast('Na-add: '+name+' x'+qty);rOrder();
+}
+
+async function copyOrder(){
+  var r=await sb.from('logs').select('item_id,item_name,qty').eq('type','sell');
+  var soldMap={};
+  if(r.data)r.data.forEach(function(l){if(!soldMap[l.item_id])soldMap[l.item_id]={name:l.item_name,qty:0};soldMap[l.item_id].qty+=l.qty;});
+  var lines=[];
+  Object.entries(soldMap).filter(function(e){return hiddenSold.indexOf(e[0])<0;}).sort(function(a,b){return b[1].qty-a[1].qty;}).forEach(function(e){lines.push('- '+e[1].name+' ('+e[1].qty+' sold)');});
+  Object.values(manualOrders).forEach(function(info){lines.push('- '+info.name+' (order '+info.qty+' pcs)');});
+  if(!lines.length){toast('Walang items!');return;}
+  navigator.clipboard.writeText('ORDER LIST - Doctor Gadget\n'+lines.join('\n')).then(function(){toast('Na-copy ang list!');});
+}
+
+// UTANG
+function rUtang(){
+  var utangs=JSON.parse(localStorage.getItem('dg_utang')||'[]');
+  var el=document.getElementById('a-utang-list');
+  if(!utangs.length){el.innerHTML='<div class="empty">Wala pang utang. &#128077;</div>';return;}
+  el.innerHTML=utangs.map(function(u,i){
+    return '<div class="ucard">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.item)+'</div>'+
+        '<div style="font-size:13px;color:#ef4444;font-weight:600;margin-top:2px">'+esc(u.name)+'</div>'+
+        (u.note?'<div style="font-size:11px;color:#aaa;margin-top:2px">'+esc(u.note)+'</div>':'')+
+        '<div style="font-size:11px;color:#aaa;margin-top:2px">'+u.date+'</div>'+
+      '</div>'+
+      '<button onclick="paidUtang('+i+')" style="flex-shrink:0;background:#10b981;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer">Paid</button>'+
+    '</div>';
+  }).join('');
+}
+
+function openAddUtang(){
+  modal(
+    '<div class="shdl"></div><div class="shn" style="margin-bottom:14px">Bagong Utang</div>'+
+    '<label class="lbl" style="margin-top:0">Item</label><input class="fi" id="ui" placeholder="e.g. iPhone 13 LCD"/>'+
+    '<label class="lbl">Pangalan ng customer</label><input class="fi" id="un" placeholder="e.g. Juan"/>'+
+    '<label class="lbl">Note (optional)</label><input class="fi" id="uo" placeholder="e.g. bayad sa Biyernes"/>'+
+    '<button class="btn" style="background:#ef4444;color:#fff" onclick="saveUtang()">+ I-save</button>'
+  );
+}
+
+function saveUtang(){
+  var item=document.getElementById('ui').value.trim();
+  var name=document.getElementById('un').value.trim();
+  var note=document.getElementById('uo').value.trim();
+  if(!item||!name){toast('Lagyan ng item at pangalan!');return;}
+  var utangs=JSON.parse(localStorage.getItem('dg_utang')||'[]');
+  utangs.unshift({item:item,name:name,note:note,date:td()});
+  localStorage.setItem('dg_utang',JSON.stringify(utangs));
+  closeSheet();toast('Na-save ang utang ni '+name);rUtang();
+}
+
+function paidUtang(i){
+  var utangs=JSON.parse(localStorage.getItem('dg_utang')||'[]');
+  var u=utangs[i];
+  if(!confirm('Bayad na si '+u.name+'?'))return;
+  utangs.splice(i,1);
+  localStorage.setItem('dg_utang',JSON.stringify(utangs));
+  toast('Paid! Inalis na.');rUtang();
+}
+
+// HISTORY
+var hView='day';
+function setHView(v){
+  hView=v;
+  var on='1.5px solid #0ea5e9;background:#0ea5e9;color:#fff',off='1.5px solid #e0e0e0;background:#fff;color:#555';
+  document.getElementById('hv-day').style.cssText='flex:1;border:'+( v==='day'?on:off)+';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer';
+  document.getElementById('hv-mon').style.cssText='flex:1;border:'+(v==='monthly'?on:off)+';border-radius:8px;padding:7px;font-size:12px;font-weight:700;cursor:pointer';
+  rHist('admin');
+}
+function clearDates(){document.getElementById('hfrom').value='';document.getElementById('hto').value='';rHist('admin');}
+
+function rHist(role){
+  var ml=role==='staff'?logs.filter(function(l){return l.date===td()&&l.type==='sell';}):logs.slice();
+  var el=document.getElementById(role==='admin'?'a-logs':'s-logs');
+  if(!el)return;
+  if(role==='admin'){
+    var from=document.getElementById('hfrom').value,to=document.getElementById('hto').value;
+    if(!from&&!to)ml=ml.filter(function(l){return l.date===td();});
+    else{if(from)ml=ml.filter(function(l){return l.date>=from;});if(to)ml=ml.filter(function(l){return l.date<=to;});}
+  }
+  if(!ml.length){el.innerHTML='<div class="empty">Walang transactions.</div>';return;}
+  if(role==='admin'&&hView==='monthly'){
+    var mm={};
+    ml.filter(function(l){return l.type==='sell';}).forEach(function(l){
+      var mon=l.date?l.date.slice(0,7):'';if(!mon)return;
+      if(!mm[mon])mm[mon]={rev:0,qty:0,txn:0,items:{}};
+      mm[mon].rev+=(l.price_used||0)*l.qty;mm[mon].qty+=l.qty;mm[mon].txn++;
+      mm[mon].items[l.item_name]=(mm[mon].items[l.item_name]||0)+l.qty;
+    });
+    var months=Object.keys(mm).sort(function(a,b){return b.localeCompare(a);});
+    if(!months.length){el.innerHTML='<div class="empty">Wala pang sales.</div>';return;}
+    el.innerHTML=months.map(function(mon){
+      var m=mm[mon],label=new Date(mon+'-01').toLocaleDateString('en-PH',{month:'long',year:'numeric'});
+      var topItems=Object.entries(m.items).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+      return '<div style="background:#fff;border-radius:14px;padding:14px;margin:0 14px 10px;border:1.5px solid #e0e0e0">'+
+        '<div style="font-weight:800;font-size:15px;margin-bottom:10px">'+label+'</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">'+
+          '<div style="background:#f8f8f8;border-radius:9px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:800;color:#0ea5e9">'+m.txn+'</div><div style="font-size:10px;color:#aaa;margin-top:2px">Transactions</div></div>'+
+          '<div style="background:#f8f8f8;border-radius:9px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:800;color:#16a34a">'+m.qty+'</div><div style="font-size:10px;color:#aaa;margin-top:2px">Items Sold</div></div>'+
+          '<div style="background:#f8f8f8;border-radius:9px;padding:10px;text-align:center"><div style="font-size:13px;font-weight:800;color:#7c3aed">'+P(m.rev)+'</div><div style="font-size:10px;color:#aaa;margin-top:2px">Revenue</div></div>'+
+        '</div>'+
+        (topItems.length?'<div style="font-size:11px;font-weight:700;color:#aaa;margin-bottom:5px">TOP ITEMS</div>'+
+          topItems.map(function(e,i){return '<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:'+(i<topItems.length-1?'1px solid #f0f0f0':'none')+'"><span>'+esc(e[0])+'</span><span style="font-weight:700;color:#0ea5e9">'+e[1]+' sold</span></div>';}).join('')
+        :'')+
+      '</div>';
+    }).join('');
+    return;
+  }
+  var bd={};
+  ml.forEach(function(l){if(!bd[l.date])bd[l.date]=[];bd[l.date].push(l);});
+  var t=td(),h='';
+  Object.entries(bd).sort(function(a,b){return b[0].localeCompare(a[0]);}).forEach(function(entry){
+    var date=entry[0],ents=entry[1];
+    var sells=ents.filter(function(e){return e.type==='sell';});
+    var rev=sells.reduce(function(s,e){return s+(e.price_used||0)*e.qty;},0);
+    var dlabel=date===t?'Ngayon':new Date(date+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',weekday:'short'});
+    h+='<div class="dw"><div class="dh"><div class="dn">'+dlabel+' &middot; '+sells.length+' benta</div>'+(role==='admin'&&rev>0?'<div class="dr">'+P(rev)+'</div>':'')+' </div>';
+    ents.sort(function(a,b){return(b.time||'').localeCompare(a.time||'');}).forEach(function(l){
+      var is=l.type==='sell';
+      h+='<div class="lc">'+
+        '<div style="font-size:19px;width:26px;text-align:center;flex-shrink:0">'+(is?'&#128228;':'&#128229;')+'</div>'+
+        '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.item_name)+'</div>'+
+        '<div style="font-size:10px;color:#aaa;margin-top:1px">'+(l.time||'')+' &middot; '+esc(l.seller_name||'')+'</div></div>'+
+        '<div style="text-align:right"><div style="font-weight:800;font-size:14px;color:'+(is?'#0ea5e9':'#16a34a')+'">'+(is?'-':'+')+l.qty+'</div>'+
+        (role==='admin'&&is&&l.price_used?'<div style="font-size:10px;color:#aaa">'+P(l.price_used*l.qty)+'</div>':'')+
+        '</div></div>';
+    });
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+// USERS
+async function rUsers(){
+  var r=await sb.from('profiles').select('*').order('created_at');
+  document.getElementById('a-ulist').innerHTML=(r.data||[]).map(function(p){
+    var btns=p.id!==me.id
+      ?'<button onclick="toggleR(\''+p.id+'\',\''+(p.role==='staff'?'admin':'staff')+'\')" style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;'+(p.role==='staff'?'background:#fffbdc;color:#8a6000':'background:#e8f4ff;color:#0069b0')+'">'+(p.role==='staff'?'Admin':'Staff')+'</button>'+
+        '<button onclick="openChgPass(\''+p.id+'\',\''+esc(p.name)+'\')" style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;background:#f0f0f0;color:#333">Pass</button>'+
+        '<button onclick="delStaff(\''+p.id+'\',\''+esc(p.name)+'\')" style="font-size:11px;border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;background:#ffe4e4;color:#c00">Del</button>'
+      :'<span style="font-size:11px;color:#bbb">Ikaw</span>';
+    return '<div class="uc"><div style="font-size:22px">'+(p.role==='admin'?'&#128081;':'&#128100;')+'</div>'+
+      '<div style="flex:1"><div style="font-weight:700;font-size:14px">'+esc(p.name)+'</div><div style="font-size:11px;color:#aaa">'+(p.role==='admin'?'Admin':'Staff')+'</div></div>'+
+      btns+'</div>';
+  }).join('');
+}
+
+async function toggleR(id,role){await sb.from('profiles').update({role:role}).eq('id',id);toast('Updated!');rUsers();}
+
+function openNewStaff(){
+  modal('<div class="shdl"></div><div class="shn" style="margin-bottom:14px">Gawa ng Staff Account</div>'+
+    '<label class="lbl" style="margin-top:0">Username</label><input class="fi" id="nn" placeholder="e.g. maria"/>'+
+    '<label class="lbl">Password</label><input class="fi" id="np" placeholder="e.g. 123456"/>'+
+    '<button class="btn btn-blue" id="nsb" onclick="newStaff()">Gawa ng Account</button>'+
+    '<div id="nse" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>');
+}
+
+async function newStaff(){
+  var n=document.getElementById('nn').value.trim().toLowerCase();
+  var p=document.getElementById('np').value.trim();
+  var e=n+'@doctorgadget.staff';
+  var err=document.getElementById('nse');err.textContent='';
+  if(!n||!p){err.textContent='Kumpleto ang fields.';return;}
+  if(p.length<4){err.textContent='Minimum 4 characters.';return;}
+  document.getElementById('nsb').textContent='Ginagawa...';
+  var res=await fetch(SB_URL+'/auth/v1/admin/users',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({email:e,password:p,email_confirm:true,user_metadata:{name:n}})});
+  var json=await res.json();
+  if(!res.ok){err.textContent=json.message||'Error';document.getElementById('nsb').textContent='Gawa ng Account';return;}
+  if(json.id){await new Promise(function(r){setTimeout(r,800);});await sb.from('profiles').update({name:n,role:'staff'}).eq('id',json.id);}
+  closeSheet();toast('Account ni '+n+' nagawa na!');rUsers();
+}
+
+function openChgPass(uid,uname){
+  modal('<div class="shdl"></div><div class="shn" style="margin-bottom:4px">Palitan ang Password</div>'+
+    '<div style="font-size:13px;color:#888;margin-bottom:14px">'+esc(uname)+'</div>'+
+    '<label class="lbl" style="margin-top:0">Bagong Password</label><input class="fi" id="cp" placeholder="e.g. 123456"/>'+
+    '<button class="btn btn-blue" id="cpb" onclick="chgPass(\''+uid+'\')">I-Update</button>'+
+    '<div id="cpe" style="color:#e33;font-size:13px;margin-top:8px;text-align:center"></div>');
+}
+
+async function chgPass(uid){
+  var p=document.getElementById('cp').value.trim();
+  if(!p){document.getElementById('cpe').textContent='Lagyan ng password.';return;}
+  document.getElementById('cpb').textContent='Ginagawa...';
+  var res=await fetch(SB_URL+'/auth/v1/admin/users/'+uid,{method:'PUT',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC},
+    body:JSON.stringify({password:p})});
+  if(res.ok){closeSheet();toast('Password updated!');}
+  else{var j=await res.json();document.getElementById('cpe').textContent=j.message||'Error';document.getElementById('cpb').textContent='I-Update';}
+}
+
+async function delStaff(uid,uname){
+  if(!confirm('I-delete si '+uname+'?'))return;
+  var res=await fetch(SB_URL+'/auth/v1/admin/users/'+uid,{method:'DELETE',
+    headers:{'Authorization':'Bearer '+SB_SVC,'apikey':SB_SVC}});
+  if(res.ok||res.status===200){toast(uname+' deleted!');rUsers();}
+  else toast('Error sa pag-delete.');
+}
+
+init();
+</script>
+</body>
+</html>
